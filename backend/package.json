@@ -24,14 +24,15 @@
     "format:check": "prettier --check .",
     "test": "vitest run --exclude tests/integration/**",
     "test:watch": "vitest --exclude tests/integration/**",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "npm run db:test:prepare && vitest run tests/integration",
     "test:coverage": "vitest run --coverage",
     "prisma:format": "prisma format",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "db:test:prepare": "tsx prisma/prepare-test-database.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",
