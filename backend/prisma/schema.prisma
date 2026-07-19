@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoEvento {
+  BORRADOR
+  PUBLICADO
+
+  @@map("estado_evento")
+}
+
+model Canton {
+  id          String    @id @default(uuid()) @db.Uuid
+  nombre      String    @db.VarChar(100)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  lugares Lugar[]
+
+  @@map("cantones")
+}
+
+model Lugar {
+  id          String    @id @default(uuid()) @db.Uuid
+  nombre      String    @db.VarChar(150)
+  direccion   String?   @db.VarChar(255)
+  latitud     Decimal?  @db.Decimal(9, 6)
+  longitud    Decimal?  @db.Decimal(9, 6)
+  cantonId    String    @map("canton_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  canton  Canton   @relation(fields: [cantonId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  eventos Evento[]
+
+  @@index([cantonId, eliminadoEn], map: "lugares_canton_eliminado_idx")
+  @@map("lugares")
+}
+
+model Categoria {
+  id          String    @id @default(uuid()) @db.Uuid
+  nombre      String    @db.VarChar(100)
+  descripcion String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  eventos EventoCategoria[]
+
+  @@map("categorias")
+}
+
+model Evento {
+  id          String       @id @default(uuid()) @db.Uuid
+  titulo      String       @db.VarChar(200)
+  descripcion String       @db.Text
+  estado      EstadoEvento @default(BORRADOR)
+  lugarId     String       @map("lugar_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime?    @map("eliminado_en") @db.Timestamptz(3)
+
+  lugar          Lugar                @relation(fields: [lugarId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  categorias     EventoCategoria[]
+  programaciones ProgramacionEvento[]
+  imagenes       ImagenEvento[]
+
+  @@index([lugarId, eliminadoEn], map: "eventos_lugar_eliminado_idx")
+  @@index([estado, eliminadoEn], map: "eventos_estado_eliminado_idx")
+  @@map("eventos")
+}
+
+model EventoCategoria {
+  eventoId    String    @map("evento_id") @db.Uuid
+  categoriaId String    @map("categoria_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  evento    Evento    @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([eventoId, categoriaId])
+  @@index([categoriaId, eliminadoEn], map: "evento_categorias_categoria_eliminado_idx")
+  @@map("evento_categorias")
+}
+
+model ProgramacionEvento {
+  id          String    @id @default(uuid()) @db.Uuid
+  eventoId    String    @map("evento_id") @db.Uuid
+  inicio      DateTime  @db.Timestamptz(3)
+  fin         DateTime? @db.Timestamptz(3)
+  descripcion String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([eventoId, eliminadoEn], map: "programaciones_evento_evento_eliminado_idx")
+  @@index([inicio, eliminadoEn], map: "programaciones_evento_inicio_eliminado_idx")
+  @@map("programaciones_evento")
+}
+
+model ImagenEvento {
+  id          String    @id @default(uuid()) @db.Uuid
+  eventoId    String    @map("evento_id") @db.Uuid
+  url         String    @db.VarChar(2048)
+  esPrincipal Boolean   @default(false) @map("es_principal")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+
+  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([eventoId, eliminadoEn], map: "imagenes_evento_evento_eliminado_idx")
+  @@map("imagenes_evento")
+}
