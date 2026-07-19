@@ -1,127 +1,257 @@
-# Misión y alcance de ZamoraFest
+# Constitución tecnológica de ZamoraFest
 
-## Identidad del proyecto
+## Propósito
 
-ZamoraFest es un proyecto académico orientado a la gestión y consulta de eventos culturales y festivos de la provincia de Zamora Chinchipe.
+Este documento establece las tecnologías y criterios técnicos aprobados para ZamoraFest. Su objetivo es mantener una base coherente y evitar cambios de herramientas sin una justificación académica o técnica.
 
-El proyecto busca ofrecer una base tecnológica organizada, segura y verificable para publicar información de eventos y permitir que las personas interesadas consulten sus principales características.
+## Plataforma de ejecución
 
-## Misión
+### Node.js
 
-Construir un backend documentado, funcional, medible y defendible académicamente que permita gestionar y consultar eventos culturales y festivos, aplicando buenas prácticas de desarrollo de software y los contenidos estudiados en la asignatura de Aplicaciones Móviles.
+Se utilizará Node.js 24 LTS como entorno de ejecución del backend.
 
-## Problema que se busca atender
+Las dependencias seleccionadas deberán ser compatibles con esta versión.
 
-La información sobre eventos culturales y festivos puede encontrarse dispersa, incompleta o presentada sin una estructura uniforme. ZamoraFest propone centralizar esta información mediante una API que pueda ser utilizada posteriormente por una aplicación móvil.
+### TypeScript
 
-Durante la fase actual no se desarrollará todavía la aplicación móvil. El backend deberá quedar preparado para que una futura aplicación Ionic pueda consumirlo.
+Todo el código del backend se desarrollará con TypeScript y comprobaciones estrictas.
 
-## Objetivo de la fase actual
+No se utilizará `any` sin una justificación concreta y localizada.
 
-El objetivo inmediato es completar un backend funcional hasta los requerimientos académicos de la Semana 8.
+### npm
 
-La entrega deberá reunir:
+npm será el único gestor de paquetes.
 
-- Especificaciones previamente aprobadas.
-- Código ejecutable.
-- Pruebas verificables.
-- Documentación de la API.
-- Evidencias de funcionamiento.
-- Mediciones comparables antes y después de las optimizaciones.
-- Registro transparente del uso de inteligencia artificial.
+El archivo `package-lock.json` deberá versionarse para garantizar instalaciones reproducibles. No se utilizará Yarn durante esta fase.
 
-## Alcance funcional hasta la Semana 8
+## API y servidor HTTP
 
-El backend deberá incorporar progresivamente:
+### Express
 
-- Modelo relacional en PostgreSQL.
-- Migraciones controladas mediante Prisma.
-- Creación, consulta, actualización y eliminación de eventos.
-- Listado paginado y consulta individual de eventos.
-- Validaciones de entrada.
-- Manejo centralizado de errores.
-- Registro e inicio de sesión de usuarios.
-- Contraseñas almacenadas mediante hash seguro.
-- Autenticación mediante tokens de acceso y renovación.
-- Renovación, rotación y revocación de refresh tokens.
+Express será el framework del backend.
+
+Se utilizará para:
+
+- Definir rutas HTTP.
+- Incorporar middlewares.
+- Gestionar solicitudes y respuestas.
+- Centralizar el manejo de errores.
+- Exponer la documentación de la API.
+
+La API seguirá un enfoque REST, utilizará JSON y tendrá el prefijo `/api/v1`.
+
+## Arquitectura
+
+El backend utilizará una arquitectura por capas con responsabilidades separadas:
+
+- Rutas: definición de endpoints y middlewares.
+- Controladores: traducción entre HTTP y los casos de uso.
+- Servicios: reglas y operaciones de negocio.
+- Acceso a datos: consultas y persistencia mediante Prisma.
+- Esquemas: validaciones de entrada y salida.
+- Middlewares: autenticación, autorización y manejo de errores.
+- Configuración: lectura y validación de variables de entorno.
+- Colas y workers: procesamiento asíncrono de la Semana 8.
+- Pruebas: verificación unitaria y de integración.
+
+La estructura definitiva de carpetas se aprobará en el plan técnico de la primera funcionalidad. No se añadirán capas sin una responsabilidad concreta.
+
+## Base de datos
+
+### PostgreSQL
+
+PostgreSQL será la base de datos relacional y la fuente de verdad de ZamoraFest.
+
+El entorno local utilizará PostgreSQL 18. Las conexiones se configurarán mediante variables de entorno.
+
+No se incluirán usuarios, contraseñas ni cadenas de conexión reales en el repositorio.
+
+### Prisma ORM
+
+Prisma se utilizará para:
+
+- Definir el esquema de datos.
+- Generar migraciones.
+- Consultar y modificar la base de datos.
+- Seleccionar explícitamente los campos necesarios.
+- Gestionar relaciones evitando consultas N+1.
+
+La carpeta de migraciones de Prisma deberá versionarse porque representa el historial reproducible de la base de datos.
+
+El cliente generado por Prisma no se versionará porque puede regenerarse durante la instalación.
+
+## Validación
+
+### Zod
+
+Zod validará:
+
+- Parámetros de ruta.
+- Parámetros de consulta.
+- Cuerpos de solicitudes.
+- Variables de entorno.
+- Estructuras que requieran comprobación explícita.
+
+Las entradas inválidas deberán rechazarse antes de ejecutar la lógica de negocio.
+
+## Autenticación y autorización
+
+La autenticación se implementará mediante JWT.
+
+Se utilizarán:
+
+- Access tokens de duración corta.
+- Refresh tokens de mayor duración.
+- Rotación de refresh tokens.
+- Revocación de sesiones.
+- Almacenamiento seguro de refresh tokens.
 - Autorización basada en roles.
-- Endpoints públicos y protegidos.
-- Documentación mediante OpenAPI y Swagger.
-- Pruebas unitarias y de integración.
-- Caché con Redis.
-- Prevención del problema N+1.
-- Estrategias de carga básica y detallada.
-- Procesamiento asíncrono de recordatorios mediante BullMQ.
-- Medición y documentación de las optimizaciones.
 
-Los detalles de cada elemento deberán definirse en su correspondiente `spec.md`, `plan.md` y `tasks.md` antes de implementarse.
+Como línea base, el access token tendrá una duración de 15 minutos y el refresh token una duración máxima de 7 días. Estos valores deberán configurarse mediante variables de entorno.
 
-## Fuera del alcance actual
+Las contraseñas se almacenarán con una función de hash segura proporcionada por una biblioteca mantenida. El algoritmo y sus parámetros se aprobarán en la especificación de autenticación.
 
-Durante esta fase no se desarrollarán:
+Los secretos JWT nunca se escribirán directamente en el código ni se incorporarán al repositorio.
 
-- Aplicación móvil con Ionic y Capacitor.
-- Integración con Android Studio.
-- Publicación en tiendas de aplicaciones.
-- Arquitectura multiempresa.
-- Organizaciones o sedes deportivas.
-- Funcionalidades específicas del dominio de Canchago.
+## Documentación de la API
+
+### OpenAPI y Swagger
+
+La API se describirá mediante OpenAPI y se visualizará con Swagger.
+
+La documentación incluirá:
+
+- Endpoints disponibles.
+- Parámetros y cuerpos de solicitud.
+- Respuestas esperadas.
+- Errores relevantes.
+- Requisitos de autenticación.
+- Ejemplos sin información sensible.
+
+Swagger deberá mantenerse sincronizado con el comportamiento real de la API.
+
+## Pruebas
+
+### Vitest
+
+Vitest será el ejecutor principal de pruebas unitarias.
+
+### Supertest
+
+Supertest permitirá realizar pruebas de integración sobre los endpoints de Express.
+
+Las pruebas deberán cubrir progresivamente:
+
+- Casos exitosos.
+- Entradas inválidas.
+- Recursos inexistentes.
+- Autenticación.
+- Autorización.
+- Paginación.
+- Errores controlados.
+- Invalidación de caché.
+- Colas y workers cuando corresponda.
+
+## Calidad del código
+
+### ESLint
+
+ESLint detectará problemas de calidad y posibles errores en TypeScript.
+
+### Prettier
+
+Prettier establecerá un formato consistente.
+
+Las reglas de ESLint y Prettier deberán ser compatibles. Sus comprobaciones se incorporarán a los scripts de npm.
+
+## Optimización de la Semana 8
+
+### Redis
+
+Redis se incorporará después de tener un backend base funcional y medible.
+
+Se aplicará cache-aside sobre:
+
+- Eventos publicados.
+- Listados paginados de eventos.
+- Categorías.
+
+Las claves considerarán filtros y paginación. También utilizarán TTL e invalidación controlada.
+
+La invalidación no utilizará búsquedas masivas con `KEYS`. Se preferirá versionado de claves y expiración.
+
+PostgreSQL continuará siendo la fuente de verdad.
+
+### Prevención de N+1
+
+Las consultas relacionadas con eventos deberán mantener una cantidad estable de consultas independientemente de la cantidad de elementos de una página.
+
+La mejora se comprobará con diferentes tamaños de página. No se asumirá que una única consulta SQL siempre sea la mejor solución.
+
+### Carga básica y detallada
+
+La consulta individual admitirá:
+
+- `GET /api/v1/eventos/{id}?detailLevel=basic`.
+- `GET /api/v1/eventos/{id}?detailLevel=detailed`.
+
+`basic` devolverá información esencial.
+
+`detailed` incorporará la información ampliada y las relaciones aprobadas.
+
+El patrón Strategy se aplicará de manera limitada, sin construir una jerarquía innecesariamente compleja.
+
+### BullMQ
+
+BullMQ utilizará Redis para procesar recordatorios mediante una cola y un worker.
+
+El endpoint registrará el recordatorio y añadirá un trabajo. El worker procesará el trabajo sin bloquear la solicitud HTTP y administrará sus estados y reintentos.
+
+No se afirmará que una notificación externa fue entregada si no existe un proveedor que confirme la entrega.
+
+## Versionamiento obligatorio
+
+Deberán incorporarse al repositorio:
+
+- `package.json`.
+- `package-lock.json`.
+- Archivos de configuración.
+- Esquema de Prisma.
+- Migraciones de Prisma.
+- Código fuente.
+- Pruebas.
+- Especificaciones.
+- Documentación y evidencias válidas.
+
+No deberán incorporarse:
+
+- `node_modules`.
+- Archivos `.env` reales.
+- Contraseñas, tokens o claves.
+- Cliente generado por Prisma.
+- Resultados de compilación.
+- Cobertura generada.
+- Logs temporales.
+
+## Tecnologías descartadas durante esta fase
+
+No forman parte del stack aprobado:
+
+- Next.js.
+- Yarn.
 - Keycloak.
 - OAuth 2.0 con PKCE.
-- Next.js.
-- Integraciones externas de notificaciones que no sean exigidas académicamente.
+- Arquitectura multiempresa.
+- Tecnologías específicas de Canchago.
+- Ionic y Capacitor durante el backend.
+- Android Studio durante esta fase.
 
-Redis y BullMQ se incorporarán únicamente cuando el backend base esté funcionando y pueda medirse correctamente.
+## Política de cambios tecnológicos
 
-## Principios rectores
+Una tecnología solamente podrá añadirse o reemplazarse cuando:
 
-### Desarrollo guiado por especificaciones
-
-Ninguna funcionalidad comenzará a implementarse sin una especificación, un plan y una lista de tareas previamente revisados.
-
-### Alcance controlado
-
-No se ampliará el alcance sin una exigencia académica o una razón técnica comprobable y documentada.
-
-### Simplicidad justificable
-
-Se seleccionará la solución más sencilla que satisfaga correctamente los requisitos. No se introducirán patrones o componentes sin una necesidad verificable.
-
-### Seguridad desde el inicio
-
-Las contraseñas, secretos, tokens y variables de entorno no deberán incluirse en el repositorio. Los endpoints protegidos deberán aplicar autenticación y autorización explícitas.
-
-### Base de datos como fuente de verdad
-
-PostgreSQL será la fuente de verdad de la información. Los mecanismos de caché y colas no reemplazarán la persistencia principal.
-
-### Optimización basada en evidencia
-
-Las mejoras de rendimiento deberán compararse bajo condiciones equivalentes. No se afirmará que existe una optimización sin métricas o evidencia reproducible.
-
-### Trazabilidad académica
-
-Los requisitos, decisiones, pruebas, commits y evidencias deberán permitir explicar cómo se construyó cada parte del proyecto.
-
-## Criterios generales de éxito
-
-La fase se considerará satisfactoria cuando:
-
-1. El backend pueda instalarse y ejecutarse siguiendo el README.
-2. Las migraciones permitan reproducir la estructura de la base de datos.
-3. Los endpoints implementados cumplan sus criterios de aceptación.
-4. Las validaciones y autorizaciones sean comprobables.
-5. Las pruebas automatizadas se ejecuten correctamente.
-6. Swagger documente la API disponible.
-7. Las optimizaciones de la Semana 8 cuenten con mediciones antes y después.
-8. El repositorio no contenga credenciales ni información secreta.
-9. Cada funcionalidad pueda relacionarse con su especificación y sus commits.
-
-## Control de cambios
-
-Esta constitución representa la línea base oficial de ZamoraFest. Cualquier modificación deberá:
-
-1. Identificar el requisito académico o problema técnico que la motiva.
-2. Explicar el impacto sobre el alcance y la arquitectura.
-3. Actualizar los documentos afectados.
-4. Ser revisada antes de comenzar la implementación relacionada.
+1. Resuelva un requisito académico o técnico identificado.
+2. Se compare con la solución vigente.
+3. Su impacto sea documentado.
+4. Se actualicen las especificaciones relacionadas.
+5. El cambio sea aprobado antes de implementarse.
