@@ -15,42 +15,42 @@
 
 ## Base común
 
-- [ ] **T004** Crear `AppError`.
-- [ ] **T005** Crear el manejador centralizado de errores.
-- [ ] **T006** Registrar el manejador de errores en Express.
-- [ ] **T007** Estandarizar las respuestas JSON.
+- [x] **T004** Crear `AppError`.
+- [x] **T005** Crear el manejador centralizado de errores.
+- [x] **T006** Registrar el manejador de errores en Express.
+- [x] **T007** Estandarizar las respuestas JSON.
 
 ## Validación
 
-- [ ] **T008** Crear el esquema Zod de creación.
-- [ ] **T009** Crear el esquema Zod de actualización.
-- [ ] **T010** Validar UUID, `page` y `limit`.
+- [x] **T008** Crear el esquema Zod de creación.
+- [x] **T009** Crear el esquema Zod de actualización.
+- [x] **T010** Validar UUID, `page` y `limit`.
 
 ## CRUD
 
-- [ ] **T011** Implementar el repositorio de eventos.
-- [ ] **T012** Implementar creación transaccional.
-- [ ] **T013** Implementar listado paginado.
-- [ ] **T014** Implementar consulta individual.
-- [ ] **T015** Implementar actualización parcial.
-- [ ] **T016** Implementar eliminación lógica.
-- [ ] **T017** Crear controlador y rutas.
-- [ ] **T018** Registrar `/api/v1/eventos` en la aplicación.
+- [x] **T011** Implementar el repositorio de eventos.
+- [x] **T012** Implementar creación transaccional.
+- [x] **T013** Implementar listado paginado.
+- [x] **T014** Implementar consulta individual.
+- [x] **T015** Implementar actualización parcial.
+- [x] **T016** Implementar eliminación lógica.
+- [x] **T017** Crear controlador y rutas.
+- [x] **T018** Registrar `/api/v1/eventos` en la aplicación.
 
 ## Datos y pruebas
 
-- [ ] **T019** Añadir datos mínimos de demostración al seed.
-- [ ] **T020** Probar creación y validaciones.
-- [ ] **T021** Probar listado, paginación y filtros públicos.
-- [ ] **T022** Probar consulta y recurso inexistente.
-- [ ] **T023** Probar actualización y eliminación lógica.
-- [ ] **T024** Confirmar que las pruebas utilicen únicamente la base `_test`.
+- [x] **T019** Añadir datos mínimos de demostración al seed.
+- [x] **T020** Probar creación y validaciones.
+- [x] **T021** Probar listado, paginación y filtros públicos.
+- [x] **T022** Probar consulta y recurso inexistente.
+- [x] **T023** Probar actualización y eliminación lógica.
+- [x] **T024** Confirmar que las pruebas utilicen únicamente la base `_test`.
 
 ## Cierre
 
-- [ ] **T025** Ejecutar formato, tipos, lint, pruebas y build.
-- [ ] **T026** Confirmar que no existan secretos ni cambios fuera del alcance.
+- [x] **T025** Ejecutar formato, tipos, lint, pruebas y build.
+- [x] **T026** Confirmar que no existan secretos ni cambios fuera del alcance.
 - [ ] **T027** Documentar resultados reales para el video.
-- [ ] **T028** Crear commits descriptivos.
+- [x] **T028** Crear commits descriptivos.
 - [ ] **T029** Publicar la rama y abrir el pull request.
 - [ ] **T030** Revisar y fusionar en `main`.
