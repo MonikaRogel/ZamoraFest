@@ -1,16 +1,21 @@
 import { randomUUID } from 'node:crypto';
 
+import { hash as hashPassword } from 'bcryptjs';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../../src/app.js';
 import { prisma } from '../../src/infrastructure/database/prisma.js';
+import { authService } from '../../src/modules/auth/auth.service.js';
 
 let testDatabaseConfirmed = false;
 let lugarId = '';
 let categoriaIds: string[] = [];
+let adminAccessToken = '';
 
 async function cleanTestData(): Promise<void> {
+  await prisma.refreshToken.deleteMany();
+  await prisma.usuario.deleteMany();
   await prisma.imagenEvento.deleteMany();
   await prisma.programacionEvento.deleteMany();
   await prisma.eventoCategoria.deleteMany();
@@ -22,6 +27,7 @@ async function cleanTestData(): Promise<void> {
 
 async function createSupportData(): Promise<void> {
   const suffix = randomUUID();
+  const adminPassword = 'AdminPrueba123';
 
   const canton = await prisma.canton.create({
     data: {
@@ -50,8 +56,23 @@ async function createSupportData(): Promise<void> {
     }),
   ]);
 
+  const admin = await prisma.usuario.create({
+    data: {
+      nombre: 'Administradora de prueba',
+      email: `admin-${suffix}@zamorafest.test`,
+      passwordHash: await hashPassword(adminPassword, 4),
+      rol: 'ADMIN',
+    },
+  });
+
+  const session = await authService.login({
+    email: admin.email,
+    password: adminPassword,
+  });
+
   lugarId = lugar.id;
   categoriaIds = categorias.map(({ id }) => id);
+  adminAccessToken = session.accessToken;
 }
 
 function validEventoPayload(estado: 'BORRADOR' | 'PUBLICADO' = 'PUBLICADO') {
@@ -93,7 +114,10 @@ describe('API REST de eventos', () => {
   it('ejecuta el CRUD completo con eliminación lógica', async () => {
     const payload = validEventoPayload();
 
-    const createResponse = await request(app).post('/api/v1/eventos').send(payload);
+    const createResponse = await request(app)
+      .post('/api/v1/eventos')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send(payload);
 
     expect(createResponse.status).toBe(201);
 
@@ -152,9 +176,12 @@ describe('API REST de eventos', () => {
       },
     });
 
-    const updateResponse = await request(app).patch(`/api/v1/eventos/${createdEvento.id}`).send({
-      titulo: 'Festival actualizado',
-    });
+    const updateResponse = await request(app)
+      .patch(`/api/v1/eventos/${createdEvento.id}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        titulo: 'Festival actualizado',
+      });
 
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.body as unknown).toMatchObject({
@@ -164,7 +191,9 @@ describe('API REST de eventos', () => {
       },
     });
 
-    const deleteResponse = await request(app).delete(`/api/v1/eventos/${createdEvento.id}`);
+    const deleteResponse = await request(app)
+      .delete(`/api/v1/eventos/${createdEvento.id}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`);
 
     expect(deleteResponse.status).toBe(204);
 
@@ -182,12 +211,15 @@ describe('API REST de eventos', () => {
   });
 
   it('rechaza datos inválidos con un error 400', async () => {
-    const response = await request(app).post('/api/v1/eventos').send({
-      titulo: 'No',
-      descripcion: 'Corta',
-      lugarId: 'identificador-invalido',
-      categoriaIds: [],
-    });
+    const response = await request(app)
+      .post('/api/v1/eventos')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        titulo: 'No',
+        descripcion: 'Corta',
+        lugarId: 'identificador-invalido',
+        categoriaIds: [],
+      });
 
     expect(response.status).toBe(400);
     expect(response.body as unknown).toMatchObject({
@@ -201,7 +233,10 @@ describe('API REST de eventos', () => {
   it('no muestra públicamente los eventos en borrador', async () => {
     const payload = validEventoPayload('BORRADOR');
 
-    const createResponse = await request(app).post('/api/v1/eventos').send(payload);
+    const createResponse = await request(app)
+      .post('/api/v1/eventos')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send(payload);
 
     expect(createResponse.status).toBe(201);
 
