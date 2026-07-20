@@ -10,6 +10,7 @@ const environmentSchema = z
     TEST_DATABASE_URL: z.string().min(1).optional(),
     JWT_ACCESS_SECRET: z.string().min(64),
     JWT_REFRESH_SECRET: z.string().min(64),
+    REDIS_URL: z.string().url().default('redis://127.0.0.1:6379'),
   })
   .superRefine((variables, context) => {
     const requiredVariable = variables.NODE_ENV === 'test' ? 'TEST_DATABASE_URL' : 'DATABASE_URL';

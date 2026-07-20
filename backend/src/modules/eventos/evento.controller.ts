@@ -21,15 +21,17 @@ export const listEventosController: RequestHandler = async (request, response) =
   const query = listEventosQuerySchema.parse(request.query);
   const result = await eventoService.list(query);
 
-  response.status(200).json(result);
+  response.setHeader('X-Cache', result.cacheStatus);
+  response.status(200).json(result.payload);
 };
 
 export const getEventoController: RequestHandler = async (request, response) => {
   const { id } = eventoIdParamsSchema.parse(request.params);
-  const evento = await eventoService.getById(id);
+  const result = await eventoService.getById(id);
 
+  response.setHeader('X-Cache', result.cacheStatus);
   response.status(200).json({
-    data: evento,
+    data: result.payload,
   });
 };
 

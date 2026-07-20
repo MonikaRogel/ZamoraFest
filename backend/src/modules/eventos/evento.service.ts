@@ -1,4 +1,5 @@
 import { AppError } from '../../common/errors/app-error.js';
+import { eventoCache } from '../../infrastructure/cache/evento-cache.js';
 import { eventoRepository } from './evento.repository.js';
 import type { CreateEventoInput, ListEventosQuery, UpdateEventoInput } from './evento.schemas.js';
 
@@ -12,12 +13,29 @@ function serializeEvento(evento: EventoRecord) {
     estado: evento.estado,
     lugar: evento.lugar,
     categorias: evento.categorias.map(({ categoria }) => categoria),
-    createdAt: evento.createdAt,
-    updatedAt: evento.updatedAt,
+    createdAt: evento.createdAt.toISOString(),
+    updatedAt: evento.updatedAt.toISOString(),
   };
 }
 
-async function ensureActiveLugar(lugarId: string) {
+type EventoPayload = ReturnType<typeof serializeEvento>;
+
+interface ListEventosPayload {
+  data: EventoPayload[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+interface CachedResult<T> {
+  payload: T;
+  cacheStatus: 'HIT' | 'MISS';
+}
+
+async function ensureActiveLugar(lugarId: string): Promise<void> {
   const lugar = await eventoRepository.findActiveLugar(lugarId);
 
   if (!lugar) {
@@ -25,7 +43,7 @@ async function ensureActiveLugar(lugarId: string) {
   }
 }
 
-async function ensureActiveCategories(categoriaIds: string[]) {
+async function ensureActiveCategories(categoriaIds: string[]): Promise<void> {
   const activeCategories = await eventoRepository.findActiveCategoryIds(categoriaIds);
 
   if (activeCategories.length !== categoriaIds.length) {
@@ -43,7 +61,7 @@ async function ensureActiveCategories(categoriaIds: string[]) {
   }
 }
 
-async function ensureActiveEvento(id: string) {
+async function ensureActiveEvento(id: string): Promise<void> {
   const evento = await eventoRepository.findActiveById(id);
 
   if (!evento) {
@@ -52,19 +70,30 @@ async function ensureActiveEvento(id: string) {
 }
 
 export const eventoService = {
-  async create(input: CreateEventoInput) {
+  async create(input: CreateEventoInput): Promise<EventoPayload> {
     await ensureActiveLugar(input.lugarId);
     await ensureActiveCategories(input.categoriaIds);
 
     const evento = await eventoRepository.create(input);
+    await eventoCache.invalidate();
 
     return serializeEvento(evento);
   },
 
-  async list(query: ListEventosQuery) {
+  async list(query: ListEventosQuery): Promise<CachedResult<ListEventosPayload>> {
+    const cacheKey = await eventoCache.listKey(query.page, query.limit);
+    const cachedResult = await eventoCache.get<ListEventosPayload>(cacheKey);
+
+    if (cachedResult !== null) {
+      return {
+        payload: cachedResult,
+        cacheStatus: 'HIT',
+      };
+    }
+
     const result = await eventoRepository.list(query.page, query.limit);
 
-    return {
+    const payload: ListEventosPayload = {
       data: result.eventos.map(serializeEvento),
       meta: {
         page: query.page,
@@ -73,9 +102,26 @@ export const eventoService = {
         totalPages: Math.ceil(result.total / query.limit),
       },
     };
+
+    await eventoCache.set(cacheKey, payload);
+
+    return {
+      payload,
+      cacheStatus: 'MISS',
+    };
   },
 
-  async getById(id: string) {
+  async getById(id: string): Promise<CachedResult<EventoPayload>> {
+    const cacheKey = await eventoCache.detailKey(id);
+    const cachedEvento = await eventoCache.get<EventoPayload>(cacheKey);
+
+    if (cachedEvento !== null) {
+      return {
+        payload: cachedEvento,
+        cacheStatus: 'HIT',
+      };
+    }
+
     const evento = await eventoRepository.findPublicById(id);
 
     if (!evento) {
@@ -86,10 +132,16 @@ export const eventoService = {
       );
     }
 
-    return serializeEvento(evento);
+    const payload = serializeEvento(evento);
+    await eventoCache.set(cacheKey, payload);
+
+    return {
+      payload,
+      cacheStatus: 'MISS',
+    };
   },
 
-  async update(id: string, input: UpdateEventoInput) {
+  async update(id: string, input: UpdateEventoInput): Promise<EventoPayload> {
     await ensureActiveEvento(id);
 
     if (input.lugarId !== undefined) {
@@ -101,12 +153,14 @@ export const eventoService = {
     }
 
     const evento = await eventoRepository.update(id, input);
+    await eventoCache.invalidate();
 
     return serializeEvento(evento);
   },
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     await ensureActiveEvento(id);
     await eventoRepository.softDelete(id);
+    await eventoCache.invalidate();
   },
 };
