@@ -56,7 +56,7 @@ Mensaje utilizado: `chore: inicializar repositorio ZamoraFest`.
 
 **Rama:** `docs/constitution`.
 
-**Estado:** en revisión.
+**Estado:** completada.
 
 Documentos:
 
@@ -82,6 +82,7 @@ Mensaje principal previsto: `docs: definir constitución técnica de ZamoraFest`
 ## Etapa 2: modelo de datos y backend inicial
 
 **Rama:** `feat/001-modelo-datos`.
+**Estado:** en especificación.
 
 Antes de implementar se crearán:
 

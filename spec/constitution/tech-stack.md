@@ -80,6 +80,16 @@ La carpeta de migraciones de Prisma deberá versionarse porque representa el his
 
 El cliente generado por Prisma no se versionará porque puede regenerarse durante la instalación.
 
+### Eliminación lógica
+
+Las operaciones funcionales de eliminación utilizarán el campo nullable `eliminadoEn`.
+
+Un registro se considerará activo cuando `eliminadoEn` sea `null`. Las consultas normales deberán excluir registros eliminados.
+
+No se utilizarán simultáneamente un campo `activo` y otro `eliminadoEn` para representar la misma condición, ya que podrían producir estados contradictorios.
+
+Las bases de datos aisladas de desarrollo y pruebas podrán reiniciarse como parte de migraciones o pruebas reproducibles. Esto no representa una eliminación funcional de información.
+
 ## Validación
 
 ### Zod
@@ -129,6 +139,16 @@ La documentación incluirá:
 - Ejemplos sin información sensible.
 
 Swagger deberá mantenerse sincronizado con el comportamiento real de la API.
+
+### Protección de Swagger y OpenAPI
+
+La documentación interactiva podrá habilitarse localmente durante el desarrollo y la demostración académica.
+
+En un despliegue real, Swagger y el documento JSON de OpenAPI deberán permanecer deshabilitados por defecto o protegidos mediante autenticación.
+
+La protección deberá aplicarse tanto a la interfaz visual como al archivo OpenAPI. Las credenciales se configurarán mediante variables de entorno y nunca se escribirán directamente en el código.
+
+Cuando existan roles, el acceso podrá limitarse a administradores autorizados.
 
 ## Pruebas
 

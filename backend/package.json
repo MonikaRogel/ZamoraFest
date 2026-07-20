@@ -1,0 +1,62 @@
+{
+  "name": "zamorafest-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend REST de ZamoraFest.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=24.0.0 <25",
+    "npm": ">=11.0.0 <12"
+  },
+  "packageManager": "npm@11.9.0",
+  "overrides": {
+    "@hono/node-server": "1.19.13"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --exclude tests/integration/**",
+    "test:watch": "vitest --exclude tests/integration/**",
+    "test:integration": "npm run db:test:prepare && vitest run tests/integration",
+    "test:coverage": "vitest run --coverage",
+    "prisma:format": "prisma format",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "db:test:prepare": "tsx prisma/prepare-test-database.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.8.0",
+    "@prisma/client": "7.8.0",
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "pg": "8.22.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/express": "5.0.6",
+    "@types/node": "24.13.3",
+    "@types/pg": "8.20.0",
+    "@types/supertest": "7.2.1",
+    "@vitest/coverage-v8": "4.1.10",
+    "eslint": "10.7.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.5",
+    "prisma": "7.8.0",
+    "supertest": "7.2.2",
+    "tsx": "4.23.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.10"
+  }
+}

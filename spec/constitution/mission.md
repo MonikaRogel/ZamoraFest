@@ -117,6 +117,12 @@ La fase se considerará satisfactoria cuando:
 8. El repositorio no contenga credenciales ni información secreta.
 9. Cada funcionalidad pueda relacionarse con su especificación y sus commits.
 
+### Conservación y eliminación lógica
+
+Las operaciones funcionales de eliminación conservarán los registros del dominio mediante eliminación lógica. Un registro eliminado no participará en las consultas normales, pero permanecerá disponible para trazabilidad.
+
+La política concreta se documentará en la especificación de cada funcionalidad. Las limpiezas técnicas de bases de datos aisladas de desarrollo o pruebas no se consideran operaciones funcionales de eliminación.
+
 ## Control de cambios
 
 Esta constitución representa la línea base oficial de ZamoraFest. Cualquier modificación deberá:
