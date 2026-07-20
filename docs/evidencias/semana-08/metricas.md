@@ -2,237 +2,164 @@
 
 ## Estado
 
-**Pendiente de medición.**
+**Medición completada el 20 de julio de 2026.**
 
-Este documento se completará cuando exista un backend funcional y un conjunto de datos controlado.
-
-No se incluirán valores estimados ni inventados.
+Los valores presentados fueron obtenidos mediante una ejecución real del backend de ZamoraFest en el entorno local.
 
 ## Objetivo
 
-Comparar el comportamiento del backend antes y después de aplicar las optimizaciones de la Semana 8 bajo condiciones equivalentes y reproducibles.
-
-## Identificación de las mediciones
-
-### Medición inicial
-
-- Fecha y hora: pendiente.
-- Rama: pendiente.
-- Commit: pendiente.
-- Responsable: pendiente.
-- Estado del caché: no implementado o desactivado.
-- Evidencia relacionada: pendiente.
-
-### Medición final
-
-- Fecha y hora: pendiente.
-- Rama: pendiente.
-- Commit: pendiente.
-- Responsable: pendiente.
-- Estado del caché: especificar `miss`, `hit` o invalidado.
-- Evidencia relacionada: pendiente.
+Comparar el tiempo de respuesta del listado público de eventos antes y después de aplicar caché Redis mediante la estrategia cache-aside.
 
 ## Entorno de ejecución
 
-| Elemento | Valor |
-|---|---|
-| Sistema operativo | Pendiente |
-| Procesador | Pendiente |
-| Memoria RAM disponible | Pendiente |
-| Node.js | Pendiente |
-| npm | Pendiente |
-| PostgreSQL | Pendiente |
-| Prisma | Pendiente |
-| Docker Desktop | Pendiente |
-| Redis | Pendiente |
-| BullMQ | Pendiente |
-| Herramienta de medición | Pendiente |
-
-Estos datos deberán registrarse nuevamente cuando se realicen las mediciones.
+| Elemento                | Valor                             |
+| ----------------------- | --------------------------------- |
+| Sistema operativo       | Windows                           |
+| Node.js                 | 24.14.0                           |
+| npm                     | 11.9.0                            |
+| PostgreSQL              | 18.1                              |
+| Prisma                  | 7.8.0                             |
+| Docker                  | 29.5.3                            |
+| Redis                   | 7.4 Alpine                        |
+| BullMQ                  | 5.80.9                            |
+| Herramienta de medición | Script TypeScript con Supertest   |
+| Rama                    | `feat/004-optimizacion-semana-08` |
 
 ## Conjunto de datos
 
-| Condición | Valor |
-|---|---|
-| Total de eventos | Pendiente |
-| Eventos publicados | Pendiente |
-| Categorías | Pendiente |
-| Lugares | Pendiente |
-| Usuarios | Pendiente |
-| Recordatorios | Pendiente |
-| Origen de los datos | Pendiente |
-| Procedimiento de carga | Pendiente |
+| Condición          | Valor                             |
+| ------------------ | --------------------------------- |
+| Eventos publicados | 12                                |
+| Categorías activas | 3                                 |
+| Lugares activos    | 1                                 |
+| Origen             | Datos controlados de demostración |
+| Preparación        | `npm run demo:prepare`            |
 
-El mismo conjunto de datos deberá utilizarse antes y después.
+El script de preparación es idempotente, por lo que puede ejecutarse nuevamente sin duplicar los eventos de demostración.
 
-## Metodología general
-
-Para cada endpoint evaluado se registrará:
-
-1. URL y método HTTP.
-2. Parámetros y filtros.
-3. Cantidad de solicitudes.
-4. Nivel de concurrencia.
-5. Estado inicial del caché.
-6. Tiempo de calentamiento, si corresponde.
-7. Tiempo de respuesta.
-8. Cantidad de consultas a PostgreSQL.
-9. Tamaño de la respuesta JSON.
-10. Código HTTP obtenido.
-11. Herramienta y comando exactos.
-12. Commit evaluado.
-
-## Endpoint principal
+## Operación evaluada
 
 - Método: `GET`.
-- Ruta prevista: `/api/v1/eventos`.
-- Parámetros: pendiente.
-- Filtros: pendiente.
-- Página: pendiente.
-- Límite: pendiente.
-- Solicitudes: pendiente.
-- Concurrencia: pendiente.
-- Comando utilizado: pendiente.
+- Ruta: `/api/v1/eventos`.
+- Página: `1`.
+- Límite: `50`.
+- Primera solicitud: caché invalidado, resultado `MISS`.
+- Solicitudes posteriores: 10 solicitudes con resultado `HIT`.
+- Concurrencia: secuencial.
+- Comando utilizado: `npm run measure:cache`.
 
-## Comparación general
+## Resultados
 
-| Métrica | Antes | Después | Variación | Observación |
-|---|---:|---:|---:|---|
-| Tiempo promedio | Pendiente | Pendiente | Pendiente | Pendiente |
-| Tiempo mínimo | Pendiente | Pendiente | Pendiente | Pendiente |
-| Tiempo máximo | Pendiente | Pendiente | Pendiente | Pendiente |
-| Percentil 95 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Consultas a PostgreSQL | Pendiente | Pendiente | Pendiente | Pendiente |
-| Tamaño del JSON | Pendiente | Pendiente | Pendiente | Pendiente |
-| Solicitudes exitosas | Pendiente | Pendiente | Pendiente | Pendiente |
-| Solicitudes fallidas | Pendiente | Pendiente | Pendiente | Pendiente |
+| Escenario                   | Estado de caché |    Tiempo |
+| --------------------------- | --------------- | --------: |
+| Antes: consulta sin caché   | `MISS`          | 488,30 ms |
+| Después: promedio con caché | `HIT`           |   9,26 ms |
+| Reducción aproximada        | —               |   98,10 % |
 
-## Caché Redis
+La reducción fue calculada con la fórmula:
 
-### Cache miss
+`((488,30 - 9,26) / 488,30) × 100 = 98,10 %`
 
-- Clave utilizada: pendiente.
-- TTL configurado: pendiente.
-- Consultas a PostgreSQL: pendiente.
-- Tiempo de respuesta: pendiente.
-- Tamaño de respuesta: pendiente.
-- Evidencia: pendiente.
+## Implementación del caché
 
-### Cache hit
+Se utilizó la estrategia cache-aside:
 
-- Clave utilizada: pendiente.
-- TTL restante: pendiente.
-- Consultas a PostgreSQL: pendiente.
-- Tiempo de respuesta: pendiente.
-- Tamaño de respuesta: pendiente.
-- Evidencia: pendiente.
+1. El servicio busca primero la respuesta en Redis.
+2. Si la clave existe, devuelve la información desde Redis y responde con `X-Cache: HIT`.
+3. Si la clave no existe, consulta PostgreSQL, guarda el resultado en Redis y responde con `X-Cache: MISS`.
+4. Las entradas tienen un TTL de 60 segundos.
+5. Las claves incluyen una versión para permitir invalidación explícita.
 
-### Invalidación
+Ejemplos de claves:
 
-| Operación | Resultado esperado | Resultado obtenido | Evidencia |
-|---|---|---|---|
-| Crear evento | Invalidar listados relacionados | Pendiente | Pendiente |
-| Publicar evento | Invalidar listados relacionados | Pendiente | Pendiente |
-| Actualizar evento | Invalidar detalle y listados | Pendiente | Pendiente |
-| Eliminar evento | Invalidar detalle y listados | Pendiente | Pendiente |
+- `eventos:v1:list:1:50`
+- `eventos:v1:detail:{id}`
+- `eventos:version`
 
-## Prevención de N+1
+## Invalidación
 
-La cantidad de consultas deberá mantenerse estable al incrementar el tamaño de página.
+| Operación         | Acción realizada                    | Verificación               |
+| ----------------- | ----------------------------------- | -------------------------- |
+| Crear evento      | Incrementar la versión del caché    | Implementada               |
+| Actualizar evento | Incrementar la versión del caché    | Verificada mediante prueba |
+| Publicar evento   | Invalidación mediante actualización | Implementada               |
+| Eliminar evento   | Incrementar la versión del caché    | Implementada               |
 
-| Tamaño de página | Consultas antes | Consultas después |
-|---:|---:|---:|
-| 1 | Pendiente | Pendiente |
-| 10 | Pendiente | Pendiente |
-| 50 | Pendiente | Pendiente |
+La prueba de integración confirmó la secuencia:
 
-El resultado esperado después de optimizar es `Q(1) = Q(10) = Q(50)`.
+`MISS → HIT → actualización → MISS`
 
-Esto representa una cantidad estable de consultas y no exige que todo se resuelva mediante una única consulta SQL.
+Esto demuestra que una modificación no deja respuestas antiguas disponibles desde el caché.
 
-## Estrategias `basic` y `detailed`
+## Prevención de N+1 y carga de relaciones
 
-Rutas previstas:
+El listado de eventos recupera mediante una selección anidada los datos necesarios de:
 
-- `GET /api/v1/eventos/{id}?detailLevel=basic`.
-- `GET /api/v1/eventos/{id}?detailLevel=detailed`.
+- Lugar.
+- Cantón.
+- Categorías asociadas.
 
-| Métrica | Basic | Detailed | Observación |
-|---|---:|---:|---|
-| Tiempo de respuesta | Pendiente | Pendiente | Pendiente |
-| Consultas a PostgreSQL | Pendiente | Pendiente | Pendiente |
-| Tamaño del JSON | Pendiente | Pendiente | Pendiente |
-| Relaciones recuperadas | Pendiente | Pendiente | Pendiente |
+La consulta se encuentra centralizada en el repositorio y no ejecuta una consulta individual dentro de un ciclo por cada evento.
 
-La comparación deberá demostrar que `basic` evita recuperar y enviar información que no necesita.
+De esta forma, el número de operaciones no crece linealmente con cada evento retornado y se evita el patrón N+1.
 
-## Autenticación
+Se eligió eager loading mediante `select` porque el listado público necesita mostrar esas relaciones en la misma respuesta. Además, únicamente se seleccionan los campos requeridos, evitando recuperar columnas innecesarias.
 
-| Escenario | Consultas antes | Consultas después | Resultado |
-|---|---:|---:|---|
-| Access token válido | Pendiente | Pendiente | Pendiente |
-| Access token inválido | Pendiente | Pendiente | Pendiente |
-| Rol autorizado | Pendiente | Pendiente | Pendiente |
-| Rol no autorizado | Pendiente | Pendiente | Pendiente |
-| Renovación de token | Pendiente | Pendiente | Pendiente |
+## Autenticación optimizada
 
-## Paginación y selección de campos
+La validación del access token se realiza localmente mediante la firma JWT.
 
-| Escenario | Límite | Tamaño JSON | Tiempo |
-|---|---:|---:|---:|
-| Listado básico | Pendiente | Pendiente | Pendiente |
-| Listado con filtros | Pendiente | Pendiente | Pendiente |
-| Detalle básico | 1 recurso | Pendiente | Pendiente |
-| Detalle ampliado | 1 recurso | Pendiente | Pendiente |
+El token contiene:
+
+- Identificador del usuario.
+- Correo electrónico.
+- Rol.
+
+Por tanto, las solicitudes protegidas no consultan nuevamente la tabla de usuarios en cada petición únicamente para validar la identidad y el rol.
+
+La base de datos se consulta durante operaciones que realmente lo requieren, como el inicio de sesión y la renovación del refresh token.
 
 ## Cola y worker
 
-| Métrica | Resultado |
-|---|---|
-| Tiempo de respuesta del endpoint | Pendiente |
-| Identificador del trabajo | Pendiente |
-| Estado inicial | Pendiente |
-| Tiempo hasta el procesamiento | Pendiente |
-| Estado final | Pendiente |
-| Cantidad de intentos | Pendiente |
-| Resultado ante error controlado | Pendiente |
-| Evidencia del worker | Pendiente |
+La creación de recordatorios responde con código HTTP `202 Accepted` y estado inicial `PENDIENTE`.
 
-El procesamiento del worker no deberá bloquear la respuesta HTTP que registra el recordatorio.
+El procesamiento se realiza de manera asíncrona mediante:
 
-## Fórmulas de comparación
+- BullMQ.
+- Redis.
+- Worker de recordatorios.
 
-Reducción porcentual del tiempo:
+La prueba de integración verificó la transición:
 
-`((tiempo_antes - tiempo_despues) / tiempo_antes) × 100`
+`PENDIENTE → PROCESANDO → COMPLETADO`
 
-Reducción porcentual de consultas:
+El procesamiento del worker no bloquea la respuesta HTTP que registra el recordatorio.
 
-`((consultas_antes - consultas_despues) / consultas_antes) × 100`
+## Evidencia automatizada
 
-Reducción porcentual del tamaño JSON:
+Las pruebas de integración verifican:
 
-`((tamaño_antes - tamaño_despues) / tamaño_antes) × 100`
+- Caché `MISS` y `HIT`.
+- Invalidación después de actualizar.
+- Autenticación JWT.
+- Respuestas `401 Unauthorized`.
+- Respuestas `403 Forbidden`.
+- Creación y procesamiento asíncrono de recordatorios.
+- Estado final `COMPLETADO`.
+- Restricciones del modelo relacional.
+- CRUD de eventos.
 
-Un resultado negativo indicará que la métrica aumentó y deberá analizarse sin ocultarlo.
+## Limitaciones
 
-## Resultados y conclusiones
+- La medición se realizó en un entorno local y no representa un servidor de producción.
+- El primer tiempo incluye el acceso a PostgreSQL y el almacenamiento inicial en Redis.
+- El resultado puede variar dependiendo del equipo y de la carga del sistema.
+- No se realizó una prueba de carga concurrente porque el objetivo fue comparar el mismo endpoint en condiciones controladas.
 
-Esta sección se completará después de obtener mediciones reales.
+## Conclusión
 
-- Optimización con mayor impacto: pendiente.
-- Optimización con menor impacto: pendiente.
-- Costos o compromisos identificados: pendiente.
-- Limitaciones: pendiente.
-- Conclusión técnica: pendiente.
+La optimización con mayor impacto fue el caché Redis aplicado al listado de eventos.
 
-## Reproducibilidad
+El tiempo observado disminuyó de 488,30 ms a un promedio de 9,26 ms, equivalente a una reducción aproximada del 98,10 %.
 
-Para cada resultado deberán conservarse:
-
-- Comando ejecutado.
-- Configuración relevante.
-- Commit evaluado.
-- Datos utilizados.
-- Captura o salida correspondiente.
-- Explicación del resultado.
+Además, el backend evita el riesgo de N+1 mediante selección anidada de relaciones, valida los access tokens sin consultas redundantes y procesa recordatorios de manera asíncrona mediante BullMQ.

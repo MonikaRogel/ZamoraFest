@@ -1,263 +1,132 @@
-# Pruebas y verificaciones — Semana 8
+# Evidencia de pruebas — Semana 8
 
 ## Estado
 
-**Pendiente de ejecución.**
+**Pruebas completadas correctamente el 20 de julio de 2026.**
 
-Este documento registrará las pruebas realizadas sobre el backend de ZamoraFest. Los resultados se completarán únicamente después de ejecutar los comandos y comprobar el comportamiento real.
+Las verificaciones se ejecutaron sobre la rama:
 
-## Objetivo
+`feat/004-optimizacion-semana-08`
 
-Conservar evidencia reproducible de que las funcionalidades y optimizaciones cumplen sus especificaciones y no introducen regresiones.
+## Resumen
 
-## Principios
+| Grupo                  | Archivos | Pruebas | Resultado |
+| ---------------------- | -------: | ------: | --------- |
+| Prueba HTTP de salud   |        1 |       1 | Aprobadas |
+| Modelo relacional      |        1 |      11 | Aprobadas |
+| API de eventos y caché |        1 |       4 | Aprobadas |
+| Autenticación y roles  |        1 |       3 | Aprobadas |
+| Cola de recordatorios  |        1 |       1 | Aprobadas |
+| Total                  |        5 |      20 | Aprobadas |
 
-Las pruebas deberán:
+De las 20 pruebas:
 
-- Relacionarse con criterios de aceptación aprobados.
-- Ejecutarse en un entorno controlado.
-- Utilizar datos preparados para pruebas.
-- No depender de información secreta.
-- Incluir casos exitosos y fallidos.
-- Poder repetirse mediante comandos documentados.
-- Registrar honestamente errores y limitaciones.
+- 1 corresponde al endpoint de salud.
+- 19 son pruebas de integración con PostgreSQL y Redis.
 
-## Entorno de prueba
+## Pruebas del modelo relacional
 
-| Elemento | Valor |
-|---|---|
-| Fecha y hora | Pendiente |
-| Rama | Pendiente |
-| Commit | Pendiente |
-| Node.js | Pendiente |
-| npm | Pendiente |
-| PostgreSQL | Pendiente |
-| Redis | Pendiente |
-| Base de datos de prueba | Pendiente |
-| Sistema operativo | Pendiente |
+Se verificaron:
 
-No se utilizará una base de datos de producción para ejecutar pruebas automatizadas.
+- Las diez tablas esperadas.
+- Claves foráneas.
+- Restricciones de unicidad.
+- Valores predeterminados.
+- Imágenes principales.
+- Coordenadas válidas.
+- Programaciones con fechas válidas.
+- Restricción del borrado físico.
+- Reutilización de nombres eliminados lógicamente.
 
-## Comandos previstos
+Resultado:
 
-Durante la inicialización del backend deberán configurarse:
+`11 pruebas aprobadas`.
 
-- `npm test`.
-- `npm run test:coverage`.
-- `npm run lint`.
-- `npm run typecheck`.
-- `npm run build`.
+## Pruebas del CRUD de eventos
 
-Cuando se ejecuten se registrarán la fecha, el commit, el resultado, la duración y la evidencia correspondiente.
+Se verificaron:
 
-## Resumen de ejecución
+- Creación de eventos.
+- Listado público paginado.
+- Consulta individual.
+- Actualización parcial.
+- Eliminación lógica.
+- Validaciones con Zod.
+- Ocultamiento de eventos en borrador.
+- Respuestas JSON y códigos HTTP.
 
-| Comando | Resultado | Pruebas | Duración | Evidencia |
-|---|---|---:|---:|---|
-| `npm test` | Pendiente | Pendiente | Pendiente | Pendiente |
-| `npm run test:coverage` | Pendiente | Pendiente | Pendiente | Pendiente |
-| `npm run lint` | Pendiente | No aplica | Pendiente | Pendiente |
-| `npm run typecheck` | Pendiente | No aplica | Pendiente | Pendiente |
-| `npm run build` | Pendiente | No aplica | Pendiente | Pendiente |
+Resultado:
 
-## Niveles de prueba
+`4 pruebas aprobadas`.
 
-### Pruebas unitarias
+## Prueba del caché Redis
 
-Comprobarán unidades aisladas como:
+La prueba automatizada ejecutó la siguiente secuencia:
 
-- Esquemas Zod.
-- Servicios.
-- Estrategias de carga.
-- Utilidades.
-- Generación y validación de tokens.
-- Reglas de autorización.
-- Construcción de claves de caché.
+1. Invalidar el caché.
+2. Consultar el listado y recibir `X-Cache: MISS`.
+3. Consultar nuevamente y recibir `X-Cache: HIT`.
+4. Actualizar un evento.
+5. Consultar otra vez y recibir `X-Cache: MISS`.
 
-### Pruebas de integración
+Esto confirma que el caché funciona y que su invalidación evita devolver datos desactualizados.
 
-Comprobarán la interacción entre:
+## Pruebas de autenticación
 
-- Rutas de Express.
-- Controladores y servicios.
-- Prisma y PostgreSQL.
-- Autenticación y autorización.
-- Redis.
-- BullMQ.
-- Cola y worker.
+Se verificaron:
 
-### Verificaciones manuales
+- Registro de un usuario con rol `ASISTENTE`.
+- Almacenamiento de la contraseña mediante hash.
+- Inicio de sesión.
+- Emisión de access token y refresh token.
+- Rotación del refresh token.
+- Rechazo de reutilización.
+- Respuesta `401 Unauthorized` sin token.
+- Respuesta `403 Forbidden` cuando un asistente intenta modificar eventos.
 
-Complementarán las pruebas para:
+Resultado:
 
-- Revisar Swagger.
-- Observar respuestas HTTP.
-- Comprobar Redis.
-- Verificar el worker.
-- Obtener capturas académicas.
+`3 pruebas aprobadas`.
 
-Las verificaciones manuales no reemplazarán las pruebas automatizadas de comportamientos críticos.
+## Prueba de BullMQ
 
-## Gestión de eventos
+Se verificó el flujo completo:
 
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Crear evento válido | Evento creado | Pendiente |
-| Crear con datos inválidos | Error de validación | Pendiente |
-| Listar eventos | Respuesta paginada | Pendiente |
-| Aplicar filtros válidos | Resultados filtrados | Pendiente |
-| Usar paginación inválida | Error controlado | Pendiente |
-| Consultar evento existente | Evento encontrado | Pendiente |
-| Consultar evento inexistente | Recurso no encontrado | Pendiente |
-| Actualizar evento válido | Evento actualizado | Pendiente |
-| Actualizar con datos inválidos | Error de validación | Pendiente |
-| Eliminar evento existente | Operación exitosa | Pendiente |
-| Eliminar evento inexistente | Error controlado | Pendiente |
+1. Un usuario autenticado registra un recordatorio.
+2. La API responde con `202 Accepted`.
+3. El recordatorio se guarda como `PENDIENTE`.
+4. El trabajo se agrega a BullMQ.
+5. El worker recibe y procesa el trabajo.
+6. El registro termina con estado `COMPLETADO`.
 
-## Validaciones y errores
+Resultado:
 
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Cuerpo vacío | Error de validación consistente | Pendiente |
-| Identificador inválido | Error de validación consistente | Pendiente |
-| JSON mal formado | Error HTTP controlado | Pendiente |
-| Recurso inexistente | Respuesta 404 consistente | Pendiente |
-| Ruta inexistente | Respuesta 404 consistente | Pendiente |
-| Error interno controlado | Respuesta sin información sensible | Pendiente |
+`1 prueba aprobada`.
 
-Las respuestas no deberán mostrar secretos, contraseñas ni trazas internas innecesarias.
+La salida del worker confirmó el procesamiento y la finalización del trabajo.
 
-## Registro y autenticación
+## Base de pruebas
 
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Registrar usuario válido | Usuario registrado | Pendiente |
-| Registrar correo duplicado | Conflicto controlado | Pendiente |
-| Registrar datos inválidos | Error de validación | Pendiente |
-| Iniciar sesión correctamente | Tokens emitidos | Pendiente |
-| Usar contraseña incorrecta | Acceso rechazado | Pendiente |
-| Usar usuario inexistente | Acceso rechazado sin filtrar información | Pendiente |
-| Renovar sesión válida | Tokens rotados | Pendiente |
-| Reutilizar refresh token rotado | Sesión rechazada | Pendiente |
-| Revocar sesión | Refresh token invalidado | Pendiente |
-| Usar refresh token revocado | Sesión rechazada | Pendiente |
+Las pruebas utilizan exclusivamente:
 
-Los tokens completos no deberán mostrarse en capturas.
+`zamorafest_test`
 
-## Autorización por roles
+Antes de ejecutar las pruebas de integración se realizan automáticamente:
 
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Endpoint público sin token | Acceso permitido | Pendiente |
-| Endpoint protegido sin token | Acceso rechazado | Pendiente |
-| Token inválido | Acceso rechazado | Pendiente |
-| Token expirado | Acceso rechazado | Pendiente |
-| Rol autorizado | Acceso permitido | Pendiente |
-| Rol sin permisos | Acceso prohibido | Pendiente |
+1. Aplicación de migraciones pendientes.
+2. Ejecución del seed.
+3. Confirmación de la base de pruebas.
+4. Limpieza controlada de los registros utilizados.
 
-Los roles definitivos se aprobarán en la especificación de autenticación.
+## Comandos de verificación
 
-## Caché Redis
-
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Primera consulta | Cache miss y consulta a PostgreSQL | Pendiente |
-| Consulta repetida | Cache hit | Pendiente |
-| Expiración del TTL | Nueva consulta a PostgreSQL | Pendiente |
-| Crear evento | Invalidación correspondiente | Pendiente |
-| Publicar evento | Invalidación correspondiente | Pendiente |
-| Actualizar evento | Invalidación correspondiente | Pendiente |
-| Eliminar evento | Invalidación correspondiente | Pendiente |
-| Redis no disponible | Comportamiento controlado | Pendiente |
-
-Una falla de Redis no deberá modificar la fuente de verdad almacenada en PostgreSQL.
-
-## Prevención de N+1
-
-| Límite | Consultas esperadas después de optimizar | Consultas obtenidas |
-|---:|---|---:|
-| 1 | Cantidad fija | Pendiente |
-| 10 | La misma cantidad fija | Pendiente |
-| 50 | La misma cantidad fija | Pendiente |
-
-La prueba deberá detectar si la cantidad de consultas crece proporcionalmente con cada evento.
-
-## Estrategias de detalle
-
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| `detailLevel=basic` | Información esencial | Pendiente |
-| `detailLevel=detailed` | Información ampliada | Pendiente |
-| Nivel no admitido | Error de validación | Pendiente |
-| Nivel omitido | Comportamiento predeterminado documentado | Pendiente |
-| Evento inexistente | Recurso no encontrado | Pendiente |
-
-También se comprobará que `basic` no recupere relaciones reservadas para `detailed`.
-
-## Paginación y campos
-
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Primera página | Metadatos y elementos correctos | Pendiente |
-| Página intermedia | Elementos correspondientes | Pendiente |
-| Página fuera de rango | Comportamiento consistente | Pendiente |
-| Límite máximo | Respuesta controlada | Pendiente |
-| Límite superior al permitido | Error o ajuste documentado | Pendiente |
-| Campos del listado | Solo información necesaria | Pendiente |
-
-## Cola y worker
-
-| Escenario | Resultado esperado | Resultado obtenido |
-|---|---|---|
-| Crear recordatorio válido | Trabajo añadido | Pendiente |
-| Datos inválidos | Trabajo no añadido | Pendiente |
-| Procesar trabajo | Estado actualizado | Pendiente |
-| Error temporal | Reintento controlado | Pendiente |
-| Agotar reintentos | Fallo registrado | Pendiente |
-| Trabajo duplicado | Comportamiento definido | Pendiente |
-| Worker detenido | Endpoint no bloqueado | Pendiente |
-
-## Swagger y OpenAPI
-
-Se verificará que:
-
-- Swagger pueda abrirse.
-- Los endpoints estén documentados.
-- Los parámetros coincidan con las validaciones.
-- Los códigos de respuesta estén descritos.
-- Los endpoints protegidos indiquen seguridad.
-- Los ejemplos no incluyan credenciales reales.
-
-Resultado: pendiente.
-
-## Registro de defectos
-
-| Identificador | Descripción | Severidad | Estado | Commit de corrección |
-|---|---|---|---|---|
-| Pendiente | Pendiente | Pendiente | Pendiente | Pendiente |
-
-Los defectos encontrados no deberán ocultarse.
-
-## Criterios de aprobación
-
-La ejecución final será satisfactoria cuando:
-
-1. Las pruebas obligatorias terminen sin fallos no explicados.
-2. ESLint no reporte errores.
-3. TypeScript complete la comprobación.
-4. El backend pueda compilarse.
-5. Las migraciones puedan reproducirse.
-6. Los endpoints cumplan los criterios de aceptación.
-7. Las optimizaciones cuenten con pruebas y evidencias.
-8. No se expongan secretos.
-9. Los resultados se relacionen con un commit.
-
-## Conclusión
-
-Esta sección se completará después de la ejecución final.
-
-- Total de pruebas: pendiente.
-- Pruebas aprobadas: pendiente.
-- Pruebas fallidas: pendiente.
-- Limitaciones conocidas: pendiente.
-- Resultado general: pendiente.
+```text
+npm run format:check
+npm run typecheck
+npm run lint
+npm test
+npm run test:integration
+npm run build
+npm audit
+git diff --check
+```
