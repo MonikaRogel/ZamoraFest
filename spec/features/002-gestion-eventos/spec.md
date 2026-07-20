@@ -100,7 +100,8 @@ Error:
 
 ## Códigos HTTP
 
-- `200`: consulta, actualización o eliminación correcta.
+- `200`: consulta o actualización correcta.
+- `204`: eliminación lógica correcta, sin cuerpo de respuesta.
 - `201`: creación correcta.
 - `400`: datos o parámetros inválidos.
 - `404`: evento, lugar o categoría inexistente o inactiva.

@@ -52,5 +52,5 @@
 - [x] **T026** Confirmar que no existan secretos ni cambios fuera del alcance.
 - [ ] **T027** Documentar resultados reales para el video.
 - [x] **T028** Crear commits descriptivos.
-- [ ] **T029** Publicar la rama y abrir el pull request.
+- [x] **T029** Publicar la rama y abrir el pull request.
 - [ ] **T030** Revisar y fusionar en `main`.
