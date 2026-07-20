@@ -32,16 +32,21 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
-    "db:test:prepare": "tsx prisma/prepare-test-database.ts"
+    "db:test:prepare": "tsx prisma/prepare-test-database.ts",
+    "worker:recordatorios": "tsx src/workers/recordatorio.worker.ts",
+    "demo:prepare": "npm run prisma:seed && tsx scripts/prepare-demo-data.ts",
+    "measure:cache": "tsx scripts/measure-cache.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "bcryptjs": "3.0.3",
+    "bullmq": "5.80.9",
     "dotenv": "17.4.2",
     "express": "5.2.1",
     "jose": "6.2.3",
     "pg": "8.22.0",
+    "redis": "6.1.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

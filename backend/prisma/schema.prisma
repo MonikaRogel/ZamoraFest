@@ -21,6 +21,15 @@ enum RolUsuario {
   @@map("rol_usuario")
 }
 
+enum EstadoRecordatorio {
+  PENDIENTE
+  PROCESANDO
+  COMPLETADO
+  FALLIDO
+
+  @@map("estado_recordatorio")
+}
+
 model Usuario {
   id           String     @id @default(uuid()) @db.Uuid
   nombre       String     @db.VarChar(100)
@@ -32,6 +41,7 @@ model Usuario {
   eliminadoEn  DateTime?  @map("eliminado_en") @db.Timestamptz(3)
 
   refreshTokens RefreshToken[]
+  recordatorios Recordatorio[]
 
   @@index([email, eliminadoEn], map: "usuarios_email_eliminado_idx")
   @@map("usuarios")
@@ -109,6 +119,7 @@ model Evento {
   categorias     EventoCategoria[]
   programaciones ProgramacionEvento[]
   imagenes       ImagenEvento[]
+  recordatorios  Recordatorio[]
 
   @@index([lugarId, eliminadoEn], map: "eventos_lugar_eliminado_idx")
   @@index([estado, eliminadoEn], map: "eventos_estado_eliminado_idx")
@@ -160,4 +171,23 @@ model ImagenEvento {
 
   @@index([eventoId, eliminadoEn], map: "imagenes_evento_evento_eliminado_idx")
   @@map("imagenes_evento")
+}
+
+model Recordatorio {
+  id          String             @id @default(uuid()) @db.Uuid
+  usuarioId   String             @map("usuario_id") @db.Uuid
+  eventoId    String             @map("evento_id") @db.Uuid
+  estado      EstadoRecordatorio @default(PENDIENTE)
+  procesadoEn DateTime?          @map("procesado_en") @db.Timestamptz(3)
+  error       String?            @db.Text
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  eliminadoEn DateTime?          @map("eliminado_en") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  evento  Evento  @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([usuarioId, estado, eliminadoEn], map: "recordatorios_usuario_estado_idx")
+  @@index([eventoId, estado, eliminadoEn], map: "recordatorios_evento_estado_idx")
+  @@map("recordatorios")
 }

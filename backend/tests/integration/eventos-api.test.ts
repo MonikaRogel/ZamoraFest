@@ -264,3 +264,43 @@ describe('API REST de eventos', () => {
     expect(getResponse.status).toBe(404);
   });
 });
+it('aplica cache-aside e invalida el caché al actualizar', async () => {
+  const payload = validEventoPayload();
+
+  const createResponse = await request(app)
+    .post('/api/v1/eventos')
+    .set('Authorization', `Bearer ${adminAccessToken}`)
+    .send(payload);
+
+  expect(createResponse.status).toBe(201);
+
+  const firstListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
+
+  expect(firstListResponse.status).toBe(200);
+  expect(firstListResponse.headers['x-cache']).toBe('MISS');
+
+  const secondListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
+
+  expect(secondListResponse.status).toBe(200);
+  expect(secondListResponse.headers['x-cache']).toBe('HIT');
+
+  const evento = await prisma.evento.findFirstOrThrow({
+    where: {
+      titulo: payload.titulo,
+    },
+  });
+
+  const updateResponse = await request(app)
+    .patch(`/api/v1/eventos/${evento.id}`)
+    .set('Authorization', `Bearer ${adminAccessToken}`)
+    .send({
+      titulo: 'Festival actualizado para invalidar caché',
+    });
+
+  expect(updateResponse.status).toBe(200);
+
+  const invalidatedListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
+
+  expect(invalidatedListResponse.status).toBe(200);
+  expect(invalidatedListResponse.headers['x-cache']).toBe('MISS');
+});

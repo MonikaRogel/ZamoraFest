@@ -92,7 +92,7 @@ afterAll(async () => {
 });
 
 describe('modelo relacional de ZamoraFest', () => {
-  it('contiene las nueve tablas esperadas', async () => {
+  it('contiene las diez tablas esperadas', async () => {
     const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
       SELECT tablename
       FROM pg_tables
@@ -109,6 +109,7 @@ describe('modelo relacional de ZamoraFest', () => {
       'imagenes_evento',
       'lugares',
       'programaciones_evento',
+      'recordatorios',
       'refresh_tokens',
       'usuarios',
     ]);
