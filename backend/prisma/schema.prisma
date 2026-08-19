@@ -38,6 +38,7 @@ model Canton {
   provincia  Provincia   @relation(fields: [idProvincia], references: [id], onDelete: Restrict, onUpdate: Cascade)
   parroquias Parroquia[]
 
+  @@index([idProvincia], map: "canton_id_provincia_idx")
   @@map("canton")
 }
 
@@ -61,6 +62,7 @@ model Parroquia {
   canton   Canton   @relation(fields: [idCanton], references: [id], onDelete: Restrict, onUpdate: Cascade)
   sectores Sector[]
 
+  @@index([idCanton], map: "parroquia_id_canton_idx")
   @@map("parroquia")
 }
 
@@ -128,6 +130,7 @@ model Usuario {
   favoritos        UsuarioEventoFavorito[]
   recordatorios    Recordatorio[]
 
+  @@index([idRol, estado], map: "usuario_rol_estado_idx")
   @@map("usuario")
 }
 
@@ -142,6 +145,7 @@ model RefreshToken {
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  @@index([usuarioId, revocadoEn, expiraEn], map: "refresh_token_usuario_estado_idx")
   @@map("refresh_token")
 }
 
@@ -182,6 +186,11 @@ model Evento {
   favoritos      UsuarioEventoFavorito[]
   recordatorios  Recordatorio[]
 
+  @@index([idLugar], map: "evento_lugar_idx")
+  @@index([idUsuarioCreador], map: "evento_creador_idx")
+  @@index([idUsuarioRevisor], map: "evento_revisor_idx")
+  @@index([estadoEvento, estadoRevision, fechaInicio], map: "evento_publicacion_fecha_idx")
+  @@index([fechaInicio], map: "evento_fecha_inicio_idx")
   @@map("evento")
 }
 
@@ -193,6 +202,7 @@ model EventoCategoria {
   categoria Categoria @relation(fields: [idCategoria], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([idEvento, idCategoria])
+  @@index([idCategoria, idEvento], map: "evento_categoria_categoria_evento_idx")
   @@map("evento_categoria")
 }
 
@@ -214,6 +224,8 @@ model ProgramacionEvento {
   recordatorios Recordatorio[]
 
   @@unique([idEvento, id], map: "programacion_evento_evento_programacion_key")
+  @@index([idEvento, estado, fechaHoraInicio], map: "programacion_evento_evento_estado_inicio_idx")
+  @@index([idLugar], map: "programacion_evento_lugar_idx")
   @@map("programacion_evento")
 }
 
@@ -233,6 +245,8 @@ model ImagenEvento {
   programacion  ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
   usuarioSubida Usuario             @relation(fields: [idUsuarioSubida], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  @@index([idEvento, estado], map: "imagen_evento_evento_estado_idx")
+  @@index([idEvento, idProgramacion], map: "imagen_evento_evento_programacion_idx")
   @@map("imagen_evento")
 }
 
@@ -249,6 +263,8 @@ model Recordatorio {
   evento       Evento              @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
   programacion ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
 
+  @@index([idUsuario, activo, fechaNotificacion], map: "recordatorio_usuario_activo_fecha_idx")
+  @@index([idEvento, idProgramacion], map: "recordatorio_evento_programacion_idx")
   @@map("recordatorio")
 }
 
@@ -261,5 +277,6 @@ model UsuarioEventoFavorito {
   evento  Evento  @relation(fields: [idEvento], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([idUsuario, idEvento])
+  @@index([idEvento, idUsuario], map: "usuario_evento_favorito_evento_usuario_idx")
   @@map("usuario_evento_favorito")
 }
