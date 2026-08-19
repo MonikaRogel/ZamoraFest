@@ -182,10 +182,13 @@ Valores iniciales:
 
 Valores iniciales:
 
+- `BORRADOR`
 - `PROGRAMADO`
 - `CANCELADO`
 - `FINALIZADO`
 - `ELIMINADO`
+
+`BORRADOR` representa un evento registrado que todavía se encuentra en preparación y permite cumplir la decisión posterior de Semana 7 según la cual el asistente puede actualizar borradores, pero no publicarlos ni eliminarlos.
 
 `PROGRAMADO` es el estado requerido por la regla de publicación de Semana 4. `CANCELADO` y `FINALIZADO` representan estados funcionales diferentes. `ELIMINADO` permite que la operación CRUD de eliminación conserve trazabilidad sin borrar físicamente el evento.
 
@@ -206,6 +209,22 @@ Valores iniciales:
 
 No se utilizará `PRINCIPAL` como tipo porque esa condición ya está representada por `es_principal`. Tampoco se utilizará `PROGRAMACION` como tipo porque la asociación correspondiente ya existe mediante `id_programacion`.
 
+### 4.6 Roles funcionales de ZamoraFest
+
+La entidad `rol` pertenece al modelo canónico de Semana 4 y se implementará como tabla relacional, no como enum de Prisma.
+
+Los roles operativos definidos posteriormente para la API son:
+
+- `VISITANTE`: puede consultar información pública y, cuando esté autenticado, gestionar únicamente sus propios favoritos y recordatorios.
+- `ASISTENTE`: representa al asistente o personal de secretaría; puede registrar eventos y actualizar los que permanezcan en estado `BORRADOR`, pero no puede publicarlos ni eliminarlos.
+- `ADMINISTRADOR`: puede revisar, aprobar, publicar, actualizar y eliminar lógicamente eventos.
+
+Estos roles se cargarán como datos controlados mediante el seed.
+
+La tabla `usuario` deberá existir desde esta realineación y cada usuario tendrá exactamente un `id_rol`.
+
+Para pruebas automatizadas existirán usuarios de prueba de los tres roles. Para desarrollo manual, las contraseñas de usuarios iniciales no se almacenarán en el repositorio y se obtendrán mediante variables de entorno.
+
 ## 5. Defaults y nulabilidad
 
 Se respetará la nulabilidad definida en Semana 4. Las mejoras de default no convertirán campos opcionales en obligatorios ni viceversa.
@@ -222,7 +241,7 @@ Defaults iniciales propuestos:
 - `recordatorio.activo`: `true`;
 - fechas de creación/registro/subida/agregado: `now()` cuando Semana 4 exige el campo y el valor puede generarse al insertar;
 - `evento.estado_revision`: `PENDIENTE`;
-- `evento.estado_evento`: `PROGRAMADO` para el flujo actualmente documentado.
+- `evento.estado_evento`: `BORRADOR`;
 
 No se establecerá default para `costo_referencial`: el cliente/servicio deberá proporcionar explícitamente el valor, incluyendo `0.00` cuando el evento sea gratuito.
 
@@ -364,7 +383,7 @@ Cambios principales:
 
 Roles iniciales previstos para los flujos ya definidos del proyecto:
 
-- `ADMIN`
+- `ADMINISTRADOR`
 - `ASISTENTE`
 - `VISITANTE`
 
@@ -458,7 +477,7 @@ Como mínimo incluirá:
 3. parroquias necesarias para los lugares de demostración;
 4. sectores necesarios, incluyendo `CABECERA_PARROQUIAL` cuando corresponda;
 5. al menos un lugar válido dentro de la jerarquía completa;
-6. roles `ADMIN`, `ASISTENTE` y `VISITANTE`;
+6. roles `ADMINISTRADOR`, `ASISTENTE` y `VISITANTE`;
 7. categorías de demostración;
 8. usuarios de prueba únicamente en la base de pruebas o mediante preparación explícita, evitando credenciales reales en el repositorio.
 
@@ -523,7 +542,17 @@ La migración deberá utilizar una de estas estrategias, seleccionada después d
 - validar conteos y relaciones;
 - retirar las estructuras antiguas únicamente después de la verificación.
 
-No se elegirá el escenario hasta ejecutar el inventario.
+El inventario de `zamorafest_dev` fue ejecutado antes de modificar el esquema.
+
+Se encontraron 9 cantones, 3 categorías, 1 lugar, 12 eventos y 12 asociaciones evento-categoría. No existen usuarios, refresh tokens, programaciones, imágenes ni recordatorios.
+
+Los 12 eventos tienen títulos de demostración, identificadores UUID secuenciales y fueron generados como datos técnicos de prueba. No representan información funcional que requiera conservación y tampoco poseen un usuario creador que pueda trasladarse legítimamente al modelo de Semana 4.
+
+Por tanto, se selecciona el **Escenario A — reconstrucción controlada de datos reproducibles**.
+
+Antes de aplicar la migración correctiva se realizará un `pg_dump` de `zamorafest_dev`. Después, la nueva migración reconstruirá las tablas funcionales según el modelo canónico y el nuevo seed generará datos coherentes con la jerarquía territorial, roles, usuarios de desarrollo cuando estén configurados y datos de demostración compatibles con el nuevo esquema.
+
+Los UUID de los 12 eventos actuales no se convertirán artificialmente a enteros ni se les asignará un creador inexistente.
 
 ## 14. Flujo de trabajo con Prisma
 
