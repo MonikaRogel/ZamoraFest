@@ -213,6 +213,7 @@ model ProgramacionEvento {
   imagenes      ImagenEvento[]
   recordatorios Recordatorio[]
 
+  @@unique([idEvento, id], map: "programacion_evento_evento_programacion_key")
   @@map("programacion_evento")
 }
 
@@ -229,7 +230,7 @@ model ImagenEvento {
   estado          Boolean  @default(true)
 
   evento        Evento              @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  programacion  ProgramacionEvento? @relation(fields: [idProgramacion], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  programacion  ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
   usuarioSubida Usuario             @relation(fields: [idUsuarioSubida], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("imagen_evento")
@@ -246,7 +247,7 @@ model Recordatorio {
 
   usuario      Usuario             @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
   evento       Evento              @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  programacion ProgramacionEvento? @relation(fields: [idProgramacion], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  programacion ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("recordatorio")
 }
