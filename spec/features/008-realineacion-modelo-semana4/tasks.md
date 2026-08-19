@@ -1,0 +1,619 @@
+# Tareas: realineación del modelo de datos con Semana 4 (008)
+
+## Estado
+
+- **Rama:** `fix/realineacion-modelo-semana4`
+- **Especificación:** `spec.md`
+- **Plan técnico:** `plan.md`
+- **Estado general:** pendiente de implementación
+
+## Regla de ejecución
+
+Las tareas se ejecutarán en el orden definido en este documento. No se avanzará a una fase posterior mientras la puerta de verificación de la fase actual no haya sido superada.
+
+No se ejecutará `prisma migrate reset`, `prisma db push` ni una migración correctiva sobre `zamorafest_dev` antes del respaldo, revisión del esquema y validación del SQL.
+
+---
+
+## Fase 0 — Línea base y protección
+
+### T001 — Confirmar rama y árbol limpio
+
+- [ ] Confirmar rama `fix/realineacion-modelo-semana4`.
+- [ ] Confirmar `git status` limpio.
+- [ ] Confirmar que `spec.md`, `plan.md` y `tasks.md` se encuentran versionados.
+
+### T002 — Registrar línea base funcional previa
+
+- [ ] Conservar evidencia de 19/19 pruebas de integración aprobadas antes de la realineación.
+- [ ] Conservar medición previa de caché: MISS aproximado 498.31 ms.
+- [ ] Conservar medición previa de caché: HIT promedio aproximado 8.86 ms.
+- [ ] Documentar que estas métricas corresponden al modelo reducido anterior.
+
+### T003 — Respaldar `zamorafest_dev`
+
+- [ ] Ejecutar `pg_dump` de `zamorafest_dev` antes de cualquier modificación destructiva.
+- [ ] Verificar que el archivo de respaldo exista y tenga tamaño mayor que cero.
+- [ ] Registrar fecha/hora y nombre del respaldo.
+- [ ] No versionar credenciales ni secretos en Git.
+
+### T004 — Confirmar inventario previo
+
+- [ ] Registrar que existen 9 cantones.
+- [ ] Registrar que existen 3 categorías.
+- [ ] Registrar que existe 1 lugar.
+- [ ] Registrar que existen 12 eventos de demostración.
+- [ ] Registrar que existen 12 asociaciones evento-categoría.
+- [ ] Registrar que no existen usuarios, refresh tokens, programaciones, imágenes ni recordatorios.
+- [ ] Confirmar formalmente el Escenario A: reconstrucción controlada de datos reproducibles.
+
+### Puerta G0
+
+No continuar si:
+
+- el respaldo no existe;
+- la rama no está limpia;
+- la base objetivo no es `zamorafest_dev`;
+- aparece información funcional no contemplada por el inventario.
+
+---
+
+## Fase 1 — Modelo canónico en Prisma
+
+### T005 — Eliminar sustituciones conceptuales incorrectas
+
+- [ ] Retirar `RolUsuario` como sustituto de la entidad `rol`.
+- [ ] Retirar `EstadoRecordatorio` de la entidad funcional `recordatorio`.
+- [ ] Retirar el modelo reducido que relaciona `lugar` directamente con `canton`.
+- [ ] Retirar campos de eliminación lógica que contradigan el modelo canónico cuando su función ya esté representada por `estado` o `estado_evento`.
+
+### T006 — Implementar jerarquía territorial completa
+
+- [ ] Crear modelo Prisma `Provincia` → tabla `provincia`.
+- [ ] Crear modelo Prisma `Canton` → tabla `canton`.
+- [ ] Crear modelo Prisma `Parroquia` → tabla `parroquia`.
+- [ ] Crear modelo Prisma `Sector` → tabla `sector`.
+- [ ] Crear modelo Prisma `Lugar` → tabla `lugar`.
+- [ ] Implementar PK `INT` autogeneradas.
+- [ ] Implementar FK en cadena `provincia → canton → parroquia → sector → lugar`.
+- [ ] Implementar códigos DPA y unicidades definidas.
+- [ ] Implementar coordenadas `DECIMAL(9,6)`.
+
+### T007 — Implementar `rol`
+
+- [ ] Crear modelo Prisma `Rol` → tabla `rol`.
+- [ ] Implementar `id_rol INT` autogenerado.
+- [ ] Implementar `nombre` único.
+- [ ] Implementar `descripcion`.
+- [ ] Implementar `estado`.
+- [ ] No utilizar enum Prisma como reemplazo funcional de `rol`.
+
+### T008 — Implementar `usuario`
+
+- [ ] Crear modelo Prisma `Usuario` → tabla `usuario`.
+- [ ] Implementar `id_usuario INT` autogenerado.
+- [ ] Implementar `id_rol` FK obligatoria.
+- [ ] Implementar `nombre_completo`.
+- [ ] Implementar `correo` único.
+- [ ] Implementar `contrasena_hash`.
+- [ ] Implementar `fecha_registro`.
+- [ ] Implementar `estado`.
+- [ ] Definir relaciones con eventos creados, eventos revisados, imágenes, favoritos y recordatorios.
+
+### T009 — Adaptar `refresh_token`
+
+- [ ] Mantener `refresh_token` como extensión técnica posterior.
+- [ ] Mantener UUID como identificador técnico si continúa siendo conveniente.
+- [ ] Cambiar `usuario_id` de UUID a `INT`.
+- [ ] Mantener hash de token.
+- [ ] Mantener expiración y revocación.
+- [ ] Mantener `TIMESTAMPTZ` para tiempos técnicos de seguridad.
+
+### T010 — Implementar `categoria`
+
+- [ ] Crear/realinear `Categoria` → tabla `categoria`.
+- [ ] Implementar PK `INT`.
+- [ ] Implementar `nombre` único.
+- [ ] Implementar `descripcion`.
+- [ ] Implementar `estado`.
+
+### T011 — Implementar `evento`
+
+- [ ] Crear/realinear `Evento` → tabla `evento`.
+- [ ] Implementar PK `INT`.
+- [ ] Implementar `titulo`.
+- [ ] Implementar `descripcion` opcional.
+- [ ] Implementar `fecha_inicio`.
+- [ ] Implementar `fecha_fin` opcional.
+- [ ] Implementar `costo_referencial DECIMAL(10,2)`.
+- [ ] Implementar FK obligatoria a `lugar`.
+- [ ] Implementar FK obligatoria `id_usuario_creador`.
+- [ ] Implementar FK opcional `id_usuario_revisor`.
+- [ ] Implementar `estado_evento`.
+- [ ] Implementar `estado_revision`.
+- [ ] Implementar `fuente_informacion`.
+- [ ] Implementar fechas de creación, actualización y revisión.
+
+### T012 — Implementar `evento_categoria`
+
+- [ ] Crear tabla `evento_categoria`.
+- [ ] Implementar PK compuesta `(id_evento, id_categoria)`.
+- [ ] Implementar ambas FK.
+- [ ] Impedir asociaciones duplicadas.
+
+### T013 — Implementar `programacion_evento`
+
+- [ ] Crear tabla `programacion_evento`.
+- [ ] Implementar PK `INT`.
+- [ ] Implementar FK obligatoria a `evento`.
+- [ ] Implementar FK opcional a `lugar`.
+- [ ] Implementar título de actividad.
+- [ ] Implementar descripción.
+- [ ] Implementar inicio y fin.
+- [ ] Implementar artista invitado.
+- [ ] Implementar orden.
+- [ ] Implementar estado.
+
+### T014 — Implementar `imagen_evento`
+
+- [ ] Crear tabla `imagen_evento`.
+- [ ] Implementar PK `INT`.
+- [ ] Implementar FK obligatoria a `evento`.
+- [ ] Implementar FK opcional a `programacion_evento`.
+- [ ] Implementar FK obligatoria a `usuario` como usuario de subida.
+- [ ] Implementar URL, tipo, descripción, principal, fecha y estado.
+- [ ] Preparar integridad evento/programación.
+
+### T015 — Implementar `usuario_evento_favorito`
+
+- [ ] Crear tabla `usuario_evento_favorito`.
+- [ ] Implementar PK compuesta `(id_usuario, id_evento)`.
+- [ ] Implementar `fecha_agregado`.
+- [ ] Impedir favoritos duplicados.
+
+### T016 — Implementar `recordatorio`
+
+- [ ] Crear/realinear tabla `recordatorio`.
+- [ ] Implementar PK `INT`.
+- [ ] Implementar FK a `usuario`.
+- [ ] Implementar FK a `evento`.
+- [ ] Implementar FK opcional a `programacion_evento`.
+- [ ] Implementar `fecha_notificacion`.
+- [ ] Implementar `activo`.
+- [ ] Implementar `fecha_creacion`.
+- [ ] Eliminar de la entidad funcional los estados técnicos de BullMQ.
+
+### Puerta G1
+
+Ejecutar y aprobar:
+
+- [ ] `npm run prisma:format`
+- [ ] `npm run prisma:validate`
+- [ ] `npm run prisma:generate`
+
+No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_token` como extensión técnica.
+
+---
+
+## Fase 2 — Restricciones físicas PostgreSQL
+
+### T017 — Implementar CHECK de dominios
+
+- [ ] `sector.tipo_sector`.
+- [ ] `lugar.tipo_lugar`.
+- [ ] `evento.estado_evento` con `BORRADOR`, `PROGRAMADO`, `CANCELADO`, `FINALIZADO`, `ELIMINADO`.
+- [ ] `evento.estado_revision` con `PENDIENTE`, `APROBADO`, `RECHAZADO`.
+- [ ] `imagen_evento.tipo_imagen`.
+
+### T018 — Implementar CHECK numéricos y temporales
+
+- [ ] Coordenadas en rango.
+- [ ] Pares de coordenadas coherentes cuando corresponda.
+- [ ] `costo_referencial >= 0`.
+- [ ] `fecha_fin >= fecha_inicio` cuando exista fecha de fin.
+- [ ] `fecha_hora_fin >= fecha_hora_inicio` cuando exista fin de programación.
+
+### T019 — Implementar integridad evento/programación
+
+- [ ] Garantizar que `imagen_evento.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
+- [ ] Garantizar que `recordatorio.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
+- [ ] Preferir FK compuesta si Prisma y PostgreSQL lo permiten de forma estable.
+- [ ] Si Prisma no representa la restricción completa, mantenerla en SQL de migración y documentarla.
+
+### T020 — Implementar imagen principal única activa
+
+- [ ] Impedir más de una imagen principal activa por evento.
+- [ ] Utilizar índice parcial PostgreSQL si resulta adecuado.
+
+### T021 — Implementar índices
+
+- [ ] FK territoriales.
+- [ ] códigos DPA.
+- [ ] correo de usuario.
+- [ ] lugar de evento.
+- [ ] creador y revisor.
+- [ ] estados de publicación.
+- [ ] fecha de inicio de evento.
+- [ ] categoría-evento.
+- [ ] recordatorios por usuario y fecha.
+- [ ] índices requeridos por consultas públicas y Strategy.
+
+### T022 — Revisar acciones referenciales
+
+- [ ] Aplicar `RESTRICT` donde la eliminación de un padre invalidaría el dominio.
+- [ ] Aplicar `CASCADE` únicamente en tablas asociativas donde esté justificado.
+- [ ] Verificar que la eliminación lógica del dominio no dependa de borrado físico.
+
+### Puerta G2
+
+- [ ] Esquema Prisma válido.
+- [ ] Restricciones físicas documentadas.
+- [ ] Índices justificados.
+- [ ] Ninguna regla canónica omitida.
+
+---
+
+## Fase 3 — Migración correctiva
+
+### T023 — Generar migración únicamente para revisión
+
+- [ ] Generar migración con `--create-only`.
+- [ ] No aplicarla inmediatamente.
+- [ ] Revisar `migration.sql` línea por línea.
+
+### T024 — Adaptar SQL al Escenario A
+
+- [ ] Conservar las tres migraciones históricas.
+- [ ] Crear migración correctiva posterior.
+- [ ] Retirar/reconstruir las tablas funcionales reducidas según orden seguro de FK.
+- [ ] Crear las tablas canónicas de Semana 4.
+- [ ] Crear `rol` y `usuario` en la misma migración correctiva.
+- [ ] Mantener `refresh_token` como extensión adaptada al nuevo `usuario`.
+- [ ] Incorporar manualmente CHECK, índices parciales y restricciones no generadas por Prisma.
+
+### T025 — Revisar seguridad de la migración
+
+- [ ] Confirmar que el SQL actúa únicamente sobre el esquema esperado.
+- [ ] Confirmar que existe respaldo `pg_dump` válido.
+- [ ] Confirmar que los 12 eventos actuales son datos de demostración y no se migrarán artificialmente.
+- [ ] Confirmar que no se inventará un usuario creador para datos antiguos.
+
+### T026 — Aplicar migración en entorno controlado
+
+- [ ] Probar primero la reconstrucción en `zamorafest_test` o base temporal equivalente.
+- [ ] Verificar creación de todas las tablas.
+- [ ] Verificar FK, PK, UQ, CHECK e índices.
+- [ ] Solo después aplicar en `zamorafest_dev`.
+
+### Puerta G3
+
+- [ ] Migración reproducible desde historial completo.
+- [ ] 14 entidades funcionales presentes.
+- [ ] `refresh_token` presente como extensión.
+- [ ] Ninguna tabla reducida antigua permanece como fuente funcional.
+
+---
+
+## Fase 4 — Seed coherente
+
+### T027 — Reescribir `seed.ts`
+
+- [ ] Crear provincia Zamora Chinchipe.
+- [ ] Crear los cantones necesarios con DPA correcto.
+- [ ] Crear parroquias necesarias.
+- [ ] Crear sectores necesarios.
+- [ ] Crear `CABECERA_PARROQUIAL` cuando corresponda.
+- [ ] Crear al menos un lugar válido en la jerarquía completa.
+- [ ] Crear categorías.
+- [ ] Crear roles `ADMINISTRADOR`, `ASISTENTE`, `VISITANTE`.
+
+### T028 — Preparar usuarios de desarrollo/prueba
+
+- [ ] Crear usuarios de prueba para los tres roles en entorno de pruebas.
+- [ ] No guardar contraseñas reales en Git.
+- [ ] Para desarrollo manual, obtener credenciales desde variables de entorno.
+- [ ] Generar hashes mediante el mecanismo de autenticación real.
+- [ ] Verificar FK `usuario → rol`.
+
+### T029 — Regenerar datos de demostración compatibles
+
+- [ ] Crear eventos únicamente después de disponer de usuario creador válido.
+- [ ] Crear datos con `BORRADOR/PENDIENTE` y/o `PROGRAMADO/APROBADO` según el caso de prueba.
+- [ ] Asociar categorías.
+- [ ] Crear programación cuando sea necesaria para pruebas.
+- [ ] No copiar los UUID anteriores.
+
+### Puerta G4
+
+- [ ] Seed idempotente/reproducible.
+- [ ] Ningún evento sin creador.
+- [ ] Ningún usuario sin rol.
+- [ ] Jerarquía territorial completa y válida.
+
+---
+
+## Fase 5 — Autenticación y autorización
+
+### T030 — Adaptar repositorio/servicio de autenticación
+
+- [ ] Cambiar identificador de usuario de UUID a `INT`.
+- [ ] Obtener rol mediante relación `usuario → rol`.
+- [ ] Mantener hash seguro de contraseña.
+- [ ] Mantener access token.
+- [ ] Mantener refresh token de 7 días según definición previa.
+- [ ] Mantener rotación y revocación.
+
+### T031 — Adaptar claims JWT
+
+- [ ] Incluir `id_usuario` adecuado.
+- [ ] Incluir rol normalizado.
+- [ ] Mantener únicamente claims necesarios.
+
+### T032 — Adaptar autorización
+
+- [ ] `VISITANTE` autenticado: favoritos y recordatorios propios.
+- [ ] `ASISTENTE`: crear eventos y modificar borradores conforme a reglas.
+- [ ] `ADMINISTRADOR`: revisar, aprobar, publicar, actualizar y eliminar lógicamente.
+- [ ] Impedir escalamiento de privilegios.
+
+### Puerta G5
+
+- [ ] Login válido.
+- [ ] Refresh válido.
+- [ ] Revocación válida.
+- [ ] Matriz de roles probada.
+
+---
+
+## Fase 6 — CRUD y reglas de negocio
+
+### T033 — Adaptar DTO/Zod de eventos
+
+- [ ] Validar todos los campos canónicos requeridos.
+- [ ] Validar fechas.
+- [ ] Validar costo.
+- [ ] Validar lugar.
+- [ ] Validar categorías.
+- [ ] No aceptar directamente creador/revisor cuando deban derivarse de autenticación.
+
+### T034 — Adaptar repositorio de eventos
+
+- [ ] Consultar nueva jerarquía territorial.
+- [ ] Consultar creador y revisor.
+- [ ] Consultar categorías.
+- [ ] Consultar programación e imágenes según Strategy.
+- [ ] Evitar N+1.
+
+### T035 — Adaptar servicio de eventos
+
+- [ ] Crear evento como `BORRADOR/PENDIENTE` para el flujo de asistente.
+- [ ] Asociar creador autenticado.
+- [ ] Validar lugar activo.
+- [ ] Validar categorías activas.
+- [ ] Implementar flujo de revisión.
+- [ ] Registrar revisor y fecha de revisión.
+- [ ] Publicar solo cuando corresponda.
+
+### T036 — Adaptar eliminación lógica
+
+- [ ] `DELETE` no eliminará físicamente el evento.
+- [ ] Cambiar a `estado_evento = ELIMINADO` cuando la operación esté autorizada.
+- [ ] Excluir eliminados de consultas normales.
+
+### T037 — Adaptar consultas públicas
+
+- [ ] Mostrar solo `PROGRAMADO + APROBADO`.
+- [ ] Mantener paginación.
+- [ ] Mantener filtros.
+- [ ] Mantener selección de campos.
+
+---
+
+## Fase 7 — Favoritos, imágenes y programación
+
+### T038 — Implementar favoritos
+
+- [ ] Crear favorito para usuario autenticado.
+- [ ] Impedir duplicados.
+- [ ] Listar favoritos propios.
+- [ ] Eliminar favorito propio según contrato definido.
+
+### T039 — Implementar programación
+
+- [ ] CRUD/servicio requerido por el alcance actual.
+- [ ] Validar pertenencia al evento.
+- [ ] Validar lugar opcional.
+- [ ] Validar fechas.
+
+### T040 — Implementar imágenes
+
+- [ ] Validar evento.
+- [ ] Registrar usuario de subida.
+- [ ] Validar programación opcional.
+- [ ] Garantizar coherencia evento/programación.
+- [ ] Garantizar principal única activa.
+
+---
+
+## Fase 8 — Recordatorios y BullMQ
+
+### T041 — Adaptar recordatorio funcional
+
+- [ ] Crear recordatorio con usuario, evento, programación opcional y fecha de notificación.
+- [ ] Validar pertenencia de programación al evento.
+- [ ] Validar propiedad del usuario.
+- [ ] Mantener `activo`.
+
+### T042 — Adaptar cola BullMQ
+
+- [ ] Job con `recordatorioId: number`.
+- [ ] No persistir estado técnico de BullMQ en los campos funcionales del recordatorio.
+- [ ] Mantener reintentos/estado técnico en la cola.
+
+### T043 — Adaptar worker
+
+- [ ] Recuperar recordatorio por `INT`.
+- [ ] Comprobar `activo`.
+- [ ] Cargar evento/programación/usuario.
+- [ ] Procesar sin redefinir la semántica del registro.
+
+---
+
+## Fase 9 — Caché y rendimiento
+
+### T044 — Realinear claves de caché
+
+- [ ] Actualizar claves que dependan de IDs UUID.
+- [ ] Adaptarlas a IDs enteros y nuevo contrato.
+
+### T045 — Mantener cache-aside
+
+- [ ] Listados públicos.
+- [ ] detalle público.
+- [ ] categorías.
+- [ ] invalidación al crear/revisar/publicar/actualizar/eliminar.
+
+### T046 — Revalidar Strategy y N+1
+
+- [ ] `basic`.
+- [ ] `detailed`.
+- [ ] verificar número de consultas.
+- [ ] mantener selección de campos.
+
+### T047 — Repetir medición
+
+- [ ] Medir MISS con nuevo modelo.
+- [ ] Medir HIT con nuevo modelo.
+- [ ] Documentar condiciones.
+- [ ] Comparar con línea base sin afirmar equivalencia si cambian las condiciones.
+
+---
+
+## Fase 10 — Pruebas
+
+### T048 — Pruebas del modelo
+
+- [ ] PK/FK.
+- [ ] unicidades.
+- [ ] CHECK.
+- [ ] jerarquía territorial.
+- [ ] roles/usuarios.
+- [ ] evento/programación cruzada.
+- [ ] favoritos duplicados.
+- [ ] imagen principal.
+
+### T049 — Pruebas de autenticación
+
+- [ ] login.
+- [ ] token inválido.
+- [ ] refresh.
+- [ ] revocación.
+- [ ] rol inactivo si aplica.
+
+### T050 — Pruebas de autorización
+
+- [ ] VISITANTE.
+- [ ] ASISTENTE.
+- [ ] ADMINISTRADOR.
+- [ ] operaciones prohibidas por rol.
+
+### T051 — Pruebas CRUD eventos
+
+- [ ] creación.
+- [ ] actualización.
+- [ ] revisión.
+- [ ] publicación.
+- [ ] eliminación lógica.
+- [ ] consulta pública.
+
+### T052 — Pruebas de favoritos y recordatorios
+
+- [ ] favoritos propios.
+- [ ] duplicados.
+- [ ] recordatorios válidos.
+- [ ] programación perteneciente a otro evento rechazada.
+- [ ] BullMQ con identificador entero.
+
+### T053 — Calidad general
+
+- [ ] `npm run typecheck`.
+- [ ] `npm run lint`.
+- [ ] `npm run test` o scripts equivalentes definidos.
+- [ ] `npm run test:integration`.
+- [ ] `npm run build`.
+
+### Puerta G10
+
+No continuar al cierre si existe una prueba relevante fallida.
+
+---
+
+## Fase 11 — Documentación
+
+### T054 — Actualizar modelo de datos
+
+- [ ] Actualizar `docs/modelo-datos.md`.
+- [ ] Sustituir DER reducido por las 14 entidades canónicas.
+- [ ] Documentar `refresh_token` como extensión técnica.
+
+### T055 — Actualizar especificaciones anteriores afectadas
+
+- [ ] Marcar explícitamente en 001 que su simplificación quedó supersedida por 008.
+- [ ] No borrar ni reescribir la evidencia histórica.
+- [ ] Añadir referencia a la corrección 008.
+
+### T056 — Actualizar OpenAPI
+
+- [ ] IDs enteros.
+- [ ] campos reales de evento.
+- [ ] estados.
+- [ ] roles.
+- [ ] favoritos.
+- [ ] recordatorios.
+- [ ] respuestas de error.
+
+### T057 — Actualizar README
+
+- [ ] Modelo real.
+- [ ] flujo de migración.
+- [ ] seed.
+- [ ] ejecución de pruebas.
+- [ ] requisitos de entorno.
+
+---
+
+## Fase 12 — Cierre de la realineación
+
+### T058 — Auditoría final contra Semana 4
+
+- [ ] Comparar entidad por entidad.
+- [ ] Comparar campo por campo.
+- [ ] Comparar PK/FK.
+- [ ] Comparar cardinalidades.
+- [ ] Comparar reglas de negocio.
+- [ ] Verificar que no falte ninguna de las 14 entidades.
+
+### T059 — Auditoría de regresión Semanas 7 y 8
+
+- [ ] autenticación y autorización.
+- [ ] refresh tokens.
+- [ ] CRUD.
+- [ ] Swagger/OpenAPI.
+- [ ] caché.
+- [ ] N+1.
+- [ ] Strategy.
+- [ ] BullMQ.
+
+### T060 — Estado final Git
+
+- [ ] árbol limpio.
+- [ ] commits trazables.
+- [ ] push de rama.
+- [ ] PR correctiva preparada.
+- [ ] no fusionar a `main` hasta completar todas las puertas relevantes.
+
+## Criterio de finalización
+
+La realineación 008 estará terminada únicamente cuando PostgreSQL, Prisma, backend, pruebas y documentación representen el mismo modelo funcional de Semana 4 y las extensiones posteriores estén claramente separadas y justificadas.
+
+Solo después de este cierre se continuará con el desarrollo de la interfaz móvil sobre una API y una base de datos ya coherentes.
