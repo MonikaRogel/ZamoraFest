@@ -5,7 +5,7 @@
 - **Rama:** `fix/realineacion-modelo-semana4`
 - **Especificación:** `spec.md`
 - **Plan técnico:** `plan.md`
-- **Estado general:** Fase 0 completada; Fase 1 en ejecución
+- **Estado general:** Fase 1 completada; Fase 2 en ejecución
 
 ## Regla de ejecución
 
@@ -69,134 +69,134 @@ No continuar si:
 
 ### T005 — Eliminar sustituciones conceptuales incorrectas
 
-- [ ] Retirar `RolUsuario` como sustituto de la entidad `rol`.
-- [ ] Retirar `EstadoRecordatorio` de la entidad funcional `recordatorio`.
-- [ ] Retirar el modelo reducido que relaciona `lugar` directamente con `canton`.
-- [ ] Retirar campos de eliminación lógica que contradigan el modelo canónico cuando su función ya esté representada por `estado` o `estado_evento`.
+- [x] Retirar `RolUsuario` como sustituto de la entidad `rol`.
+- [x] Retirar `EstadoRecordatorio` de la entidad funcional `recordatorio`.
+- [x] Retirar el modelo reducido que relaciona `lugar` directamente con `canton`.
+- [x] Retirar campos de eliminación lógica que contradigan el modelo canónico cuando su función ya esté representada por `estado` o `estado_evento`.
 
 ### T006 — Implementar jerarquía territorial completa
 
-- [ ] Crear modelo Prisma `Provincia` → tabla `provincia`.
-- [ ] Crear modelo Prisma `Canton` → tabla `canton`.
-- [ ] Crear modelo Prisma `Parroquia` → tabla `parroquia`.
-- [ ] Crear modelo Prisma `Sector` → tabla `sector`.
-- [ ] Crear modelo Prisma `Lugar` → tabla `lugar`.
-- [ ] Implementar PK `INT` autogeneradas.
-- [ ] Implementar FK en cadena `provincia → canton → parroquia → sector → lugar`.
-- [ ] Implementar códigos DPA y unicidades definidas.
-- [ ] Implementar coordenadas `DECIMAL(9,6)`.
+- [x] Crear modelo Prisma `Provincia` → tabla `provincia`.
+- [x] Crear modelo Prisma `Canton` → tabla `canton`.
+- [x] Crear modelo Prisma `Parroquia` → tabla `parroquia`.
+- [x] Crear modelo Prisma `Sector` → tabla `sector`.
+- [x] Crear modelo Prisma `Lugar` → tabla `lugar`.
+- [x] Implementar PK `INT` autogeneradas.
+- [x] Implementar FK en cadena `provincia → canton → parroquia → sector → lugar`.
+- [x] Implementar códigos DPA y unicidades definidas.
+- [x] Implementar coordenadas `DECIMAL(9,6)`.
 
 ### T007 — Implementar `rol`
 
-- [ ] Crear modelo Prisma `Rol` → tabla `rol`.
-- [ ] Implementar `id_rol INT` autogenerado.
-- [ ] Implementar `nombre` único.
-- [ ] Implementar `descripcion`.
-- [ ] Implementar `estado`.
-- [ ] No utilizar enum Prisma como reemplazo funcional de `rol`.
+- [x] Crear modelo Prisma `Rol` → tabla `rol`.
+- [x] Implementar `id_rol INT` autogenerado.
+- [x] Implementar `nombre` único.
+- [x] Implementar `descripcion`.
+- [x] Implementar `estado`.
+- [x] No utilizar enum Prisma como reemplazo funcional de `rol`.
 
 ### T008 — Implementar `usuario`
 
-- [ ] Crear modelo Prisma `Usuario` → tabla `usuario`.
-- [ ] Implementar `id_usuario INT` autogenerado.
-- [ ] Implementar `id_rol` FK obligatoria.
-- [ ] Implementar `nombre_completo`.
-- [ ] Implementar `correo` único.
-- [ ] Implementar `contrasena_hash`.
-- [ ] Implementar `fecha_registro`.
-- [ ] Implementar `estado`.
-- [ ] Definir relaciones con eventos creados, eventos revisados, imágenes, favoritos y recordatorios.
+- [x] Crear modelo Prisma `Usuario` → tabla `usuario`.
+- [x] Implementar `id_usuario INT` autogenerado.
+- [x] Implementar `id_rol` FK obligatoria.
+- [x] Implementar `nombre_completo`.
+- [x] Implementar `correo` único.
+- [x] Implementar `contrasena_hash`.
+- [x] Implementar `fecha_registro`.
+- [x] Implementar `estado`.
+- [x] Definir relaciones con eventos creados, eventos revisados, imágenes, favoritos y recordatorios.
 
 ### T009 — Adaptar `refresh_token`
 
-- [ ] Mantener `refresh_token` como extensión técnica posterior.
-- [ ] Mantener UUID como identificador técnico si continúa siendo conveniente.
-- [ ] Cambiar `usuario_id` de UUID a `INT`.
-- [ ] Mantener hash de token.
-- [ ] Mantener expiración y revocación.
-- [ ] Mantener `TIMESTAMPTZ` para tiempos técnicos de seguridad.
+- [x] Mantener `refresh_token` como extensión técnica posterior.
+- [x] Mantener UUID como identificador técnico si continúa siendo conveniente.
+- [x] Cambiar `usuario_id` de UUID a `INT`.
+- [x] Mantener hash de token.
+- [x] Mantener expiración y revocación.
+- [x] Mantener `TIMESTAMPTZ` para tiempos técnicos de seguridad.
 
 ### T010 — Implementar `categoria`
 
-- [ ] Crear/realinear `Categoria` → tabla `categoria`.
-- [ ] Implementar PK `INT`.
-- [ ] Implementar `nombre` único.
-- [ ] Implementar `descripcion`.
-- [ ] Implementar `estado`.
+- [x] Crear/realinear `Categoria` → tabla `categoria`.
+- [x] Implementar PK `INT`.
+- [x] Implementar `nombre` único.
+- [x] Implementar `descripcion`.
+- [x] Implementar `estado`.
 
 ### T011 — Implementar `evento`
 
-- [ ] Crear/realinear `Evento` → tabla `evento`.
-- [ ] Implementar PK `INT`.
-- [ ] Implementar `titulo`.
-- [ ] Implementar `descripcion` opcional.
-- [ ] Implementar `fecha_inicio`.
-- [ ] Implementar `fecha_fin` opcional.
-- [ ] Implementar `costo_referencial DECIMAL(10,2)`.
-- [ ] Implementar FK obligatoria a `lugar`.
-- [ ] Implementar FK obligatoria `id_usuario_creador`.
-- [ ] Implementar FK opcional `id_usuario_revisor`.
-- [ ] Implementar `estado_evento`.
-- [ ] Implementar `estado_revision`.
-- [ ] Implementar `fuente_informacion`.
-- [ ] Implementar fechas de creación, actualización y revisión.
+- [x] Crear/realinear `Evento` → tabla `evento`.
+- [x] Implementar PK `INT`.
+- [x] Implementar `titulo`.
+- [x] Implementar `descripcion` opcional.
+- [x] Implementar `fecha_inicio`.
+- [x] Implementar `fecha_fin` opcional.
+- [x] Implementar `costo_referencial DECIMAL(10,2)`.
+- [x] Implementar FK obligatoria a `lugar`.
+- [x] Implementar FK obligatoria `id_usuario_creador`.
+- [x] Implementar FK opcional `id_usuario_revisor`.
+- [x] Implementar `estado_evento`.
+- [x] Implementar `estado_revision`.
+- [x] Implementar `fuente_informacion`.
+- [x] Implementar fechas de creación, actualización y revisión.
 
 ### T012 — Implementar `evento_categoria`
 
-- [ ] Crear tabla `evento_categoria`.
-- [ ] Implementar PK compuesta `(id_evento, id_categoria)`.
-- [ ] Implementar ambas FK.
-- [ ] Impedir asociaciones duplicadas.
+- [x] Crear tabla `evento_categoria`.
+- [x] Implementar PK compuesta `(id_evento, id_categoria)`.
+- [x] Implementar ambas FK.
+- [x] Impedir asociaciones duplicadas.
 
 ### T013 — Implementar `programacion_evento`
 
-- [ ] Crear tabla `programacion_evento`.
-- [ ] Implementar PK `INT`.
-- [ ] Implementar FK obligatoria a `evento`.
-- [ ] Implementar FK opcional a `lugar`.
-- [ ] Implementar título de actividad.
-- [ ] Implementar descripción.
-- [ ] Implementar inicio y fin.
-- [ ] Implementar artista invitado.
-- [ ] Implementar orden.
-- [ ] Implementar estado.
+- [x] Crear tabla `programacion_evento`.
+- [x] Implementar PK `INT`.
+- [x] Implementar FK obligatoria a `evento`.
+- [x] Implementar FK opcional a `lugar`.
+- [x] Implementar título de actividad.
+- [x] Implementar descripción.
+- [x] Implementar inicio y fin.
+- [x] Implementar artista invitado.
+- [x] Implementar orden.
+- [x] Implementar estado.
 
 ### T014 — Implementar `imagen_evento`
 
-- [ ] Crear tabla `imagen_evento`.
-- [ ] Implementar PK `INT`.
-- [ ] Implementar FK obligatoria a `evento`.
-- [ ] Implementar FK opcional a `programacion_evento`.
-- [ ] Implementar FK obligatoria a `usuario` como usuario de subida.
-- [ ] Implementar URL, tipo, descripción, principal, fecha y estado.
-- [ ] Preparar integridad evento/programación.
+- [x] Crear tabla `imagen_evento`.
+- [x] Implementar PK `INT`.
+- [x] Implementar FK obligatoria a `evento`.
+- [x] Implementar FK opcional a `programacion_evento`.
+- [x] Implementar FK obligatoria a `usuario` como usuario de subida.
+- [x] Implementar URL, tipo, descripción, principal, fecha y estado.
+- [x] Preparar integridad evento/programación.
 
 ### T015 — Implementar `usuario_evento_favorito`
 
-- [ ] Crear tabla `usuario_evento_favorito`.
-- [ ] Implementar PK compuesta `(id_usuario, id_evento)`.
-- [ ] Implementar `fecha_agregado`.
-- [ ] Impedir favoritos duplicados.
+- [x] Crear tabla `usuario_evento_favorito`.
+- [x] Implementar PK compuesta `(id_usuario, id_evento)`.
+- [x] Implementar `fecha_agregado`.
+- [x] Impedir favoritos duplicados.
 
 ### T016 — Implementar `recordatorio`
 
-- [ ] Crear/realinear tabla `recordatorio`.
-- [ ] Implementar PK `INT`.
-- [ ] Implementar FK a `usuario`.
-- [ ] Implementar FK a `evento`.
-- [ ] Implementar FK opcional a `programacion_evento`.
-- [ ] Implementar `fecha_notificacion`.
-- [ ] Implementar `activo`.
-- [ ] Implementar `fecha_creacion`.
-- [ ] Eliminar de la entidad funcional los estados técnicos de BullMQ.
+- [x] Crear/realinear tabla `recordatorio`.
+- [x] Implementar PK `INT`.
+- [x] Implementar FK a `usuario`.
+- [x] Implementar FK a `evento`.
+- [x] Implementar FK opcional a `programacion_evento`.
+- [x] Implementar `fecha_notificacion`.
+- [x] Implementar `activo`.
+- [x] Implementar `fecha_creacion`.
+- [x] Eliminar de la entidad funcional los estados técnicos de BullMQ.
 
 ### Puerta G1
 
 Ejecutar y aprobar:
 
-- [ ] `npm run prisma:format`
-- [ ] `npm run prisma:validate`
-- [ ] `npm run prisma:generate`
+- [x] `npm run prisma:format`
+- [x] `npm run prisma:validate`
+- [x] `npm run prisma:generate`
 
 No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_token` como extensión técnica.
 
