@@ -5,7 +5,7 @@
 - **Rama:** `fix/realineacion-modelo-semana4`
 - **Especificación:** `spec.md`
 - **Plan técnico:** `plan.md`
-- **Estado general:** pendiente de implementación
+- **Estado general:** Fase 0 completada; Fase 1 en ejecución
 
 ## Regla de ejecución
 
@@ -19,33 +19,40 @@ No se ejecutará `prisma migrate reset`, `prisma db push` ni una migración corr
 
 ### T001 — Confirmar rama y árbol limpio
 
-- [ ] Confirmar rama `fix/realineacion-modelo-semana4`.
-- [ ] Confirmar `git status` limpio.
-- [ ] Confirmar que `spec.md`, `plan.md` y `tasks.md` se encuentran versionados.
+- [x] Confirmar rama `fix/realineacion-modelo-semana4`.
+- [x] Confirmar `git status` limpio.
+- [x] Confirmar que `spec.md`, `plan.md` y `tasks.md` se encuentran versionados.
 
 ### T002 — Registrar línea base funcional previa
 
-- [ ] Conservar evidencia de 19/19 pruebas de integración aprobadas antes de la realineación.
-- [ ] Conservar medición previa de caché: MISS aproximado 498.31 ms.
-- [ ] Conservar medición previa de caché: HIT promedio aproximado 8.86 ms.
-- [ ] Documentar que estas métricas corresponden al modelo reducido anterior.
+- [x] Conservar evidencia de 19/19 pruebas de integración aprobadas antes de la realineación.
+- [x] Conservar medición previa de caché: MISS aproximado 498.31 ms.
+- [x] Conservar medición previa de caché: HIT promedio aproximado 8.86 ms.
+- [x] Documentar que estas métricas corresponden al modelo reducido anterior.
 
 ### T003 — Respaldar `zamorafest_dev`
 
-- [ ] Ejecutar `pg_dump` de `zamorafest_dev` antes de cualquier modificación destructiva.
-- [ ] Verificar que el archivo de respaldo exista y tenga tamaño mayor que cero.
-- [ ] Registrar fecha/hora y nombre del respaldo.
-- [ ] No versionar credenciales ni secretos en Git.
+- [x] Ejecutar `pg_dump` de `zamorafest_dev` antes de cualquier modificación destructiva.
+- [x] Verificar que el archivo de respaldo exista y tenga tamaño mayor que cero.
+- [x] Registrar fecha/hora y nombre del respaldo.
+- [x] No versionar credenciales ni secretos en Git.
+
+Evidencia:
+- respaldo: `zamorafest_dev_pre_realineacion_20260818-230418.dump`;
+- ubicación externa al repositorio: `D:\UEA\NIVEL V\APP_MOVILES_MR\ZamoraFest_Backups`;
+- tamaño: 26.09 KB (26714 bytes);
+- validación `pg_restore --list`: correcta;
+- entradas reconocidas: 61.
 
 ### T004 — Confirmar inventario previo
 
-- [ ] Registrar que existen 9 cantones.
-- [ ] Registrar que existen 3 categorías.
-- [ ] Registrar que existe 1 lugar.
-- [ ] Registrar que existen 12 eventos de demostración.
-- [ ] Registrar que existen 12 asociaciones evento-categoría.
-- [ ] Registrar que no existen usuarios, refresh tokens, programaciones, imágenes ni recordatorios.
-- [ ] Confirmar formalmente el Escenario A: reconstrucción controlada de datos reproducibles.
+- [x] Registrar que existen 9 cantones.
+- [x] Registrar que existen 3 categorías.
+- [x] Registrar que existe 1 lugar.
+- [x] Registrar que existen 12 eventos de demostración.
+- [x] Registrar que existen 12 asociaciones evento-categoría.
+- [x] Registrar que no existen usuarios, refresh tokens, programaciones, imágenes ni recordatorios.
+- [x] Confirmar formalmente el Escenario A: reconstrucción controlada de datos reproducibles.
 
 ### Puerta G0
 
