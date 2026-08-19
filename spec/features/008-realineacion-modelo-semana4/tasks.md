@@ -5,7 +5,7 @@
 - **Rama:** `fix/realineacion-modelo-semana4`
 - **Especificación:** `spec.md`
 - **Plan técnico:** `plan.md`
-- **Estado general:** Fase 1 completada; Fase 2 en ejecución
+- **Estado general:** Fase 2 completada; Fase 3 en ejecución
 
 ## Regla de ejecución
 
@@ -206,57 +206,57 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T017 — Implementar CHECK de dominios
 
-- [ ] `sector.tipo_sector`.
-- [ ] `lugar.tipo_lugar`.
-- [ ] `evento.estado_evento` con `BORRADOR`, `PROGRAMADO`, `CANCELADO`, `FINALIZADO`, `ELIMINADO`.
-- [ ] `evento.estado_revision` con `PENDIENTE`, `APROBADO`, `RECHAZADO`.
-- [ ] `imagen_evento.tipo_imagen`.
+- [x] `sector.tipo_sector`.
+- [x] `lugar.tipo_lugar`.
+- [x] `evento.estado_evento` con `BORRADOR`, `PROGRAMADO`, `CANCELADO`, `FINALIZADO`, `ELIMINADO`.
+- [x] `evento.estado_revision` con `PENDIENTE`, `APROBADO`, `RECHAZADO`.
+- [x] `imagen_evento.tipo_imagen`.
 
 ### T018 — Implementar CHECK numéricos y temporales
 
-- [ ] Coordenadas en rango.
-- [ ] Pares de coordenadas coherentes cuando corresponda.
-- [ ] `costo_referencial >= 0`.
-- [ ] `fecha_fin >= fecha_inicio` cuando exista fecha de fin.
-- [ ] `fecha_hora_fin >= fecha_hora_inicio` cuando exista fin de programación.
+- [x] Coordenadas en rango.
+- [x] Pares de coordenadas coherentes cuando corresponda.
+- [x] `costo_referencial >= 0`.
+- [x] `fecha_fin >= fecha_inicio` cuando exista fecha de fin.
+- [x] `fecha_hora_fin >= fecha_hora_inicio` cuando exista fin de programación.
 
 ### T019 — Implementar integridad evento/programación
 
-- [ ] Garantizar que `imagen_evento.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
-- [ ] Garantizar que `recordatorio.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
-- [ ] Preferir FK compuesta si Prisma y PostgreSQL lo permiten de forma estable.
-- [ ] Si Prisma no representa la restricción completa, mantenerla en SQL de migración y documentarla.
+- [x] Garantizar que `imagen_evento.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
+- [x] Garantizar que `recordatorio.id_programacion`, cuando exista, pertenezca al mismo `id_evento`.
+- [x] Preferir FK compuesta si Prisma y PostgreSQL lo permiten de forma estable.
+- [x] No fue necesario mantener esta integridad fuera de Prisma: las FK compuestas quedaron representadas de forma estable.
 
 ### T020 — Implementar imagen principal única activa
 
-- [ ] Impedir más de una imagen principal activa por evento.
-- [ ] Utilizar índice parcial PostgreSQL si resulta adecuado.
+- [x] Impedir más de una imagen principal activa por evento.
+- [x] Utilizar índice parcial PostgreSQL si resulta adecuado.
 
 ### T021 — Implementar índices
 
-- [ ] FK territoriales.
-- [ ] códigos DPA.
-- [ ] correo de usuario.
-- [ ] lugar de evento.
-- [ ] creador y revisor.
-- [ ] estados de publicación.
-- [ ] fecha de inicio de evento.
-- [ ] categoría-evento.
-- [ ] recordatorios por usuario y fecha.
-- [ ] índices requeridos por consultas públicas y Strategy.
+- [x] FK territoriales.
+- [x] códigos DPA.
+- [x] correo de usuario.
+- [x] lugar de evento.
+- [x] creador y revisor.
+- [x] estados de publicación.
+- [x] fecha de inicio de evento.
+- [x] categoría-evento.
+- [x] recordatorios por usuario y fecha.
+- [x] índices requeridos por consultas públicas y Strategy.
 
 ### T022 — Revisar acciones referenciales
 
-- [ ] Aplicar `RESTRICT` donde la eliminación de un padre invalidaría el dominio.
-- [ ] Aplicar `CASCADE` únicamente en tablas asociativas donde esté justificado.
-- [ ] Verificar que la eliminación lógica del dominio no dependa de borrado físico.
+- [x] Aplicar `RESTRICT` donde la eliminación de un padre invalidaría el dominio.
+- [x] Aplicar `CASCADE` únicamente en tablas asociativas donde esté justificado.
+- [x] Verificar que la eliminación lógica del dominio no dependa de borrado físico.
 
 ### Puerta G2
 
-- [ ] Esquema Prisma válido.
-- [ ] Restricciones físicas documentadas.
-- [ ] Índices justificados.
-- [ ] Ninguna regla canónica omitida.
+- [x] Esquema Prisma válido.
+- [x] Restricciones físicas documentadas.
+- [x] Índices justificados.
+- [x] Ninguna regla canónica omitida.
 
 ---
 
@@ -264,32 +264,32 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T023 — Generar migración únicamente para revisión
 
-- [ ] Generar migración con `--create-only`.
-- [ ] No aplicarla inmediatamente.
-- [ ] Revisar `migration.sql` línea por línea.
+- [x] Generar migración con `--create-only`.
+- [x] No aplicarla inmediatamente.
+- [x] Revisar `migration.sql` línea por línea.
 
 ### T024 — Adaptar SQL al Escenario A
 
-- [ ] Conservar las tres migraciones históricas.
-- [ ] Crear migración correctiva posterior.
-- [ ] Retirar/reconstruir las tablas funcionales reducidas según orden seguro de FK.
-- [ ] Crear las tablas canónicas de Semana 4.
-- [ ] Crear `rol` y `usuario` en la misma migración correctiva.
-- [ ] Mantener `refresh_token` como extensión adaptada al nuevo `usuario`.
-- [ ] Incorporar manualmente CHECK, índices parciales y restricciones no generadas por Prisma.
+- [x] Conservar las tres migraciones históricas.
+- [x] Crear migración correctiva posterior.
+- [x] Retirar/reconstruir las tablas funcionales reducidas según orden seguro de FK.
+- [x] Crear las tablas canónicas de Semana 4.
+- [x] Crear `rol` y `usuario` en la misma migración correctiva.
+- [x] Mantener `refresh_token` como extensión adaptada al nuevo `usuario`.
+- [x] Incorporar manualmente CHECK, índices parciales y restricciones no generadas por Prisma.
 
 ### T025 — Revisar seguridad de la migración
 
-- [ ] Confirmar que el SQL actúa únicamente sobre el esquema esperado.
-- [ ] Confirmar que existe respaldo `pg_dump` válido.
-- [ ] Confirmar que los 12 eventos actuales son datos de demostración y no se migrarán artificialmente.
-- [ ] Confirmar que no se inventará un usuario creador para datos antiguos.
+- [x] Confirmar que el SQL actúa únicamente sobre el esquema esperado.
+- [x] Confirmar que existe respaldo `pg_dump` válido.
+- [x] Confirmar que los 12 eventos actuales son datos de demostración y no se migrarán artificialmente.
+- [x] Confirmar que no se inventará un usuario creador para datos antiguos.
 
 ### T026 — Aplicar migración en entorno controlado
 
-- [ ] Probar primero la reconstrucción en `zamorafest_test` o base temporal equivalente.
-- [ ] Verificar creación de todas las tablas.
-- [ ] Verificar FK, PK, UQ, CHECK e índices.
+- [x] Probar primero la reconstrucción en `zamorafest_test` o base temporal equivalente.
+- [x] Verificar creación de todas las tablas.
+- [x] Verificar FK, PK, UQ, CHECK e índices.
 - [ ] Solo después aplicar en `zamorafest_dev`.
 
 ### Puerta G3
