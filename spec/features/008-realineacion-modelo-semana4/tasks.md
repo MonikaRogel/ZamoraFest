@@ -5,7 +5,7 @@
 - **Rama:** `fix/realineacion-modelo-semana4`
 - **Especificación:** `spec.md`
 - **Plan técnico:** `plan.md`
-- **Estado general:** Fase 2 completada; Fase 3 en ejecución
+- **Estado general:** Fase 3 completada; Fase 4 en ejecución
 
 ## Regla de ejecución
 
@@ -290,14 +290,14 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 - [x] Probar primero la reconstrucción en `zamorafest_test` o base temporal equivalente.
 - [x] Verificar creación de todas las tablas.
 - [x] Verificar FK, PK, UQ, CHECK e índices.
-- [ ] Solo después aplicar en `zamorafest_dev`.
+- [x] Solo después aplicar en `zamorafest_dev`.
 
 ### Puerta G3
 
-- [ ] Migración reproducible desde historial completo.
-- [ ] 14 entidades funcionales presentes.
-- [ ] `refresh_token` presente como extensión.
-- [ ] Ninguna tabla reducida antigua permanece como fuente funcional.
+- [x] Migración reproducible desde historial completo.
+- [x] 14 entidades funcionales presentes.
+- [x] `refresh_token` presente como extensión.
+- [x] Ninguna tabla reducida antigua permanece como fuente funcional.
 
 ---
 
