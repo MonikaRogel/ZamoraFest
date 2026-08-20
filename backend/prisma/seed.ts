@@ -1,3 +1,5 @@
+import { compare, hash as hashPassword } from 'bcryptjs';
+
 import { prisma } from '../src/infrastructure/database/prisma.js';
 
 const cantones = [
@@ -32,6 +34,143 @@ const roles = [
     descripcion: 'Consulta de eventos y gestión de preferencias personales.',
   },
 ] as const;
+
+type RolSeed = (typeof roles)[number]['nombre'];
+
+interface UsuarioSeed {
+  rol: RolSeed;
+  nombreCompleto: string;
+  correo: string;
+  password: string;
+}
+
+const BCRYPT_ROUNDS = 12;
+
+function requireCredential(name: string): string {
+  const value = process.env[name];
+
+  if (!value || value.length === 0) {
+    throw new Error(`Falta la variable de entorno ${name}.`);
+  }
+
+  return value;
+}
+
+function resolveSeedUsers(): UsuarioSeed[] {
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
+
+  const variables = [
+    'SEED_ADMIN_EMAIL',
+    'SEED_ADMIN_PASSWORD',
+    'SEED_ASISTENTE_EMAIL',
+    'SEED_ASISTENTE_PASSWORD',
+    'SEED_VISITANTE_EMAIL',
+    'SEED_VISITANTE_PASSWORD',
+  ] as const;
+
+  const configured = variables.filter((name) => {
+    const value = process.env[name];
+    return typeof value === 'string' && value.length > 0;
+  });
+
+  if (nodeEnv !== 'test' && configured.length === 0) {
+    return [];
+  }
+
+  if (configured.length !== variables.length) {
+    throw new Error(
+      `Configuración incompleta de usuarios seed: ${configured.length}/${variables.length} variables definidas.`,
+    );
+  }
+
+  const suffix = nodeEnv === 'test' ? 'de prueba' : 'de desarrollo';
+
+  const usuarios: UsuarioSeed[] = [
+    {
+      rol: 'ADMINISTRADOR',
+      nombreCompleto: `Administrador ${suffix}`,
+      correo: requireCredential('SEED_ADMIN_EMAIL').trim().toLowerCase(),
+      password: requireCredential('SEED_ADMIN_PASSWORD'),
+    },
+    {
+      rol: 'ASISTENTE',
+      nombreCompleto: `Asistente ${suffix}`,
+      correo: requireCredential('SEED_ASISTENTE_EMAIL').trim().toLowerCase(),
+      password: requireCredential('SEED_ASISTENTE_PASSWORD'),
+    },
+    {
+      rol: 'VISITANTE',
+      nombreCompleto: `Visitante ${suffix}`,
+      correo: requireCredential('SEED_VISITANTE_EMAIL').trim().toLowerCase(),
+      password: requireCredential('SEED_VISITANTE_PASSWORD'),
+    },
+  ];
+
+  const correos = new Set(usuarios.map((usuario) => usuario.correo));
+
+  if (correos.size !== usuarios.length) {
+    throw new Error('Los correos configurados para usuarios seed deben ser distintos.');
+  }
+
+  for (const usuario of usuarios) {
+    if (usuario.password.length < 8 || usuario.password.length > 72) {
+      throw new Error(
+        `La contraseña local de ${usuario.rol} debe tener entre 8 y 72 caracteres.`,
+      );
+    }
+
+    if (!usuario.correo.includes('@')) {
+      throw new Error(`El correo local de ${usuario.rol} no es válido.`);
+    }
+  }
+
+  return usuarios;
+}
+
+async function upsertSeedUser(usuario: UsuarioSeed, idRol: number): Promise<void> {
+  const existente = await prisma.usuario.findUnique({
+    where: {
+      correo: usuario.correo,
+    },
+    select: {
+      contrasenaHash: true,
+    },
+  });
+
+  if (!existente) {
+    const contrasenaHash = await hashPassword(usuario.password, BCRYPT_ROUNDS);
+
+    await prisma.usuario.create({
+      data: {
+        idRol,
+        nombreCompleto: usuario.nombreCompleto,
+        correo: usuario.correo,
+        contrasenaHash,
+        estado: true,
+      },
+    });
+
+    return;
+  }
+
+  const passwordCoincide = await compare(usuario.password, existente.contrasenaHash);
+
+  await prisma.usuario.update({
+    where: {
+      correo: usuario.correo,
+    },
+    data: {
+      idRol,
+      nombreCompleto: usuario.nombreCompleto,
+      estado: true,
+      ...(passwordCoincide
+        ? {}
+        : {
+            contrasenaHash: await hashPassword(usuario.password, BCRYPT_ROUNDS),
+          }),
+    },
+  });
+}
 
 async function seed(): Promise<void> {
   const provincia = await prisma.provincia.upsert({
@@ -144,8 +283,10 @@ async function seed(): Promise<void> {
     });
   }
 
+  const roleIds = new Map<RolSeed, number>();
+
   for (const rol of roles) {
-    await prisma.rol.upsert({
+    const rolGuardado = await prisma.rol.upsert({
       where: { nombre: rol.nombre },
       update: {
         descripcion: rol.descripcion,
@@ -157,6 +298,20 @@ async function seed(): Promise<void> {
         estado: true,
       },
     });
+
+    roleIds.set(rol.nombre, rolGuardado.id);
+  }
+
+  const usuariosSeed = resolveSeedUsers();
+
+  for (const usuario of usuariosSeed) {
+    const idRol = roleIds.get(usuario.rol);
+
+    if (idRol === undefined) {
+      throw new Error(`No se pudo resolver el rol ${usuario.rol}.`);
+    }
+
+    await upsertSeedUser(usuario, idRol);
   }
 
   const [
@@ -235,7 +390,47 @@ async function seed(): Promise<void> {
     throw new Error('El seed territorial y de catálogos no quedó completo.');
   }
 
-  console.log('Seed T027 completado:');
+  if (usuariosSeed.length > 0) {
+    const usuariosGuardados = await prisma.usuario.findMany({
+      where: {
+        correo: {
+          in: usuariosSeed.map((usuario) => usuario.correo),
+        },
+        estado: true,
+      },
+      select: {
+        correo: true,
+        rol: {
+          select: {
+            nombre: true,
+            estado: true,
+          },
+        },
+      },
+    });
+
+    if (usuariosGuardados.length !== usuariosSeed.length) {
+      throw new Error('No se cargaron todos los usuarios seed.');
+    }
+
+    for (const usuarioEsperado of usuariosSeed) {
+      const usuarioGuardado = usuariosGuardados.find(
+        (usuario) => usuario.correo === usuarioEsperado.correo,
+      );
+
+      if (
+        !usuarioGuardado ||
+        usuarioGuardado.rol.nombre !== usuarioEsperado.rol ||
+        !usuarioGuardado.rol.estado
+      ) {
+        throw new Error(
+          `La relación usuario → rol no es válida para ${usuarioEsperado.rol}.`,
+        );
+      }
+    }
+  }
+
+  console.log('Seed completado:');
   console.log(`- ${totalProvincias} provincia`);
   console.log(`- ${totalCantones} cantones`);
   console.log(`- ${totalParroquias} parroquia de referencia`);
@@ -243,11 +438,12 @@ async function seed(): Promise<void> {
   console.log(`- ${totalLugares} lugar`);
   console.log(`- ${totalCategorias} categorías`);
   console.log(`- ${totalRoles} roles`);
+  console.log(`- ${usuariosSeed.length} usuarios de entorno`);
 }
 
 seed()
   .catch((error: unknown) => {
-    console.error('No se pudo ejecutar el seed T027.', error);
+    console.error('No se pudo ejecutar el seed.', error);
     process.exitCode = 1;
   })
   .finally(async () => {

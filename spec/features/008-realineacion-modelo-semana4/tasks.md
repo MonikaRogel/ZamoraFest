@@ -316,11 +316,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T028 — Preparar usuarios de desarrollo/prueba
 
-- [ ] Crear usuarios de prueba para los tres roles en entorno de pruebas.
-- [ ] No guardar contraseñas reales en Git.
-- [ ] Para desarrollo manual, obtener credenciales desde variables de entorno.
-- [ ] Generar hashes mediante el mecanismo de autenticación real.
-- [ ] Verificar FK `usuario → rol`.
+- [x] Crear usuarios de prueba para los tres roles en entorno de pruebas.
+- [x] No guardar contraseñas reales en Git.
+- [x] Para desarrollo manual, obtener credenciales desde variables de entorno.
+- [x] Generar hashes mediante el mecanismo de autenticación real.
+- [x] Verificar FK `usuario → rol`.
 
 ### T029 — Regenerar datos de demostración compatibles
 
