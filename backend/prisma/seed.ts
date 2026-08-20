@@ -1,159 +1,253 @@
 import { prisma } from '../src/infrastructure/database/prisma.js';
 
-const cantones: Array<{ id: string; nombre: string }> = [
-  {
-    id: 'a0000000-0000-4000-8000-000000000001',
-    nombre: 'Centinela del Cóndor',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000002',
-    nombre: 'Chinchipe',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000003',
-    nombre: 'El Pangui',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000004',
-    nombre: 'Nangaritza',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000005',
-    nombre: 'Palanda',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000006',
-    nombre: 'Paquisha',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000007',
-    nombre: 'Yacuambi',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000008',
-    nombre: 'Yantzaza',
-  },
-  {
-    id: 'a0000000-0000-4000-8000-000000000009',
-    nombre: 'Zamora',
-  },
-];
+const cantones = [
+  { codigoDpa: '1901', nombre: 'Zamora' },
+  { codigoDpa: '1902', nombre: 'Chinchipe' },
+  { codigoDpa: '1903', nombre: 'Nangaritza' },
+  { codigoDpa: '1904', nombre: 'Yacuambi' },
+  { codigoDpa: '1905', nombre: 'Yantzaza' },
+  { codigoDpa: '1906', nombre: 'El Pangui' },
+  { codigoDpa: '1907', nombre: 'Centinela del Cóndor' },
+  { codigoDpa: '1908', nombre: 'Palanda' },
+  { codigoDpa: '1909', nombre: 'Paquisha' },
+] as const;
 
-const lugar = {
-  id: 'b0000000-0000-4000-8000-000000000001',
-  nombre: 'Parque Lineal de Zamora',
-  direccion: 'Zamora, Zamora Chinchipe',
-  cantonId: 'a0000000-0000-4000-8000-000000000009',
-};
+const categorias = [
+  { nombre: 'Cultura', descripcion: 'Eventos culturales y tradicionales.' },
+  { nombre: 'Música', descripcion: 'Conciertos y presentaciones musicales.' },
+  { nombre: 'Gastronomía', descripcion: 'Ferias y muestras gastronómicas.' },
+] as const;
 
-const categorias: Array<{
-  id: string;
-  nombre: string;
-  descripcion: string;
-}> = [
+const roles = [
   {
-    id: 'c0000000-0000-4000-8000-000000000001',
-    nombre: 'Cultura',
-    descripcion: 'Eventos culturales y tradicionales.',
+    nombre: 'ADMINISTRADOR',
+    descripcion: 'Administración, revisión y publicación de contenido.',
   },
   {
-    id: 'c0000000-0000-4000-8000-000000000002',
-    nombre: 'Música',
-    descripcion: 'Conciertos y presentaciones musicales.',
+    nombre: 'ASISTENTE',
+    descripcion: 'Creación y gestión operativa de contenido.',
   },
   {
-    id: 'c0000000-0000-4000-8000-000000000003',
-    nombre: 'Gastronomía',
-    descripcion: 'Ferias y muestras gastronómicas.',
+    nombre: 'VISITANTE',
+    descripcion: 'Consulta de eventos y gestión de preferencias personales.',
   },
-];
+] as const;
 
 async function seed(): Promise<void> {
-  await prisma.$transaction(
-    cantones.map((canton) =>
-      prisma.canton.upsert({
-        where: {
-          id: canton.id,
-        },
-        update: {
-          nombre: canton.nombre,
-          eliminadoEn: null,
-        },
-        create: canton,
-      }),
-    ),
-  );
-
-  await prisma.lugar.upsert({
-    where: {
-      id: lugar.id,
-    },
+  const provincia = await prisma.provincia.upsert({
+    where: { codigoDpa: '19' },
     update: {
-      nombre: lugar.nombre,
-      direccion: lugar.direccion,
-      cantonId: lugar.cantonId,
-      eliminadoEn: null,
+      nombre: 'Zamora Chinchipe',
+      estado: true,
     },
-    create: lugar,
+    create: {
+      codigoDpa: '19',
+      nombre: 'Zamora Chinchipe',
+      estado: true,
+    },
   });
 
-  await prisma.$transaction(
-    categorias.map((categoria) =>
-      prisma.categoria.upsert({
-        where: {
-          id: categoria.id,
-        },
-        update: {
-          nombre: categoria.nombre,
-          descripcion: categoria.descripcion,
-          eliminadoEn: null,
-        },
-        create: categoria,
-      }),
-    ),
-  );
+  const cantonIds = new Map<string, number>();
 
-  const [totalCantones, totalLugares, totalCategorias] = await Promise.all([
+  for (const canton of cantones) {
+    const cantonGuardado = await prisma.canton.upsert({
+      where: { codigoDpa: canton.codigoDpa },
+      update: {
+        nombre: canton.nombre,
+        idProvincia: provincia.id,
+        estado: true,
+      },
+      create: {
+        codigoDpa: canton.codigoDpa,
+        nombre: canton.nombre,
+        idProvincia: provincia.id,
+        estado: true,
+      },
+    });
+
+    cantonIds.set(canton.codigoDpa, cantonGuardado.id);
+  }
+
+  const idCantonZamora = cantonIds.get('1901');
+
+  if (idCantonZamora === undefined) {
+    throw new Error('No se pudo resolver el cantón Zamora.');
+  }
+
+  const parroquiaZamora = await prisma.parroquia.upsert({
+    where: { codigoDpa: '190150' },
+    update: {
+      nombre: 'Zamora',
+      idCanton: idCantonZamora,
+      estado: true,
+    },
+    create: {
+      codigoDpa: '190150',
+      nombre: 'Zamora',
+      idCanton: idCantonZamora,
+      estado: true,
+    },
+  });
+
+  const sectorCabecera = await prisma.sector.upsert({
+    where: {
+      idParroquia_nombre: {
+        idParroquia: parroquiaZamora.id,
+        nombre: 'Cabecera parroquial',
+      },
+    },
+    update: {
+      tipoSector: 'CABECERA_PARROQUIAL',
+      estado: true,
+    },
+    create: {
+      idParroquia: parroquiaZamora.id,
+      nombre: 'Cabecera parroquial',
+      tipoSector: 'CABECERA_PARROQUIAL',
+      estado: true,
+    },
+  });
+
+  const lugar = await prisma.lugar.upsert({
+    where: {
+      idSector_nombre: {
+        idSector: sectorCabecera.id,
+        nombre: 'Parque Lineal de Zamora',
+      },
+    },
+    update: {
+      tipoLugar: 'PARQUE',
+      direccionReferencial: 'Zamora, Zamora Chinchipe',
+      estado: true,
+    },
+    create: {
+      idSector: sectorCabecera.id,
+      nombre: 'Parque Lineal de Zamora',
+      tipoLugar: 'PARQUE',
+      direccionReferencial: 'Zamora, Zamora Chinchipe',
+      estado: true,
+    },
+  });
+
+  for (const categoria of categorias) {
+    await prisma.categoria.upsert({
+      where: { nombre: categoria.nombre },
+      update: {
+        descripcion: categoria.descripcion,
+        estado: true,
+      },
+      create: {
+        nombre: categoria.nombre,
+        descripcion: categoria.descripcion,
+        estado: true,
+      },
+    });
+  }
+
+  for (const rol of roles) {
+    await prisma.rol.upsert({
+      where: { nombre: rol.nombre },
+      update: {
+        descripcion: rol.descripcion,
+        estado: true,
+      },
+      create: {
+        nombre: rol.nombre,
+        descripcion: rol.descripcion,
+        estado: true,
+      },
+    });
+  }
+
+  const [
+    totalProvincias,
+    totalCantones,
+    totalParroquias,
+    totalSectores,
+    totalLugares,
+    totalCategorias,
+    totalRoles,
+  ] = await Promise.all([
+    prisma.provincia.count({
+      where: {
+        codigoDpa: '19',
+        estado: true,
+      },
+    }),
     prisma.canton.count({
       where: {
-        id: {
-          in: cantones.map((canton) => canton.id),
+        codigoDpa: {
+          in: cantones.map((canton) => canton.codigoDpa),
         },
-        eliminadoEn: null,
+        idProvincia: provincia.id,
+        estado: true,
+      },
+    }),
+    prisma.parroquia.count({
+      where: {
+        codigoDpa: '190150',
+        idCanton: idCantonZamora,
+        estado: true,
+      },
+    }),
+    prisma.sector.count({
+      where: {
+        idParroquia: parroquiaZamora.id,
+        nombre: 'Cabecera parroquial',
+        tipoSector: 'CABECERA_PARROQUIAL',
+        estado: true,
       },
     }),
     prisma.lugar.count({
       where: {
         id: lugar.id,
-        eliminadoEn: null,
+        idSector: sectorCabecera.id,
+        estado: true,
       },
     }),
     prisma.categoria.count({
       where: {
-        id: {
-          in: categorias.map((categoria) => categoria.id),
+        nombre: {
+          in: categorias.map((categoria) => categoria.nombre),
         },
-        eliminadoEn: null,
+        estado: true,
+      },
+    }),
+    prisma.rol.count({
+      where: {
+        nombre: {
+          in: roles.map((rol) => rol.nombre),
+        },
+        estado: true,
       },
     }),
   ]);
 
   if (
+    totalProvincias !== 1 ||
     totalCantones !== cantones.length ||
+    totalParroquias !== 1 ||
+    totalSectores !== 1 ||
     totalLugares !== 1 ||
-    totalCategorias !== categorias.length
+    totalCategorias !== categorias.length ||
+    totalRoles !== roles.length
   ) {
-    throw new Error('No se cargaron todos los datos iniciales.');
+    throw new Error('El seed territorial y de catálogos no quedó completo.');
   }
 
-  console.log(
-    `Seed completado: ${totalCantones} cantones, ${totalLugares} lugar y ${totalCategorias} categorías activas.`,
-  );
+  console.log('Seed T027 completado:');
+  console.log(`- ${totalProvincias} provincia`);
+  console.log(`- ${totalCantones} cantones`);
+  console.log(`- ${totalParroquias} parroquia de referencia`);
+  console.log(`- ${totalSectores} sector`);
+  console.log(`- ${totalLugares} lugar`);
+  console.log(`- ${totalCategorias} categorías`);
+  console.log(`- ${totalRoles} roles`);
 }
 
 seed()
-  .catch((_error: unknown) => {
-    console.error('No se pudo ejecutar el seed.');
+  .catch((error: unknown) => {
+    console.error('No se pudo ejecutar el seed T027.', error);
     process.exitCode = 1;
   })
   .finally(async () => {

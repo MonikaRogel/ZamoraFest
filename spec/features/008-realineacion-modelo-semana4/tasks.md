@@ -305,14 +305,14 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T027 — Reescribir `seed.ts`
 
-- [ ] Crear provincia Zamora Chinchipe.
-- [ ] Crear los cantones necesarios con DPA correcto.
-- [ ] Crear parroquias necesarias.
-- [ ] Crear sectores necesarios.
-- [ ] Crear `CABECERA_PARROQUIAL` cuando corresponda.
-- [ ] Crear al menos un lugar válido en la jerarquía completa.
-- [ ] Crear categorías.
-- [ ] Crear roles `ADMINISTRADOR`, `ASISTENTE`, `VISITANTE`.
+- [x] Crear provincia Zamora Chinchipe.
+- [x] Crear los cantones necesarios con DPA correcto.
+- [x] Crear parroquias necesarias.
+- [x] Crear sectores necesarios.
+- [x] Crear `CABECERA_PARROQUIAL` cuando corresponda.
+- [x] Crear al menos un lugar válido en la jerarquía completa.
+- [x] Crear categorías.
+- [x] Crear roles `ADMINISTRADOR`, `ASISTENTE`, `VISITANTE`.
 
 ### T028 — Preparar usuarios de desarrollo/prueba
 
