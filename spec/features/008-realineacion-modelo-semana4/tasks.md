@@ -361,7 +361,7 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 - [ ] `VISITANTE` autenticado: favoritos y recordatorios propios.
 - [ ] `ASISTENTE`: crear eventos y modificar borradores conforme a reglas.
 - [ ] `ADMINISTRADOR`: revisar, aprobar, publicar, actualizar y eliminar lógicamente.
-- [ ] Impedir escalamiento de privilegios.
+- [x] Impedir escalamiento de privilegios.
 
 ### Puerta G5
 

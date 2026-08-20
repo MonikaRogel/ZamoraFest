@@ -14,10 +14,10 @@ export const eventoRouter = Router();
 eventoRouter
   .route('/')
   .get(listEventosController)
-  .post(authenticate, authorizeRoles('ADMIN'), createEventoController);
+  .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
 
 eventoRouter
   .route('/:id')
   .get(getEventoController)
-  .patch(authenticate, authorizeRoles('ADMIN'), updateEventoController)
-  .delete(authenticate, authorizeRoles('ADMIN'), deleteEventoController);
+  .patch(authenticate, authorizeRoles('ADMINISTRADOR'), updateEventoController)
+  .delete(authenticate, authorizeRoles('ADMINISTRADOR'), deleteEventoController);
