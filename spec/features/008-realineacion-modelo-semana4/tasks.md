@@ -376,12 +376,12 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T033 — Adaptar DTO/Zod de eventos
 
-- [ ] Validar todos los campos canónicos requeridos.
-- [ ] Validar fechas.
-- [ ] Validar costo.
-- [ ] Validar lugar.
-- [ ] Validar categorías.
-- [ ] No aceptar directamente creador/revisor cuando deban derivarse de autenticación.
+- [x] Validar todos los campos canónicos requeridos.
+- [x] Validar fechas.
+- [x] Validar costo.
+- [x] Validar lugar.
+- [x] Validar categorías.
+- [x] No aceptar directamente creador/revisor cuando deban derivarse de autenticación.
 
 ### T034 — Adaptar repositorio de eventos
 
