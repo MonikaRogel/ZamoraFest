@@ -324,18 +324,18 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T029 — Regenerar datos de demostración compatibles
 
-- [ ] Crear eventos únicamente después de disponer de usuario creador válido.
-- [ ] Crear datos con `BORRADOR/PENDIENTE` y/o `PROGRAMADO/APROBADO` según el caso de prueba.
-- [ ] Asociar categorías.
-- [ ] Crear programación cuando sea necesaria para pruebas.
-- [ ] No copiar los UUID anteriores.
+- [x] Crear eventos únicamente después de disponer de usuario creador válido.
+- [x] Crear datos con `BORRADOR/PENDIENTE` y/o `PROGRAMADO/APROBADO` según el caso de prueba.
+- [x] Asociar categorías.
+- [x] Crear programación cuando sea necesaria para pruebas.
+- [x] No copiar los UUID anteriores.
 
 ### Puerta G4
 
-- [ ] Seed idempotente/reproducible.
-- [ ] Ningún evento sin creador.
-- [ ] Ningún usuario sin rol.
-- [ ] Jerarquía territorial completa y válida.
+- [x] Seed idempotente/reproducible.
+- [x] Ningún evento sin creador.
+- [x] Ningún usuario sin rol.
+- [x] Jerarquía territorial completa y válida.
 
 ---
 
