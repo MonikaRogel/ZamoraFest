@@ -385,11 +385,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T034 — Adaptar repositorio de eventos
 
-- [ ] Consultar nueva jerarquía territorial.
-- [ ] Consultar creador y revisor.
-- [ ] Consultar categorías.
-- [ ] Consultar programación e imágenes según Strategy.
-- [ ] Evitar N+1.
+- [x] Consultar nueva jerarquía territorial.
+- [x] Consultar creador y revisor.
+- [x] Consultar categorías.
+- [x] Consultar programación e imágenes según Strategy.
+- [x] Evitar N+1.
 
 ### T035 — Adaptar servicio de eventos
 
