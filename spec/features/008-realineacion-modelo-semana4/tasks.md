@@ -352,9 +352,9 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T031 — Adaptar claims JWT
 
-- [ ] Incluir `id_usuario` adecuado.
-- [ ] Incluir rol normalizado.
-- [ ] Mantener únicamente claims necesarios.
+- [x] Incluir `id_usuario` adecuado.
+- [x] Incluir rol normalizado.
+- [x] Mantener únicamente claims necesarios.
 
 ### T032 — Adaptar autorización
 
