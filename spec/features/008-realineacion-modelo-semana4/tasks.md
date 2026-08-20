@@ -343,12 +343,12 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T030 — Adaptar repositorio/servicio de autenticación
 
-- [ ] Cambiar identificador de usuario de UUID a `INT`.
-- [ ] Obtener rol mediante relación `usuario → rol`.
-- [ ] Mantener hash seguro de contraseña.
-- [ ] Mantener access token.
-- [ ] Mantener refresh token de 7 días según definición previa.
-- [ ] Mantener rotación y revocación.
+- [x] Cambiar identificador de usuario de UUID a `INT`.
+- [x] Obtener rol mediante relación `usuario → rol`.
+- [x] Mantener hash seguro de contraseña.
+- [x] Mantener access token.
+- [x] Mantener refresh token de 7 días según definición previa.
+- [x] Mantener rotación y revocación.
 
 ### T031 — Adaptar claims JWT
 
