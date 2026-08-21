@@ -19,6 +19,12 @@ redisClient.on('error', (error: Error) => {
 
 let connectionPromise: Promise<void> | undefined;
 
+function assertPositiveSafeInteger(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new RangeError(`${field} debe ser un entero positivo.`);
+  }
+}
+
 async function getClient() {
   if (redisClient.isReady) {
     return redisClient;
@@ -46,6 +52,7 @@ async function withFallback<T>(operation: () => Promise<T>, fallback: T): Promis
 async function getVersion(): Promise<string> {
   return withFallback(async () => {
     const client = await getClient();
+
     return (await client.get(CACHE_VERSION_KEY)) ?? '0';
   }, '0');
 }
@@ -57,24 +64,40 @@ export const eventoCache = {
     cantonId?: number,
     categoriaId?: number,
   ): Promise<string> {
+    assertPositiveSafeInteger(page, 'page');
+
+    assertPositiveSafeInteger(limit, 'limit');
+
+    if (cantonId !== undefined) {
+      assertPositiveSafeInteger(cantonId, 'cantonId');
+    }
+
+    if (categoriaId !== undefined) {
+      assertPositiveSafeInteger(categoriaId, 'categoriaId');
+    }
+
     const version = await getVersion();
 
     return (
-      `eventos:v${version}:list:` +
+      `eventos:v${version}:public:list:` +
       `page=${page}:limit=${limit}:` +
-      `canton=${cantonId ?? 'all'}:` +
-      `categoria=${categoriaId ?? 'all'}`
+      `cantonId=${cantonId ?? 'all'}:` +
+      `categoriaId=${categoriaId ?? 'all'}`
     );
   },
 
-  async detailKey(id: string): Promise<string> {
+  async detailKey(id: number): Promise<string> {
+    assertPositiveSafeInteger(id, 'id');
+
     const version = await getVersion();
-    return `eventos:v${version}:detail:${id}`;
+
+    return `eventos:v${version}:public:` + `detail:id=${id}`;
   },
 
   async get<T>(key: string): Promise<T | null> {
     return withFallback<T | null>(async () => {
       const client = await getClient();
+
       const cachedValue = await client.get(key);
 
       if (cachedValue === null) {
@@ -82,6 +105,7 @@ export const eventoCache = {
       }
 
       const parsedValue: unknown = JSON.parse(cachedValue);
+
       return parsedValue as T;
     }, null);
   },
@@ -99,6 +123,7 @@ export const eventoCache = {
   async invalidate(): Promise<void> {
     await withFallback(async () => {
       const client = await getClient();
+
       await client.incr(CACHE_VERSION_KEY);
     }, undefined);
   },

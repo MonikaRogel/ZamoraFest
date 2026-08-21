@@ -470,8 +470,8 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T044 — Realinear claves de caché
 
-- [ ] Actualizar claves que dependan de IDs UUID.
-- [ ] Adaptarlas a IDs enteros y nuevo contrato.
+- [x] Actualizar claves que dependan de IDs UUID.
+- [x] Adaptarlas a IDs enteros y nuevo contrato.
 
 ### T045 — Mantener cache-aside
 

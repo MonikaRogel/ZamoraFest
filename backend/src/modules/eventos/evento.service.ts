@@ -294,7 +294,7 @@ export const eventoService = {
   },
 
   async getById(id: number): Promise<CachedResult<EventoPayload>> {
-    const cacheKey = await eventoCache.detailKey(String(id));
+    const cacheKey = await eventoCache.detailKey(id);
 
     const cachedEvento = await eventoCache.get<EventoPayload>(cacheKey);
 
