@@ -453,9 +453,9 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T042 — Adaptar cola BullMQ
 
-- [ ] Job con `recordatorioId: number`.
-- [ ] No persistir estado técnico de BullMQ en los campos funcionales del recordatorio.
-- [ ] Mantener reintentos/estado técnico en la cola.
+- [x] Job con `recordatorioId: number`.
+- [x] No persistir estado técnico de BullMQ en los campos funcionales del recordatorio.
+- [x] Mantener reintentos/estado técnico en la cola.
 
 ### T043 — Adaptar worker
 
