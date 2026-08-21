@@ -2,6 +2,7 @@ import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
+import { recordatorioApplication } from './recordatorio.application.js';
 import { createRecordatorioSchema, recordatorioIdParamsSchema } from './recordatorio.schemas.js';
 import { recordatorioService } from './recordatorio.service.js';
 
@@ -24,7 +25,7 @@ export const createRecordatorioController: RequestHandler = async (request, resp
 
   const input = createRecordatorioSchema.parse(request.body as unknown);
 
-  const recordatorio = await recordatorioService.create(identidad, input);
+  const recordatorio = await recordatorioApplication.create(identidad, input);
 
   response.status(201).json({
     data: recordatorio,

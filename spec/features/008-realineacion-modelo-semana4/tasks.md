@@ -459,10 +459,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T043 — Adaptar worker
 
-- [ ] Recuperar recordatorio por `INT`.
-- [ ] Comprobar `activo`.
-- [ ] Cargar evento/programación/usuario.
-- [ ] Procesar sin redefinir la semántica del registro.
+- [x] Recuperar recordatorio por `INT`.
+- [x] Comprobar `activo`.
+- [x] Cargar evento/programación/usuario.
+- [x] Procesar sin redefinir la semántica del registro.
 
 ---
 
