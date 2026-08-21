@@ -6,6 +6,8 @@ import {
   deleteEventoController,
   getEventoController,
   listEventosController,
+  publishEventoController,
+  reviewEventoController,
   updateEventoController,
 } from './evento.controller.js';
 
@@ -16,8 +18,22 @@ eventoRouter
   .get(listEventosController)
   .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
 
+eventoRouter.post(
+  '/:id/revision',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  reviewEventoController,
+);
+
+eventoRouter.post(
+  '/:id/publicacion',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  publishEventoController,
+);
+
 eventoRouter
   .route('/:id')
   .get(getEventoController)
-  .patch(authenticate, authorizeRoles('ADMINISTRADOR'), updateEventoController)
+  .patch(authenticate, authorizeRoles('ASISTENTE', 'ADMINISTRADOR'), updateEventoController)
   .delete(authenticate, authorizeRoles('ADMINISTRADOR'), deleteEventoController);

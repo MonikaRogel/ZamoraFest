@@ -393,13 +393,13 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T035 — Adaptar servicio de eventos
 
-- [ ] Crear evento como `BORRADOR/PENDIENTE` para el flujo de asistente.
-- [ ] Asociar creador autenticado.
-- [ ] Validar lugar activo.
-- [ ] Validar categorías activas.
-- [ ] Implementar flujo de revisión.
-- [ ] Registrar revisor y fecha de revisión.
-- [ ] Publicar solo cuando corresponda.
+- [x] Crear evento como `BORRADOR/PENDIENTE` para el flujo de asistente.
+- [x] Asociar creador autenticado.
+- [x] Validar lugar activo.
+- [x] Validar categorías activas.
+- [x] Implementar flujo de revisión.
+- [x] Registrar revisor y fecha de revisión.
+- [x] Publicar solo cuando corresponda.
 
 ### T036 — Adaptar eliminación lógica
 

@@ -13,6 +13,8 @@ export interface CreateEventoRepositoryInput {
   categoriaIds: number[];
   fuenteInformacion?: string | null;
   idUsuarioCreador: number;
+  estadoEvento: 'BORRADOR';
+  estadoRevision: 'PENDIENTE';
 }
 
 export interface UpdateEventoRepositoryInput {
@@ -24,6 +26,12 @@ export interface UpdateEventoRepositoryInput {
   lugarId?: number;
   categoriaIds?: number[];
   fuenteInformacion?: string | null;
+}
+
+export interface ReviewEventoRepositoryInput {
+  estadoRevision: 'APROBADO' | 'RECHAZADO';
+  idUsuarioRevisor: number;
+  fechaRevision: Date;
 }
 
 const usuarioResumenSelect = {
@@ -256,6 +264,8 @@ export const eventoRepository = {
             id: input.idUsuarioCreador,
           },
         },
+        estadoEvento: input.estadoEvento,
+        estadoRevision: input.estadoRevision,
         categorias: {
           create: input.categoriaIds.map((idCategoria) => ({
             categoria: {
@@ -430,6 +440,36 @@ export const eventoRepository = {
         },
         select: eventoBasicSelect,
       });
+    });
+  },
+
+  review(id: number, input: ReviewEventoRepositoryInput) {
+    return prisma.evento.update({
+      where: {
+        id,
+      },
+      data: {
+        estadoRevision: input.estadoRevision,
+        usuarioRevisor: {
+          connect: {
+            id: input.idUsuarioRevisor,
+          },
+        },
+        fechaRevision: input.fechaRevision,
+      },
+      select: eventoBasicSelect,
+    });
+  },
+
+  publish(id: number) {
+    return prisma.evento.update({
+      where: {
+        id,
+      },
+      data: {
+        estadoEvento: 'PROGRAMADO',
+      },
+      select: eventoBasicSelect,
     });
   },
 };

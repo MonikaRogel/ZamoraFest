@@ -195,3 +195,11 @@ export type CreateEventoInput = z.infer<typeof createEventoSchema>;
 export type UpdateEventoInput = z.infer<typeof updateEventoSchema>;
 
 export type ListEventosQuery = z.infer<typeof listEventosQuerySchema>;
+
+export const reviewEventoSchema = z
+  .object({
+    decision: z.enum(['APROBAR', 'RECHAZAR']),
+  })
+  .strict();
+
+export type ReviewEventoInput = z.infer<typeof reviewEventoSchema>;
