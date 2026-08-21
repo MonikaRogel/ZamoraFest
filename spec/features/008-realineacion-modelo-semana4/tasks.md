@@ -427,10 +427,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T039 — Implementar programación
 
-- [ ] CRUD/servicio requerido por el alcance actual.
-- [ ] Validar pertenencia al evento.
-- [ ] Validar lugar opcional.
-- [ ] Validar fechas.
+- [x] CRUD/servicio requerido por el alcance actual.
+- [x] Validar pertenencia al evento.
+- [x] Validar lugar opcional.
+- [x] Validar fechas.
 
 ### T040 — Implementar imágenes
 

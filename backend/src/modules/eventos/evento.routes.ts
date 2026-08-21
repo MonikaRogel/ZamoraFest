@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { authenticate, authorizeRoles } from '../../middleware/auth.js';
+import { programacionRouter } from '../programaciones/programacion.routes.js';
 import {
   createEventoController,
   deleteEventoController,
@@ -31,6 +32,8 @@ eventoRouter.post(
   authorizeRoles('ADMINISTRADOR'),
   publishEventoController,
 );
+
+eventoRouter.use('/:eventoId/programaciones', programacionRouter);
 
 eventoRouter
   .route('/:id')
