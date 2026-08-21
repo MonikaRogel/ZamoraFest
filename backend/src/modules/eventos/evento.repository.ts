@@ -357,19 +357,22 @@ export const eventoRepository = {
   },
 
   findById(id: number, detailLevel: EventoDetailLevel = 'basic') {
+    const where = {
+      id,
+      estadoEvento: {
+        not: 'ELIMINADO',
+      },
+    } satisfies Prisma.EventoWhereInput;
+
     if (detailLevel === 'detailed') {
-      return prisma.evento.findUnique({
-        where: {
-          id,
-        },
+      return prisma.evento.findFirst({
+        where,
         select: eventoDetailedSelect,
       });
     }
 
-    return prisma.evento.findUnique({
-      where: {
-        id,
-      },
+    return prisma.evento.findFirst({
+      where,
       select: eventoBasicSelect,
     });
   },
@@ -440,6 +443,18 @@ export const eventoRepository = {
         },
         select: eventoBasicSelect,
       });
+    });
+  },
+
+  logicalDelete(id: number) {
+    return prisma.evento.update({
+      where: {
+        id,
+      },
+      data: {
+        estadoEvento: 'ELIMINADO',
+      },
+      select: eventoBasicSelect,
     });
   },
 

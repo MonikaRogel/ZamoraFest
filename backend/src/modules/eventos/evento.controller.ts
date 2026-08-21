@@ -100,9 +100,11 @@ export const publishEventoController: RequestHandler = async (request, response)
 };
 
 export const deleteEventoController: RequestHandler = async (request, response) => {
+  const identity = requireIdentity(request);
+
   const { id } = eventoIdParamsSchema.parse(request.params);
 
-  await eventoService.remove(id);
+  await eventoService.remove(id, identity);
 
   response.status(204).send();
 };

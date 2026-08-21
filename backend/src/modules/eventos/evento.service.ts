@@ -4,6 +4,7 @@ import type { IdentidadAcceso } from '../auth/auth.service.js';
 import {
   puedeActualizarEvento,
   puedeCrearEvento,
+  puedeEliminarEvento,
   puedeGestionarRecursoPropio,
   puedePublicarEvento,
   puedeRevisarEvento,
@@ -421,15 +422,15 @@ export const eventoService = {
     return serializeEvento(evento);
   },
 
-  remove(id: number): Promise<void> {
-    void id;
+  async remove(id: number, identidad: IdentidadAcceso): Promise<void> {
+    if (!puedeEliminarEvento(identidad.rol)) {
+      throw new AppError(403, 'FORBIDDEN', 'No tiene permisos para eliminar eventos.');
+    }
 
-    return Promise.reject(
-      new AppError(
-        501,
-        'EVENT_DELETE_NOT_AVAILABLE',
-        'La eliminación lógica de eventos aún no está disponible.',
-      ),
-    );
+    await getEventoOrThrow(id);
+
+    await eventoRepository.logicalDelete(id);
+
+    await eventoCache.invalidate();
   },
 };

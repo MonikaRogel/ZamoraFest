@@ -403,9 +403,9 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T036 — Adaptar eliminación lógica
 
-- [ ] `DELETE` no eliminará físicamente el evento.
-- [ ] Cambiar a `estado_evento = ELIMINADO` cuando la operación esté autorizada.
-- [ ] Excluir eliminados de consultas normales.
+- [x] `DELETE` no eliminará físicamente el evento.
+- [x] Cambiar a `estado_evento = ELIMINADO` cuando la operación esté autorizada.
+- [x] Excluir eliminados de consultas normales.
 
 ### T037 — Adaptar consultas públicas
 
