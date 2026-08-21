@@ -420,10 +420,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T038 — Implementar favoritos
 
-- [ ] Crear favorito para usuario autenticado.
-- [ ] Impedir duplicados.
-- [ ] Listar favoritos propios.
-- [ ] Eliminar favorito propio según contrato definido.
+- [x] Crear favorito para usuario autenticado.
+- [x] Impedir duplicados.
+- [x] Listar favoritos propios.
+- [x] Eliminar favorito propio según contrato definido.
 
 ### T039 — Implementar programación
 
