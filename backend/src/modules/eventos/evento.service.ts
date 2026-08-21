@@ -252,7 +252,17 @@ export const eventoService = {
   },
 
   async list(query: ListEventosQuery): Promise<CachedResult<ListEventosPayload>> {
-    const cacheKey = await eventoCache.listKey(query.page, query.limit);
+    const filters = {
+      ...(query.cantonId !== undefined ? { cantonId: query.cantonId } : {}),
+      ...(query.categoriaId !== undefined ? { categoriaId: query.categoriaId } : {}),
+    };
+
+    const cacheKey = await eventoCache.listKey(
+      query.page,
+      query.limit,
+      query.cantonId,
+      query.categoriaId,
+    );
 
     const cachedResult = await eventoCache.get<ListEventosPayload>(cacheKey);
 
@@ -263,7 +273,7 @@ export const eventoService = {
       };
     }
 
-    const result = await eventoRepository.list(query.page, query.limit, 'basic');
+    const result = await eventoRepository.list(query.page, query.limit, 'basic', filters);
 
     const payload: ListEventosPayload = {
       data: result.eventos.map(serializeEvento),

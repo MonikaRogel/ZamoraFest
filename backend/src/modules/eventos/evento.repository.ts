@@ -3,6 +3,11 @@ import { prisma } from '../../infrastructure/database/prisma.js';
 
 export type EventoDetailLevel = 'basic' | 'detailed';
 
+export interface PublicEventoFilters {
+  cantonId?: number;
+  categoriaId?: number;
+}
+
 export interface CreateEventoRepositoryInput {
   titulo: string;
   descripcion?: string | null;
@@ -218,6 +223,45 @@ const publicEventoWhere = {
   },
 } satisfies Prisma.EventoWhereInput;
 
+function buildPublicEventoWhere(filters: PublicEventoFilters): Prisma.EventoWhereInput {
+  const conditions: Prisma.EventoWhereInput[] = [publicEventoWhere];
+
+  if (filters.cantonId !== undefined) {
+    conditions.push({
+      lugar: {
+        sector: {
+          parroquia: {
+            canton: {
+              id: filters.cantonId,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (filters.categoriaId !== undefined) {
+    conditions.push({
+      categorias: {
+        some: {
+          idCategoria: filters.categoriaId,
+          categoria: {
+            estado: true,
+          },
+        },
+      },
+    });
+  }
+
+  if (conditions.length === 1) {
+    return publicEventoWhere;
+  }
+
+  return {
+    AND: conditions,
+  };
+}
+
 export const eventoRepository = {
   findActiveLugar(lugarId: number) {
     return prisma.lugar.findFirst({
@@ -280,16 +324,22 @@ export const eventoRepository = {
     });
   },
 
-  async list(page: number, limit: number, detailLevel: EventoDetailLevel = 'basic') {
+  async list(
+    page: number,
+    limit: number,
+    detailLevel: EventoDetailLevel = 'basic',
+    filters: PublicEventoFilters = {},
+  ) {
     const skip = (page - 1) * limit;
+    const where = buildPublicEventoWhere(filters);
 
     if (detailLevel === 'detailed') {
       const [total, eventos] = await prisma.$transaction([
         prisma.evento.count({
-          where: publicEventoWhere,
+          where,
         }),
         prisma.evento.findMany({
-          where: publicEventoWhere,
+          where,
           select: eventoDetailedSelect,
           orderBy: [
             {
@@ -312,10 +362,10 @@ export const eventoRepository = {
 
     const [total, eventos] = await prisma.$transaction([
       prisma.evento.count({
-        where: publicEventoWhere,
+        where,
       }),
       prisma.evento.findMany({
-        where: publicEventoWhere,
+        where,
         select: eventoBasicSelect,
         orderBy: [
           {

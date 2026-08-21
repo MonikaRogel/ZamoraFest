@@ -409,10 +409,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T037 — Adaptar consultas públicas
 
-- [ ] Mostrar solo `PROGRAMADO + APROBADO`.
-- [ ] Mantener paginación.
-- [ ] Mantener filtros.
-- [ ] Mantener selección de campos.
+- [x] Mostrar solo `PROGRAMADO + APROBADO`.
+- [x] Mantener paginación.
+- [x] Mantener filtros.
+- [x] Mantener selección de campos.
 
 ---
 

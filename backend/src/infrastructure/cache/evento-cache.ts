@@ -51,9 +51,20 @@ async function getVersion(): Promise<string> {
 }
 
 export const eventoCache = {
-  async listKey(page: number, limit: number): Promise<string> {
+  async listKey(
+    page: number,
+    limit: number,
+    cantonId?: number,
+    categoriaId?: number,
+  ): Promise<string> {
     const version = await getVersion();
-    return `eventos:v${version}:list:${page}:${limit}`;
+
+    return (
+      `eventos:v${version}:list:` +
+      `page=${page}:limit=${limit}:` +
+      `canton=${cantonId ?? 'all'}:` +
+      `categoria=${categoriaId ?? 'all'}`
+    );
   },
 
   async detailKey(id: string): Promise<string> {

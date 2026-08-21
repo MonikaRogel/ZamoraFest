@@ -183,10 +183,18 @@ export const eventoIdParamsSchema = z
       ),
   })
   .strict();
+const queryEntityIdSchema = z.coerce
+  .number()
+  .int('El identificador debe ser un n?mero entero.')
+  .min(1, 'El identificador debe ser mayor que cero.')
+  .max(POSTGRES_INT_MAX, 'El identificador supera el rango permitido.');
+
 export const listEventosQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(50).default(10),
+    cantonId: queryEntityIdSchema.optional(),
+    categoriaId: queryEntityIdSchema.optional(),
   })
   .strict();
 
