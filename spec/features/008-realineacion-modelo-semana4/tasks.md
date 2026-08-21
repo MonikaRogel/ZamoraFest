@@ -446,10 +446,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T041 — Adaptar recordatorio funcional
 
-- [ ] Crear recordatorio con usuario, evento, programación opcional y fecha de notificación.
-- [ ] Validar pertenencia de programación al evento.
-- [ ] Validar propiedad del usuario.
-- [ ] Mantener `activo`.
+- [x] Crear recordatorio con usuario, evento, programación opcional y fecha de notificación.
+- [x] Validar pertenencia de programación al evento.
+- [x] Validar propiedad del usuario.
+- [x] Mantener `activo`.
 
 ### T042 — Adaptar cola BullMQ
 
