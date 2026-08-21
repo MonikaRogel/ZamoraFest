@@ -434,11 +434,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T040 — Implementar imágenes
 
-- [ ] Validar evento.
-- [ ] Registrar usuario de subida.
-- [ ] Validar programación opcional.
-- [ ] Garantizar coherencia evento/programación.
-- [ ] Garantizar principal única activa.
+- [x] Validar evento.
+- [x] Registrar usuario de subida.
+- [x] Validar programación opcional.
+- [x] Garantizar coherencia evento/programación.
+- [x] Garantizar principal única activa.
 
 ---
 

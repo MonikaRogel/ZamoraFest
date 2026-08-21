@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { authenticate, authorizeRoles } from '../../middleware/auth.js';
+import { imagenRouter } from '../imagenes/imagen.routes.js';
 import { programacionRouter } from '../programaciones/programacion.routes.js';
 import {
   createEventoController,
@@ -34,6 +35,7 @@ eventoRouter.post(
 );
 
 eventoRouter.use('/:eventoId/programaciones', programacionRouter);
+eventoRouter.use('/:eventoId/imagenes', imagenRouter);
 
 eventoRouter
   .route('/:id')
