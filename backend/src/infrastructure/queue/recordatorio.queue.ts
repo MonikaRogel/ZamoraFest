@@ -42,7 +42,7 @@ export async function enqueueRecordatorio(recordatorioId: number): Promise<void>
       recordatorioId,
     },
     {
-      jobId: `recordatorio:${recordatorioId}`,
+      jobId: `recordatorio-${recordatorioId}`,
     },
   );
 }

@@ -61,7 +61,7 @@ describe('T042 - cola BullMQ de recordatorios', () => {
         recordatorioId: 9,
       },
       {
-        jobId: 'recordatorio:9',
+        jobId: 'recordatorio-9',
       },
     );
   });

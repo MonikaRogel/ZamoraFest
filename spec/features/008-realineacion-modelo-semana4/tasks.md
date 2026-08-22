@@ -536,11 +536,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T052 — Pruebas de favoritos y recordatorios
 
-- [ ] favoritos propios.
-- [ ] duplicados.
-- [ ] recordatorios válidos.
-- [ ] programación perteneciente a otro evento rechazada.
-- [ ] BullMQ con identificador entero.
+- [x] favoritos propios.
+- [x] duplicados.
+- [x] recordatorios válidos.
+- [x] programación perteneciente a otro evento rechazada.
+- [x] BullMQ con identificador entero.
 
 ### T053 — Calidad general
 
