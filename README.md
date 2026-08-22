@@ -112,7 +112,7 @@ backend/.env.example
 backend/.env.test.example
 ```
 
-Para desarrollo, ackend/.env.example contempla:
+Para desarrollo, `backend/.env.example` contempla:
 
 ```text
 NODE_ENV
