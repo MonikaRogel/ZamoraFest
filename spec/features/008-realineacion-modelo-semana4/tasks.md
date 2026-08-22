@@ -520,10 +520,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T050 — Pruebas de autorización
 
-- [ ] VISITANTE.
-- [ ] ASISTENTE.
-- [ ] ADMINISTRADOR.
-- [ ] operaciones prohibidas por rol.
+- [x] VISITANTE.
+- [x] ASISTENTE.
+- [x] ADMINISTRADOR.
+- [x] operaciones prohibidas por rol.
 
 ### T051 — Pruebas CRUD eventos
 
