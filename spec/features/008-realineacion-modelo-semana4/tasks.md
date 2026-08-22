@@ -501,14 +501,14 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T048 — Pruebas del modelo
 
-- [ ] PK/FK.
-- [ ] unicidades.
-- [ ] CHECK.
-- [ ] jerarquía territorial.
-- [ ] roles/usuarios.
-- [ ] evento/programación cruzada.
-- [ ] favoritos duplicados.
-- [ ] imagen principal.
+- [x] PK/FK.
+- [x] unicidades.
+- [x] CHECK.
+- [x] jerarquía territorial.
+- [x] roles/usuarios.
+- [x] evento/programación cruzada.
+- [x] favoritos duplicados.
+- [x] imagen principal.
 
 ### T049 — Pruebas de autenticación
 
