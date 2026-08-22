@@ -38,6 +38,7 @@ No se ejecutará `prisma migrate reset`, `prisma db push` ni una migración corr
 - [x] No versionar credenciales ni secretos en Git.
 
 Evidencia:
+
 - respaldo: `zamorafest_dev_pre_realineacion_20260818-230418.dump`;
 - ubicación externa al repositorio: `D:\UEA\NIVEL V\APP_MOVILES_MR\ZamoraFest_Backups`;
 - tamaño: 26.09 KB (26714 bytes);
@@ -489,10 +490,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T047 — Repetir medición
 
-- [ ] Medir MISS con nuevo modelo.
-- [ ] Medir HIT con nuevo modelo.
-- [ ] Documentar condiciones.
-- [ ] Comparar con línea base sin afirmar equivalencia si cambian las condiciones.
+- [x] Medir MISS con nuevo modelo.
+- [x] Medir HIT con nuevo modelo.
+- [x] Documentar condiciones.
+- [x] Comparar con línea base sin afirmar equivalencia si cambian las condiciones.
 
 ---
 
