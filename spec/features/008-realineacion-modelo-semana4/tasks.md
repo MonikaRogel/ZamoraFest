@@ -560,9 +560,9 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T054 — Actualizar modelo de datos
 
-- [ ] Actualizar `docs/modelo-datos.md`.
-- [ ] Sustituir DER reducido por las 14 entidades canónicas.
-- [ ] Documentar `refresh_token` como extensión técnica.
+- [x] Actualizar `docs/modelo-datos.md`.
+- [x] Sustituir DER reducido por las 14 entidades canónicas.
+- [x] Documentar `refresh_token` como extensión técnica.
 
 ### T055 — Actualizar especificaciones anteriores afectadas
 
