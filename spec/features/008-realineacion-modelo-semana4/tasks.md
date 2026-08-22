@@ -482,10 +482,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T046 — Revalidar Strategy y N+1
 
-- [ ] `basic`.
-- [ ] `detailed`.
-- [ ] verificar número de consultas.
-- [ ] mantener selección de campos.
+- [x] `basic`.
+- [x] `detailed`.
+- [x] verificar número de consultas.
+- [x] mantener selección de campos.
 
 ### T047 — Repetir medición
 
