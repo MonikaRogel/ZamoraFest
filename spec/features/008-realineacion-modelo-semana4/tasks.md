@@ -614,11 +614,11 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T060 — Estado final Git
 
-- [ ] árbol limpio.
-- [ ] commits trazables.
-- [ ] push de rama.
-- [ ] PR correctiva preparada.
-- [ ] no fusionar a `main` hasta completar todas las puertas relevantes.
+- [x] árbol limpio.
+- [x] commits trazables.
+- [x] push de rama.
+- [x] PR correctiva preparada.
+- [x] no fusionar a `main` hasta completar todas las puertas relevantes.
 
 ## Criterio de finalización
 
