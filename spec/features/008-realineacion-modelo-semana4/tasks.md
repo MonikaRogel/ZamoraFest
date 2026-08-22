@@ -603,14 +603,14 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T059 — Auditoría de regresión Semanas 7 y 8
 
-- [ ] autenticación y autorización.
-- [ ] refresh tokens.
-- [ ] CRUD.
-- [ ] Swagger/OpenAPI.
-- [ ] caché.
-- [ ] N+1.
-- [ ] Strategy.
-- [ ] BullMQ.
+- [x] autenticación y autorización.
+- [x] refresh tokens.
+- [x] CRUD.
+- [x] Swagger/OpenAPI.
+- [x] caché.
+- [x] N+1.
+- [x] Strategy.
+- [x] BullMQ.
 
 ### T060 — Estado final Git
 
