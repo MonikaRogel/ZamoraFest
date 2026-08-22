@@ -94,6 +94,12 @@ export const eventoCache = {
     return `eventos:v${version}:public:` + `detail:id=${id}`;
   },
 
+  async categoriasKey(): Promise<string> {
+    const version = await getVersion();
+
+    return `eventos:v${version}:public:categorias`;
+  },
+
   async get<T>(key: string): Promise<T | null> {
     return withFallback<T | null>(async () => {
       const client = await getClient();

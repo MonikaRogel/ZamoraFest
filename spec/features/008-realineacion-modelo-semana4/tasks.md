@@ -475,10 +475,10 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T045 — Mantener cache-aside
 
-- [ ] Listados públicos.
-- [ ] detalle público.
-- [ ] categorías.
-- [ ] invalidación al crear/revisar/publicar/actualizar/eliminar.
+- [x] Listados públicos.
+- [x] detalle público.
+- [x] categorías.
+- [x] invalidación al crear/revisar/publicar/actualizar/eliminar.
 
 ### T046 — Revalidar Strategy y N+1
 
