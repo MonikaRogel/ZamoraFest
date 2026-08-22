@@ -572,13 +572,13 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T056 — Actualizar OpenAPI
 
-- [ ] IDs enteros.
-- [ ] campos reales de evento.
-- [ ] estados.
-- [ ] roles.
-- [ ] favoritos.
-- [ ] recordatorios.
-- [ ] respuestas de error.
+- [x] IDs enteros.
+- [x] campos reales de evento.
+- [x] estados.
+- [x] roles.
+- [x] favoritos.
+- [x] recordatorios.
+- [x] respuestas de error.
 
 ### T057 — Actualizar README
 
