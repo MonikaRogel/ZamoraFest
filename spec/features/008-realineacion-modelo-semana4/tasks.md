@@ -582,11 +582,11 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T057 — Actualizar README
 
-- [ ] Modelo real.
-- [ ] flujo de migración.
-- [ ] seed.
-- [ ] ejecución de pruebas.
-- [ ] requisitos de entorno.
+- [x] Modelo real.
+- [x] flujo de migración.
+- [x] seed.
+- [x] ejecución de pruebas.
+- [x] requisitos de entorno.
 
 ---
 
