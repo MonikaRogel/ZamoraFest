@@ -58,7 +58,7 @@ async function confirmTestDatabase(): Promise<void> {
 
 async function removeQueuedJobs(): Promise<void> {
   for (const recordatorioId of queuedRecordatorioIds) {
-    const job = await recordatorioQueue.getJob(`recordatorio:${recordatorioId}`);
+    const job = await recordatorioQueue.getJob(`recordatorio-${recordatorioId}`);
 
     if (job) {
       await job.remove();
