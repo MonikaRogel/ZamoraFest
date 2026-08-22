@@ -594,12 +594,12 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T058 — Auditoría final contra Semana 4
 
-- [ ] Comparar entidad por entidad.
-- [ ] Comparar campo por campo.
-- [ ] Comparar PK/FK.
-- [ ] Comparar cardinalidades.
-- [ ] Comparar reglas de negocio.
-- [ ] Verificar que no falte ninguna de las 14 entidades.
+- [x] Comparar entidad por entidad.
+- [x] Comparar campo por campo.
+- [x] Comparar PK/FK.
+- [x] Comparar cardinalidades.
+- [x] Comparar reglas de negocio.
+- [x] Verificar que no falte ninguna de las 14 entidades.
 
 ### T059 — Auditoría de regresión Semanas 7 y 8
 
