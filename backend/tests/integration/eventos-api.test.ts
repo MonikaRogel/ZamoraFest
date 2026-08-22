@@ -1,306 +1,535 @@
-import { randomUUID } from 'node:crypto';
-
 import { hash as hashPassword } from 'bcryptjs';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { z } from 'zod';
 
 import { app } from '../../src/app.js';
+import { eventoCache } from '../../src/infrastructure/cache/evento-cache.js';
 import { prisma } from '../../src/infrastructure/database/prisma.js';
 import { authService } from '../../src/modules/auth/auth.service.js';
 
-let testDatabaseConfirmed = false;
-let lugarId = '';
-let categoriaIds: string[] = [];
-let adminAccessToken = '';
+const TEST_SOURCE_PREFIX = 'T051_';
+const TEST_EMAIL_PREFIX = 't051.';
 
-async function cleanTestData(): Promise<void> {
-  await prisma.refreshToken.deleteMany();
-  await prisma.usuario.deleteMany();
-  await prisma.imagenEvento.deleteMany();
-  await prisma.programacionEvento.deleteMany();
-  await prisma.eventoCategoria.deleteMany();
-  await prisma.evento.deleteMany();
-  await prisma.categoria.deleteMany();
-  await prisma.lugar.deleteMany();
-  await prisma.canton.deleteMany();
+const ASISTENTE_EMAIL = 't051.asistente@zamorafest.test';
+const ADMIN_EMAIL = 't051.administrador@zamorafest.test';
+
+const ASISTENTE_PASSWORD = 'AsistenteT051';
+const ADMIN_PASSWORD = 'AdministradorT051';
+
+interface SupportContext {
+  lugarId: number;
+  categoriaIds: number[];
+  asistenteId: number;
+  administradorId: number;
+  asistenteToken: string;
+  administradorToken: string;
 }
 
-async function createSupportData(): Promise<void> {
-  const suffix = randomUUID();
-  const adminPassword = 'AdminPrueba123';
+const eventoResponseSchema = z.object({
+  data: z.object({
+    id: z.number().int().positive(),
+    titulo: z.string(),
+    estadoEvento: z.enum(['BORRADOR', 'PROGRAMADO', 'CANCELADO', 'FINALIZADO', 'ELIMINADO']),
+    estadoRevision: z.enum(['PENDIENTE', 'APROBADO', 'RECHAZADO']),
+    costoReferencial: z.number(),
+    fechaRevision: z.string().nullable(),
+    usuarioRevisor: z
+      .object({
+        id: z.number().int().positive(),
+      })
+      .nullable(),
+  }),
+});
 
-  const canton = await prisma.canton.create({
-    data: {
-      nombre: `Cantón API ${suffix}`,
+const listadoResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.number().int().positive(),
+      titulo: z.string(),
+      estadoEvento: z.string(),
+      estadoRevision: z.string(),
+    }),
+  ),
+  meta: z.object({
+    page: z.number().int(),
+    limit: z.number().int(),
+    total: z.number().int(),
+    totalPages: z.number().int(),
+  }),
+});
+
+let support: SupportContext;
+
+async function confirmTestDatabase(): Promise<void> {
+  const databases = await prisma.$queryRaw<Array<{ databaseName: string }>>`
+    SELECT current_database() AS "databaseName"
+  `;
+
+  expect(databases[0]?.databaseName).toBe('zamorafest_test');
+}
+
+async function cleanT051Data(): Promise<void> {
+  const eventos = await prisma.evento.findMany({
+    where: {
+      fuenteInformacion: {
+        startsWith: TEST_SOURCE_PREFIX,
+      },
+    },
+    select: {
+      id: true,
     },
   });
 
-  const lugar = await prisma.lugar.create({
-    data: {
-      nombre: `Lugar API ${suffix}`,
-      direccion: 'Dirección utilizada en pruebas',
-      cantonId: canton.id,
+  const eventoIds = eventos.map((evento) => evento.id);
+
+  if (eventoIds.length > 0) {
+    await prisma.imagenEvento.deleteMany({
+      where: {
+        idEvento: {
+          in: eventoIds,
+        },
+      },
+    });
+
+    await prisma.recordatorio.deleteMany({
+      where: {
+        idEvento: {
+          in: eventoIds,
+        },
+      },
+    });
+
+    await prisma.usuarioEventoFavorito.deleteMany({
+      where: {
+        idEvento: {
+          in: eventoIds,
+        },
+      },
+    });
+
+    await prisma.eventoCategoria.deleteMany({
+      where: {
+        idEvento: {
+          in: eventoIds,
+        },
+      },
+    });
+
+    await prisma.programacionEvento.deleteMany({
+      where: {
+        idEvento: {
+          in: eventoIds,
+        },
+      },
+    });
+
+    await prisma.evento.deleteMany({
+      where: {
+        id: {
+          in: eventoIds,
+        },
+      },
+    });
+  }
+
+  const usuarios = await prisma.usuario.findMany({
+    where: {
+      correo: {
+        startsWith: TEST_EMAIL_PREFIX,
+      },
+    },
+    select: {
+      id: true,
     },
   });
 
-  const categorias = await Promise.all([
-    prisma.categoria.create({
-      data: {
-        nombre: `Cultura ${suffix}`,
+  const usuarioIds = usuarios.map((usuario) => usuario.id);
+
+  if (usuarioIds.length > 0) {
+    await prisma.refreshToken.deleteMany({
+      where: {
+        usuarioId: {
+          in: usuarioIds,
+        },
+      },
+    });
+
+    await prisma.usuario.deleteMany({
+      where: {
+        id: {
+          in: usuarioIds,
+        },
+      },
+    });
+  }
+
+  await eventoCache.invalidate();
+}
+
+async function createSupportData(): Promise<SupportContext> {
+  const [lugar, categorias, rolAsistente, rolAdministrador] = await Promise.all([
+    prisma.lugar.findFirst({
+      where: {
+        estado: true,
+      },
+      select: {
+        id: true,
       },
     }),
-    prisma.categoria.create({
-      data: {
-        nombre: `Música ${suffix}`,
+
+    prisma.categoria.findMany({
+      where: {
+        estado: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+      take: 2,
+      select: {
+        id: true,
+      },
+    }),
+
+    prisma.rol.findUnique({
+      where: {
+        nombre: 'ASISTENTE',
+      },
+      select: {
+        id: true,
+        estado: true,
+      },
+    }),
+
+    prisma.rol.findUnique({
+      where: {
+        nombre: 'ADMINISTRADOR',
+      },
+      select: {
+        id: true,
+        estado: true,
       },
     }),
   ]);
 
-  const admin = await prisma.usuario.create({
+  if (!lugar) {
+    throw new Error('El seed no contiene un lugar activo.');
+  }
+
+  if (categorias.length < 2) {
+    throw new Error('El seed no contiene al menos dos categorías activas.');
+  }
+
+  if (!rolAsistente?.estado) {
+    throw new Error('El rol ASISTENTE no está disponible.');
+  }
+
+  if (!rolAdministrador?.estado) {
+    throw new Error('El rol ADMINISTRADOR no está disponible.');
+  }
+
+  const [asistenteHash, administradorHash] = await Promise.all([
+    hashPassword(ASISTENTE_PASSWORD, 4),
+    hashPassword(ADMIN_PASSWORD, 4),
+  ]);
+
+  const asistente = await prisma.usuario.create({
     data: {
-      nombre: 'Administradora de prueba',
-      email: `admin-${suffix}@zamorafest.test`,
-      passwordHash: await hashPassword(adminPassword, 4),
-      rol: 'ADMIN',
+      idRol: rolAsistente.id,
+      nombreCompleto: 'Asistente T051',
+      correo: ASISTENTE_EMAIL,
+      contrasenaHash: asistenteHash,
+      estado: true,
     },
   });
 
-  const session = await authService.login({
-    email: admin.email,
-    password: adminPassword,
+  const administrador = await prisma.usuario.create({
+    data: {
+      idRol: rolAdministrador.id,
+      nombreCompleto: 'Administrador T051',
+      correo: ADMIN_EMAIL,
+      contrasenaHash: administradorHash,
+      estado: true,
+    },
   });
 
-  lugarId = lugar.id;
-  categoriaIds = categorias.map(({ id }) => id);
-  adminAccessToken = session.accessToken;
-}
+  const [asistenteSession, administradorSession] = await Promise.all([
+    authService.login({
+      email: ASISTENTE_EMAIL,
+      password: ASISTENTE_PASSWORD,
+    }),
 
-function validEventoPayload(estado: 'BORRADOR' | 'PUBLICADO' = 'PUBLICADO') {
+    authService.login({
+      email: ADMIN_EMAIL,
+      password: ADMIN_PASSWORD,
+    }),
+  ]);
+
   return {
-    titulo: `Festival de prueba ${randomUUID()}`,
-    descripcion: 'Descripción válida para verificar la gestión de eventos.',
-    lugarId,
-    categoriaIds,
-    estado,
+    lugarId: lugar.id,
+    categoriaIds: categorias.map((categoria) => categoria.id),
+    asistenteId: asistente.id,
+    administradorId: administrador.id,
+    asistenteToken: asistenteSession.accessToken,
+    administradorToken: administradorSession.accessToken,
   };
 }
 
+function eventoPayload(label: string) {
+  return {
+    titulo: `Evento T051 ${label}`,
+    descripcion: `Evento de integración para ${label}.`,
+    fechaInicio: '2026-10-15T18:00:00',
+    fechaFin: '2026-10-15T22:00:00',
+    costoReferencial: 0,
+    lugarId: support.lugarId,
+    categoriaIds: support.categoriaIds,
+    fuenteInformacion: `${TEST_SOURCE_PREFIX}${label}`,
+  };
+}
+
+async function createEvento(label: string) {
+  const response = await request(app)
+    .post('/api/v1/eventos')
+    .set('Authorization', `Bearer ${support.asistenteToken}`)
+    .send(eventoPayload(label));
+
+  expect(response.status).toBe(201);
+
+  const evento = eventoResponseSchema.parse(response.body as unknown).data;
+
+  expect(evento.estadoEvento).toBe('BORRADOR');
+  expect(evento.estadoRevision).toBe('PENDIENTE');
+
+  return evento;
+}
+
+async function approveEvento(eventoId: number) {
+  const response = await request(app)
+    .post(`/api/v1/eventos/${eventoId}/revision`)
+    .set('Authorization', `Bearer ${support.administradorToken}`)
+    .send({
+      decision: 'APROBAR',
+    });
+
+  expect(response.status).toBe(200);
+
+  return eventoResponseSchema.parse(response.body as unknown).data;
+}
+
+async function publishEvento(eventoId: number) {
+  const response = await request(app)
+    .post(`/api/v1/eventos/${eventoId}/publicacion`)
+    .set('Authorization', `Bearer ${support.administradorToken}`);
+
+  expect(response.status).toBe(200);
+
+  return eventoResponseSchema.parse(response.body as unknown).data;
+}
+
 beforeAll(async () => {
-  const result = await prisma.$queryRaw<Array<{ baseDatos: string }>>`
-    SELECT current_database() AS "baseDatos"
-  `;
-
-  testDatabaseConfirmed = result[0]?.baseDatos === 'zamorafest_test';
-
-  expect(testDatabaseConfirmed).toBe(true);
+  await confirmTestDatabase();
 });
 
 beforeEach(async () => {
-  await cleanTestData();
-  await createSupportData();
+  await cleanT051Data();
+  support = await createSupportData();
 });
 
 afterEach(async () => {
-  if (testDatabaseConfirmed) {
-    await cleanTestData();
-  }
+  await cleanT051Data();
 });
 
 afterAll(async () => {
+  await cleanT051Data();
+  await eventoCache.close();
   await prisma.$disconnect();
 });
 
-describe('API REST de eventos', () => {
-  it('ejecuta el CRUD completo con eliminación lógica', async () => {
-    const payload = validEventoPayload();
+describe('T051 - CRUD canónico de eventos', () => {
+  it('crea un evento como BORRADOR y PENDIENTE mediante ASISTENTE', async () => {
+    const payload = eventoPayload('CREACION');
 
-    const createResponse = await request(app)
-      .post('/api/v1/eventos')
-      .set('Authorization', `Bearer ${adminAccessToken}`)
-      .send(payload);
-
-    expect(createResponse.status).toBe(201);
-
-    const createBody: unknown = createResponse.body;
-
-    expect(createBody).toMatchObject({
-      data: {
-        titulo: payload.titulo,
-        estado: 'PUBLICADO',
-      },
-    });
-
-    const createdEvento = await prisma.evento.findFirstOrThrow({
-      where: {
-        titulo: payload.titulo,
-      },
-    });
-
-    const totalCategorias = await prisma.eventoCategoria.count({
-      where: {
-        eventoId: createdEvento.id,
-        eliminadoEn: null,
-      },
-    });
-
-    expect(totalCategorias).toBe(2);
-
-    const listResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
-
-    expect(listResponse.status).toBe(200);
-
-    const listBody: unknown = listResponse.body;
-
-    expect(listBody).toMatchObject({
-      data: [
-        {
-          id: createdEvento.id,
-          titulo: payload.titulo,
-        },
-      ],
-      meta: {
-        page: 1,
-        limit: 10,
-        total: 1,
-        totalPages: 1,
-      },
-    });
-
-    const getResponse = await request(app).get(`/api/v1/eventos/${createdEvento.id}`);
-
-    expect(getResponse.status).toBe(200);
-    expect(getResponse.body as unknown).toMatchObject({
-      data: {
-        id: createdEvento.id,
-        titulo: payload.titulo,
-      },
-    });
-
-    const updateResponse = await request(app)
-      .patch(`/api/v1/eventos/${createdEvento.id}`)
-      .set('Authorization', `Bearer ${adminAccessToken}`)
-      .send({
-        titulo: 'Festival actualizado',
-      });
-
-    expect(updateResponse.status).toBe(200);
-    expect(updateResponse.body as unknown).toMatchObject({
-      data: {
-        id: createdEvento.id,
-        titulo: 'Festival actualizado',
-      },
-    });
-
-    const deleteResponse = await request(app)
-      .delete(`/api/v1/eventos/${createdEvento.id}`)
-      .set('Authorization', `Bearer ${adminAccessToken}`);
-
-    expect(deleteResponse.status).toBe(204);
-
-    const deletedEvento = await prisma.evento.findUniqueOrThrow({
-      where: {
-        id: createdEvento.id,
-      },
-    });
-
-    expect(deletedEvento.eliminadoEn).toBeInstanceOf(Date);
-
-    const deletedGetResponse = await request(app).get(`/api/v1/eventos/${createdEvento.id}`);
-
-    expect(deletedGetResponse.status).toBe(404);
-  });
-
-  it('rechaza datos inválidos con un error 400', async () => {
     const response = await request(app)
       .post('/api/v1/eventos')
-      .set('Authorization', `Bearer ${adminAccessToken}`)
-      .send({
-        titulo: 'No',
-        descripcion: 'Corta',
-        lugarId: 'identificador-invalido',
-        categoriaIds: [],
-      });
-
-    expect(response.status).toBe(400);
-    expect(response.body as unknown).toMatchObject({
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'La solicitud contiene datos inválidos.',
-      },
-    });
-  });
-
-  it('no muestra públicamente los eventos en borrador', async () => {
-    const payload = validEventoPayload('BORRADOR');
-
-    const createResponse = await request(app)
-      .post('/api/v1/eventos')
-      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .set('Authorization', `Bearer ${support.asistenteToken}`)
       .send(payload);
 
-    expect(createResponse.status).toBe(201);
+    expect(response.status).toBe(201);
 
-    const createdEvento = await prisma.evento.findFirstOrThrow({
+    const evento = eventoResponseSchema.parse(response.body as unknown).data;
+
+    expect(evento).toMatchObject({
+      titulo: payload.titulo,
+      estadoEvento: 'BORRADOR',
+      estadoRevision: 'PENDIENTE',
+      costoReferencial: 0,
+    });
+
+    const persistido = await prisma.evento.findUniqueOrThrow({
       where: {
-        titulo: payload.titulo,
+        id: evento.id,
       },
     });
 
-    const listResponse = await request(app).get('/api/v1/eventos');
+    expect(persistido.idUsuarioCreador).toBe(support.asistenteId);
+    expect(persistido.estadoEvento).toBe('BORRADOR');
+    expect(persistido.estadoRevision).toBe('PENDIENTE');
+
+    const categorias = await prisma.eventoCategoria.count({
+      where: {
+        idEvento: evento.id,
+      },
+    });
+
+    expect(categorias).toBe(support.categoriaIds.length);
+  });
+
+  it('actualiza un borrador propio mediante ASISTENTE', async () => {
+    const evento = await createEvento('ACTUALIZACION');
+
+    const response = await request(app)
+      .patch(`/api/v1/eventos/${evento.id}`)
+      .set('Authorization', `Bearer ${support.asistenteToken}`)
+      .send({
+        titulo: 'Evento T051 actualizado',
+        costoReferencial: 12.5,
+      });
+
+    expect(response.status).toBe(200);
+
+    const actualizado = eventoResponseSchema.parse(response.body as unknown).data;
+
+    expect(actualizado).toMatchObject({
+      id: evento.id,
+      titulo: 'Evento T051 actualizado',
+      costoReferencial: 12.5,
+      estadoEvento: 'BORRADOR',
+      estadoRevision: 'PENDIENTE',
+    });
+
+    const persistido = await prisma.evento.findUniqueOrThrow({
+      where: {
+        id: evento.id,
+      },
+    });
+
+    expect(persistido.titulo).toBe('Evento T051 actualizado');
+    expect(Number(persistido.costoReferencial.toString())).toBe(12.5);
+    expect(persistido.fechaActualizacion).toBeInstanceOf(Date);
+  });
+
+  it('aprueba un evento pendiente mediante ADMINISTRADOR', async () => {
+    const evento = await createEvento('REVISION');
+
+    const aprobado = await approveEvento(evento.id);
+
+    expect(aprobado.estadoEvento).toBe('BORRADOR');
+    expect(aprobado.estadoRevision).toBe('APROBADO');
+    expect(aprobado.usuarioRevisor?.id).toBe(support.administradorId);
+    expect(aprobado.fechaRevision).not.toBeNull();
+
+    const persistido = await prisma.evento.findUniqueOrThrow({
+      where: {
+        id: evento.id,
+      },
+    });
+
+    expect(persistido.estadoEvento).toBe('BORRADOR');
+    expect(persistido.estadoRevision).toBe('APROBADO');
+    expect(persistido.idUsuarioRevisor).toBe(support.administradorId);
+    expect(persistido.fechaRevision).toBeInstanceOf(Date);
+  });
+
+  it('publica únicamente un evento previamente aprobado', async () => {
+    const evento = await createEvento('PUBLICACION');
+
+    await approveEvento(evento.id);
+
+    const publicado = await publishEvento(evento.id);
+
+    expect(publicado.estadoEvento).toBe('PROGRAMADO');
+    expect(publicado.estadoRevision).toBe('APROBADO');
+
+    const persistido = await prisma.evento.findUniqueOrThrow({
+      where: {
+        id: evento.id,
+      },
+    });
+
+    expect(persistido.estadoEvento).toBe('PROGRAMADO');
+    expect(persistido.estadoRevision).toBe('APROBADO');
+  });
+
+  it('realiza eliminación lógica y conserva físicamente el evento', async () => {
+    const evento = await createEvento('ELIMINACION');
+
+    await approveEvento(evento.id);
+    await publishEvento(evento.id);
+
+    const publicBefore = await request(app).get(`/api/v1/eventos/${evento.id}`);
+
+    expect(publicBefore.status).toBe(200);
+
+    const response = await request(app)
+      .delete(`/api/v1/eventos/${evento.id}`)
+      .set('Authorization', `Bearer ${support.administradorToken}`);
+
+    expect(response.status).toBe(204);
+
+    const persistido = await prisma.evento.findUnique({
+      where: {
+        id: evento.id,
+      },
+    });
+
+    expect(persistido).not.toBeNull();
+    expect(persistido?.estadoEvento).toBe('ELIMINADO');
+
+    const publicAfter = await request(app).get(`/api/v1/eventos/${evento.id}`);
+
+    expect(publicAfter.status).toBe(404);
+  });
+
+  it('expone públicamente solo eventos PROGRAMADO y APROBADO', async () => {
+    const borrador = await createEvento('PUBLICO_BORRADOR');
+    const publicable = await createEvento('PUBLICO_PROGRAMADO');
+
+    await approveEvento(publicable.id);
+    await publishEvento(publicable.id);
+
+    const listResponse = await request(app).get('/api/v1/eventos?page=1&limit=50');
 
     expect(listResponse.status).toBe(200);
-    expect(listResponse.body as unknown).toMatchObject({
-      data: [],
-      meta: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
+
+    const listado = listadoResponseSchema.parse(listResponse.body as unknown);
+
+    const ids = listado.data.map((evento) => evento.id);
+
+    expect(ids).toContain(publicable.id);
+    expect(ids).not.toContain(borrador.id);
+
+    const publicadoListado = listado.data.find((evento) => evento.id === publicable.id);
+
+    expect(publicadoListado).toMatchObject({
+      estadoEvento: 'PROGRAMADO',
+      estadoRevision: 'APROBADO',
+    });
+
+    const publicableDetail = await request(app).get(`/api/v1/eventos/${publicable.id}`);
+
+    expect(publicableDetail.status).toBe(200);
+
+    expect(publicableDetail.body as unknown).toMatchObject({
+      data: {
+        id: publicable.id,
+        estadoEvento: 'PROGRAMADO',
+        estadoRevision: 'APROBADO',
       },
     });
 
-    const getResponse = await request(app).get(`/api/v1/eventos/${createdEvento.id}`);
+    const draftDetail = await request(app).get(`/api/v1/eventos/${borrador.id}`);
 
-    expect(getResponse.status).toBe(404);
+    expect(draftDetail.status).toBe(404);
   });
-});
-it('aplica cache-aside e invalida el caché al actualizar', async () => {
-  const payload = validEventoPayload();
-
-  const createResponse = await request(app)
-    .post('/api/v1/eventos')
-    .set('Authorization', `Bearer ${adminAccessToken}`)
-    .send(payload);
-
-  expect(createResponse.status).toBe(201);
-
-  const firstListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
-
-  expect(firstListResponse.status).toBe(200);
-  expect(firstListResponse.headers['x-cache']).toBe('MISS');
-
-  const secondListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
-
-  expect(secondListResponse.status).toBe(200);
-  expect(secondListResponse.headers['x-cache']).toBe('HIT');
-
-  const evento = await prisma.evento.findFirstOrThrow({
-    where: {
-      titulo: payload.titulo,
-    },
-  });
-
-  const updateResponse = await request(app)
-    .patch(`/api/v1/eventos/${evento.id}`)
-    .set('Authorization', `Bearer ${adminAccessToken}`)
-    .send({
-      titulo: 'Festival actualizado para invalidar caché',
-    });
-
-  expect(updateResponse.status).toBe(200);
-
-  const invalidatedListResponse = await request(app).get('/api/v1/eventos?page=1&limit=10');
-
-  expect(invalidatedListResponse.status).toBe(200);
-  expect(invalidatedListResponse.headers['x-cache']).toBe('MISS');
 });

@@ -527,12 +527,12 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T051 — Pruebas CRUD eventos
 
-- [ ] creación.
-- [ ] actualización.
-- [ ] revisión.
-- [ ] publicación.
-- [ ] eliminación lógica.
-- [ ] consulta pública.
+- [x] creación.
+- [x] actualización.
+- [x] revisión.
+- [x] publicación.
+- [x] eliminación lógica.
+- [x] consulta pública.
 
 ### T052 — Pruebas de favoritos y recordatorios
 

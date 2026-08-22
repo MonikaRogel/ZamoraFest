@@ -1,5 +1,6 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../infrastructure/database/prisma.js';
+import { eventoInstantToDatabaseDate } from './evento.datetime.js';
 
 export type EventoDetailLevel = 'basic' | 'detailed';
 
@@ -429,7 +430,9 @@ export const eventoRepository = {
 
   update(id: number, input: UpdateEventoRepositoryInput) {
     return prisma.$transaction(async (transaction) => {
-      const data: Prisma.EventoUpdateInput = {};
+      const data: Prisma.EventoUpdateInput = {
+        fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+      };
 
       if (input.titulo !== undefined) {
         data.titulo = input.titulo;
