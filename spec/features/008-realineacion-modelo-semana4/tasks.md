@@ -544,11 +544,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T053 — Calidad general
 
-- [ ] `npm run typecheck`.
-- [ ] `npm run lint`.
-- [ ] `npm run test` o scripts equivalentes definidos.
-- [ ] `npm run test:integration`.
-- [ ] `npm run build`.
+- [x] `npm run typecheck`.
+- [x] `npm run lint`.
+- [x] `npm run test` o scripts equivalentes definidos.
+- [x] `npm run test:integration`.
+- [x] `npm run build`.
 
 ### Puerta G10
 
