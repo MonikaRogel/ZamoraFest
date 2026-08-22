@@ -566,9 +566,9 @@ No continuar al cierre si existe una prueba relevante fallida.
 
 ### T055 — Actualizar especificaciones anteriores afectadas
 
-- [ ] Marcar explícitamente en 001 que su simplificación quedó supersedida por 008.
-- [ ] No borrar ni reescribir la evidencia histórica.
-- [ ] Añadir referencia a la corrección 008.
+- [x] Marcar explícitamente en 001 que su simplificación quedó supersedida por 008.
+- [x] No borrar ni reescribir la evidencia histórica.
+- [x] Añadir referencia a la corrección 008.
 
 ### T056 — Actualizar OpenAPI
 

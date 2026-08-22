@@ -1,5 +1,10 @@
 # Tareas: modelo de datos y backend inicial (001)
 
+> [!IMPORTANT]
+> **Vigencia:** este documento conserva la evidencia histórica de la funcionalidad `001-modelo-datos` aprobada el 2026-07-19. Su modelo reducido de siete entidades y las decisiones asociadas quedaron **supersedidos para el estado vigente del proyecto** por `spec/features/008-realineacion-modelo-semana4/`, que realinea ZamoraFest con el modelo canónico de Semana 4.
+>
+> El contenido histórico que sigue no se reescribe ni elimina; se conserva para mantener la trazabilidad técnica y académica.
+
 ## Metadatos
 
 - **Rama:** `feat/001-modelo-datos`
