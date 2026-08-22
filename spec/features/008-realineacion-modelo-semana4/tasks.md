@@ -512,11 +512,11 @@ No avanzar si Prisma no representa las 14 entidades funcionales más `refresh_to
 
 ### T049 — Pruebas de autenticación
 
-- [ ] login.
-- [ ] token inválido.
-- [ ] refresh.
-- [ ] revocación.
-- [ ] rol inactivo si aplica.
+- [x] login.
+- [x] token inválido.
+- [x] refresh.
+- [x] revocación.
+- [x] rol inactivo si aplica.
 
 ### T050 — Pruebas de autorización
 
