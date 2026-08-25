@@ -1,8 +1,20 @@
 import { Router } from 'express';
 
 import { authenticate } from '../../middleware/auth.js';
-import { createRecordatorioController } from './recordatorio.controller.js';
+import {
+  createRecordatorioController,
+  deactivateRecordatorioController,
+  getRecordatorioController,
+  listRecordatoriosController,
+} from './recordatorio.controller.js';
 
 export const recordatorioRouter = Router();
 
-recordatorioRouter.post('/', authenticate, createRecordatorioController);
+recordatorioRouter.use(authenticate);
+
+recordatorioRouter.route('/').get(listRecordatoriosController).post(createRecordatorioController);
+
+recordatorioRouter
+  .route('/:id')
+  .get(getRecordatorioController)
+  .delete(deactivateRecordatorioController);

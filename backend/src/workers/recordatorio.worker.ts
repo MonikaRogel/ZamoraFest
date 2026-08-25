@@ -7,73 +7,133 @@ import {
 } from '../infrastructure/queue/recordatorio.queue.js';
 import { bullMqConnection } from '../infrastructure/queue/redis-connection.js';
 
-export const recordatorioWorker = new Worker<RecordatorioJobData>(
-  RECORDATORIO_QUEUE_NAME,
-  async (job) => {
-    const { recordatorioId } = job.data;
+export type RecordatorioSkipReason =
+  | 'NOT_FOUND'
+  | 'INACTIVE'
+  | 'USER_INACTIVE'
+  | 'EVENT_NOT_PUBLIC'
+  | 'PROGRAMACION_INACTIVE'
+  | 'PROGRAMACION_EVENT_MISMATCH';
 
-    try {
-      const recordatorio = await prisma.recordatorio.update({
-        where: {
-          id: recordatorioId,
-        },
-        data: {
-          estado: 'PROCESANDO',
-          error: null,
-        },
+export type RecordatorioWorkerResult =
+  | {
+      recordatorioId: number;
+      processed: true;
+      destinatario: string;
+      evento: string;
+      programacion: string | null;
+    }
+  | {
+      recordatorioId: number;
+      processed: false;
+      reason: RecordatorioSkipReason;
+    };
+
+function validateRecordatorioId(recordatorioId: number): void {
+  if (!Number.isSafeInteger(recordatorioId) || recordatorioId <= 0) {
+    throw new RangeError('recordatorioId debe ser un entero positivo.');
+  }
+}
+
+function skipped(recordatorioId: number, reason: RecordatorioSkipReason): RecordatorioWorkerResult {
+  return {
+    recordatorioId,
+    processed: false,
+    reason,
+  };
+}
+
+export async function processRecordatorioJob(
+  data: RecordatorioJobData,
+): Promise<RecordatorioWorkerResult> {
+  const { recordatorioId } = data;
+
+  validateRecordatorioId(recordatorioId);
+
+  const recordatorio = await prisma.recordatorio.findUnique({
+    where: {
+      id: recordatorioId,
+    },
+    select: {
+      id: true,
+      activo: true,
+      fechaNotificacion: true,
+      usuario: {
         select: {
           id: true,
-          usuario: {
-            select: {
-              nombre: true,
-              email: true,
-            },
-          },
-          evento: {
-            select: {
-              titulo: true,
-            },
-          },
+          nombreCompleto: true,
+          correo: true,
+          estado: true,
         },
-      });
-
-      console.log(
-        `Procesando recordatorio ${recordatorio.id}: ${recordatorio.usuario.email} → ${recordatorio.evento.titulo}`,
-      );
-
-      await prisma.recordatorio.update({
-        where: {
-          id: recordatorioId,
+      },
+      evento: {
+        select: {
+          id: true,
+          titulo: true,
+          estadoEvento: true,
+          estadoRevision: true,
         },
-        data: {
-          estado: 'COMPLETADO',
-          procesadoEn: new Date(),
-          error: null,
+      },
+      programacion: {
+        select: {
+          id: true,
+          idEvento: true,
+          tituloActividad: true,
+          estado: true,
         },
-      });
+      },
+    },
+  });
 
-      return {
-        recordatorioId,
-        destinatario: recordatorio.usuario.email,
-        evento: recordatorio.evento.titulo,
-      };
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Error desconocido al procesar el recordatorio.';
+  if (!recordatorio) {
+    return skipped(recordatorioId, 'NOT_FOUND');
+  }
 
-      await prisma.recordatorio.updateMany({
-        where: {
-          id: recordatorioId,
-        },
-        data: {
-          estado: 'FALLIDO',
-          error: message,
-        },
-      });
+  if (!recordatorio.activo) {
+    return skipped(recordatorioId, 'INACTIVE');
+  }
 
-      throw error;
+  if (!recordatorio.usuario.estado) {
+    return skipped(recordatorioId, 'USER_INACTIVE');
+  }
+
+  if (
+    recordatorio.evento.estadoEvento !== 'PROGRAMADO' ||
+    recordatorio.evento.estadoRevision !== 'APROBADO'
+  ) {
+    return skipped(recordatorioId, 'EVENT_NOT_PUBLIC');
+  }
+
+  if (recordatorio.programacion !== null) {
+    if (recordatorio.programacion.idEvento !== recordatorio.evento.id) {
+      return skipped(recordatorioId, 'PROGRAMACION_EVENT_MISMATCH');
     }
-  },
+
+    if (!recordatorio.programacion.estado) {
+      return skipped(recordatorioId, 'PROGRAMACION_INACTIVE');
+    }
+  }
+
+  console.log(
+    [
+      `Procesando recordatorio ${recordatorio.id}:`,
+      `${recordatorio.usuario.correo} →`,
+      recordatorio.evento.titulo,
+    ].join(' '),
+  );
+
+  return {
+    recordatorioId: recordatorio.id,
+    processed: true,
+    destinatario: recordatorio.usuario.correo,
+    evento: recordatorio.evento.titulo,
+    programacion: recordatorio.programacion?.tituloActividad ?? null,
+  };
+}
+
+export const recordatorioWorker = new Worker<RecordatorioJobData, RecordatorioWorkerResult>(
+  RECORDATORIO_QUEUE_NAME,
+  async (job) => processRecordatorioJob(job.data),
   {
     connection: bullMqConnection,
     concurrency: 2,
@@ -104,6 +164,7 @@ async function shutdown(signal: string): Promise<void> {
   }
 
   closing = true;
+
   console.log(`Cerrando worker por ${signal}...`);
 
   await recordatorioWorker.close();

@@ -1,11 +1,15 @@
 import { Router } from 'express';
 
 import { authenticate, authorizeRoles } from '../../middleware/auth.js';
+import { imagenRouter } from '../imagenes/imagen.routes.js';
+import { programacionRouter } from '../programaciones/programacion.routes.js';
 import {
   createEventoController,
   deleteEventoController,
   getEventoController,
   listEventosController,
+  publishEventoController,
+  reviewEventoController,
   updateEventoController,
 } from './evento.controller.js';
 
@@ -14,10 +18,27 @@ export const eventoRouter = Router();
 eventoRouter
   .route('/')
   .get(listEventosController)
-  .post(authenticate, authorizeRoles('ADMIN'), createEventoController);
+  .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
+
+eventoRouter.post(
+  '/:id/revision',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  reviewEventoController,
+);
+
+eventoRouter.post(
+  '/:id/publicacion',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  publishEventoController,
+);
+
+eventoRouter.use('/:eventoId/programaciones', programacionRouter);
+eventoRouter.use('/:eventoId/imagenes', imagenRouter);
 
 eventoRouter
   .route('/:id')
   .get(getEventoController)
-  .patch(authenticate, authorizeRoles('ADMIN'), updateEventoController)
-  .delete(authenticate, authorizeRoles('ADMIN'), deleteEventoController);
+  .patch(authenticate, authorizeRoles('ASISTENTE', 'ADMINISTRADOR'), updateEventoController)
+  .delete(authenticate, authorizeRoles('ADMINISTRADOR'), deleteEventoController);

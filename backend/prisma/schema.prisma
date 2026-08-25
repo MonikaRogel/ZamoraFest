@@ -7,50 +7,137 @@ datasource db {
   provider = "postgresql"
 }
 
-enum EstadoEvento {
-  BORRADOR
-  PUBLICADO
+model Provincia {
+  id            Int     @id @default(autoincrement()) @map("id_provincia")
+  codigoDpa     String  @unique(map: "provincia_codigo_dpa_key") @map("codigo_dpa") @db.VarChar(10)
+  nombre        String  @unique(map: "provincia_nombre_key") @db.VarChar(100)
+  descripcion   String? @db.Text
+  imagenPortada String? @map("imagen_portada") @db.VarChar(2048)
+  estado        Boolean @default(true)
 
-  @@map("estado_evento")
+  cantones Canton[]
+
+  @@map("provincia")
 }
 
-enum RolUsuario {
-  ASISTENTE
-  ADMIN
+model Canton {
+  id                 Int       @id @default(autoincrement()) @map("id_canton")
+  codigoDpa          String    @unique(map: "canton_codigo_dpa_key") @map("codigo_dpa") @db.VarChar(10)
+  nombre             String    @db.VarChar(100)
+  idProvincia        Int       @map("id_provincia")
+  descripcion        String?   @db.Text
+  poblacionAprox     Int?      @map("poblacion_aprox")
+  anioPoblacion      Int?      @map("anio_poblacion")
+  fuenteInformacion  String?   @map("fuente_informacion") @db.VarChar(500)
+  fechaActualizacion DateTime? @map("fecha_actualizacion") @db.Date
+  latitud            Decimal?  @db.Decimal(9, 6)
+  longitud           Decimal?  @db.Decimal(9, 6)
+  imagenPortada      String?   @map("imagen_portada") @db.VarChar(2048)
+  estado             Boolean   @default(true)
 
-  @@map("rol_usuario")
+  provincia  Provincia   @relation(fields: [idProvincia], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  parroquias Parroquia[]
+
+  @@index([idProvincia], map: "canton_id_provincia_idx")
+  @@map("canton")
 }
 
-enum EstadoRecordatorio {
-  PENDIENTE
-  PROCESANDO
-  COMPLETADO
-  FALLIDO
+model Parroquia {
+  id                 Int       @id @default(autoincrement()) @map("id_parroquia")
+  codigoDpa          String    @unique(map: "parroquia_codigo_dpa_key") @map("codigo_dpa") @db.VarChar(10)
+  nombre             String    @db.VarChar(100)
+  idCanton           Int       @map("id_canton")
+  descripcion        String?   @db.Text
+  poblacionAprox     Int?      @map("poblacion_aprox")
+  anioPoblacion      Int?      @map("anio_poblacion")
+  clima              String?   @db.VarChar(100)
+  altitud            Int?
+  latitud            Decimal?  @db.Decimal(9, 6)
+  longitud           Decimal?  @db.Decimal(9, 6)
+  imagenPortada      String?   @map("imagen_portada") @db.VarChar(2048)
+  fuenteInformacion  String?   @map("fuente_informacion") @db.VarChar(500)
+  fechaActualizacion DateTime? @map("fecha_actualizacion") @db.Date
+  estado             Boolean   @default(true)
 
-  @@map("estado_recordatorio")
+  canton   Canton   @relation(fields: [idCanton], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  sectores Sector[]
+
+  @@index([idCanton], map: "parroquia_id_canton_idx")
+  @@map("parroquia")
+}
+
+model Sector {
+  id          Int      @id @default(autoincrement()) @map("id_sector")
+  idParroquia Int      @map("id_parroquia")
+  nombre      String   @db.VarChar(150)
+  tipoSector  String   @map("tipo_sector") @db.VarChar(30)
+  descripcion String?  @db.Text
+  latitud     Decimal? @db.Decimal(9, 6)
+  longitud    Decimal? @db.Decimal(9, 6)
+  estado      Boolean  @default(true)
+
+  parroquia Parroquia @relation(fields: [idParroquia], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  lugares   Lugar[]
+
+  @@unique([idParroquia, nombre], map: "sector_parroquia_nombre_key")
+  @@map("sector")
+}
+
+model Lugar {
+  id                   Int      @id @default(autoincrement()) @map("id_lugar")
+  idSector             Int      @map("id_sector")
+  nombre               String   @db.VarChar(150)
+  tipoLugar            String   @map("tipo_lugar") @db.VarChar(30)
+  direccionReferencial String?  @map("direccion_referencial") @db.VarChar(255)
+  referencia           String?  @db.Text
+  latitud              Decimal? @db.Decimal(9, 6)
+  longitud             Decimal? @db.Decimal(9, 6)
+  estado               Boolean  @default(true)
+
+  sector         Sector               @relation(fields: [idSector], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  eventos        Evento[]
+  programaciones ProgramacionEvento[]
+
+  @@unique([idSector, nombre], map: "lugar_sector_nombre_key")
+  @@map("lugar")
+}
+
+model Rol {
+  id          Int     @id @default(autoincrement()) @map("id_rol")
+  nombre      String  @unique(map: "rol_nombre_key") @db.VarChar(50)
+  descripcion String? @db.VarChar(255)
+  estado      Boolean @default(true)
+
+  usuarios Usuario[]
+
+  @@map("rol")
 }
 
 model Usuario {
-  id           String     @id @default(uuid()) @db.Uuid
-  nombre       String     @db.VarChar(100)
-  email        String     @db.VarChar(254)
-  passwordHash String     @map("password_hash") @db.VarChar(100)
-  rol          RolUsuario @default(ASISTENTE)
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn  DateTime?  @map("eliminado_en") @db.Timestamptz(3)
+  id             Int      @id @default(autoincrement()) @map("id_usuario")
+  idRol          Int      @map("id_rol")
+  nombreCompleto String   @map("nombre_completo") @db.VarChar(150)
+  correo         String   @unique(map: "usuario_correo_key") @db.VarChar(254)
+  contrasenaHash String   @map("contrasena_hash") @db.VarChar(100)
+  fechaRegistro  DateTime @default(now()) @map("fecha_registro") @db.Timestamp(3)
+  estado         Boolean  @default(true)
 
-  refreshTokens RefreshToken[]
-  recordatorios Recordatorio[]
+  rol              Rol                     @relation(fields: [idRol], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  refreshTokens    RefreshToken[]
+  eventosCreados   Evento[]                @relation("EventoCreador")
+  eventosRevisados Evento[]                @relation("EventoRevisor")
+  imagenesSubidas  ImagenEvento[]
+  favoritos        UsuarioEventoFavorito[]
+  recordatorios    Recordatorio[]
 
-  @@index([email, eliminadoEn], map: "usuarios_email_eliminado_idx")
-  @@map("usuarios")
+  @@index([idRol, estado], map: "usuario_rol_estado_idx")
+  @@map("usuario")
 }
 
 model RefreshToken {
   id         String    @id @default(uuid()) @db.Uuid
-  usuarioId  String    @map("usuario_id") @db.Uuid
-  tokenHash  String    @unique(map: "refresh_tokens_token_hash_key") @map("token_hash") @db.Char(64)
+  usuarioId  Int       @map("usuario_id")
+  tokenHash  String    @unique(map: "refresh_token_token_hash_key") @map("token_hash") @db.Char(64)
   expiraEn   DateTime  @map("expira_en") @db.Timestamptz(3)
   revocadoEn DateTime? @map("revocado_en") @db.Timestamptz(3)
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -58,136 +145,138 @@ model RefreshToken {
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  @@index([usuarioId, revocadoEn, expiraEn], map: "refresh_tokens_usuario_estado_idx")
-  @@map("refresh_tokens")
-}
-
-model Canton {
-  id          String    @id @default(uuid()) @db.Uuid
-  nombre      String    @db.VarChar(100)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
-
-  lugares Lugar[]
-
-  @@map("cantones")
-}
-
-model Lugar {
-  id          String    @id @default(uuid()) @db.Uuid
-  nombre      String    @db.VarChar(150)
-  direccion   String?   @db.VarChar(255)
-  latitud     Decimal?  @db.Decimal(9, 6)
-  longitud    Decimal?  @db.Decimal(9, 6)
-  cantonId    String    @map("canton_id") @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
-
-  canton  Canton   @relation(fields: [cantonId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  eventos Evento[]
-
-  @@index([cantonId, eliminadoEn], map: "lugares_canton_eliminado_idx")
-  @@map("lugares")
+  @@index([usuarioId, revocadoEn, expiraEn], map: "refresh_token_usuario_estado_idx")
+  @@map("refresh_token")
 }
 
 model Categoria {
-  id          String    @id @default(uuid()) @db.Uuid
-  nombre      String    @db.VarChar(100)
-  descripcion String?   @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+  id          Int     @id @default(autoincrement()) @map("id_categoria")
+  nombre      String  @unique(map: "categoria_nombre_key") @db.VarChar(100)
+  descripcion String? @db.Text
+  estado      Boolean @default(true)
 
   eventos EventoCategoria[]
 
-  @@map("categorias")
+  @@map("categoria")
 }
 
 model Evento {
-  id          String       @id @default(uuid()) @db.Uuid
-  titulo      String       @db.VarChar(200)
-  descripcion String       @db.Text
-  estado      EstadoEvento @default(BORRADOR)
-  lugarId     String       @map("lugar_id") @db.Uuid
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime?    @map("eliminado_en") @db.Timestamptz(3)
+  id                 Int       @id @default(autoincrement()) @map("id_evento")
+  titulo             String    @db.VarChar(200)
+  descripcion        String?   @db.Text
+  fechaInicio        DateTime  @map("fecha_inicio") @db.Timestamp(3)
+  fechaFin           DateTime? @map("fecha_fin") @db.Timestamp(3)
+  costoReferencial   Decimal   @map("costo_referencial") @db.Decimal(10, 2)
+  idLugar            Int       @map("id_lugar")
+  idUsuarioCreador   Int       @map("id_usuario_creador")
+  idUsuarioRevisor   Int?      @map("id_usuario_revisor")
+  estadoEvento       String    @default("BORRADOR") @map("estado_evento") @db.VarChar(30)
+  estadoRevision     String    @default("PENDIENTE") @map("estado_revision") @db.VarChar(30)
+  fuenteInformacion  String?   @map("fuente_informacion") @db.VarChar(500)
+  fechaCreacion      DateTime  @default(now()) @map("fecha_creacion") @db.Timestamp(3)
+  fechaActualizacion DateTime? @map("fecha_actualizacion") @db.Timestamp(3)
+  fechaRevision      DateTime? @map("fecha_revision") @db.Timestamp(3)
 
-  lugar          Lugar                @relation(fields: [lugarId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  lugar          Lugar                   @relation(fields: [idLugar], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuarioCreador Usuario                 @relation("EventoCreador", fields: [idUsuarioCreador], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuarioRevisor Usuario?                @relation("EventoRevisor", fields: [idUsuarioRevisor], references: [id], onDelete: Restrict, onUpdate: Cascade)
   categorias     EventoCategoria[]
   programaciones ProgramacionEvento[]
   imagenes       ImagenEvento[]
+  favoritos      UsuarioEventoFavorito[]
   recordatorios  Recordatorio[]
 
-  @@index([lugarId, eliminadoEn], map: "eventos_lugar_eliminado_idx")
-  @@index([estado, eliminadoEn], map: "eventos_estado_eliminado_idx")
-  @@map("eventos")
+  @@index([idLugar], map: "evento_lugar_idx")
+  @@index([idUsuarioCreador], map: "evento_creador_idx")
+  @@index([idUsuarioRevisor], map: "evento_revisor_idx")
+  @@index([estadoEvento, estadoRevision, fechaInicio], map: "evento_publicacion_fecha_idx")
+  @@index([fechaInicio], map: "evento_fecha_inicio_idx")
+  @@map("evento")
 }
 
 model EventoCategoria {
-  eventoId    String    @map("evento_id") @db.Uuid
-  categoriaId String    @map("categoria_id") @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+  idEvento    Int @map("id_evento")
+  idCategoria Int @map("id_categoria")
 
-  evento    Evento    @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  evento    Evento    @relation(fields: [idEvento], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  categoria Categoria @relation(fields: [idCategoria], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@id([eventoId, categoriaId])
-  @@index([categoriaId, eliminadoEn], map: "evento_categorias_categoria_eliminado_idx")
-  @@map("evento_categorias")
+  @@id([idEvento, idCategoria])
+  @@index([idCategoria, idEvento], map: "evento_categoria_categoria_evento_idx")
+  @@map("evento_categoria")
 }
 
 model ProgramacionEvento {
-  id          String    @id @default(uuid()) @db.Uuid
-  eventoId    String    @map("evento_id") @db.Uuid
-  inicio      DateTime  @db.Timestamptz(3)
-  fin         DateTime? @db.Timestamptz(3)
-  descripcion String?   @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+  id              Int       @id @default(autoincrement()) @map("id_programacion")
+  idEvento        Int       @map("id_evento")
+  idLugar         Int?      @map("id_lugar")
+  tituloActividad String    @map("titulo_actividad") @db.VarChar(200)
+  descripcion     String?   @db.Text
+  fechaHoraInicio DateTime  @map("fecha_hora_inicio") @db.Timestamp(3)
+  fechaHoraFin    DateTime? @map("fecha_hora_fin") @db.Timestamp(3)
+  artistaInvitado String?   @map("artista_invitado") @db.VarChar(200)
+  orden           Int?
+  estado          Boolean   @default(true)
 
-  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  evento        Evento         @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  lugar         Lugar?         @relation(fields: [idLugar], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  imagenes      ImagenEvento[]
+  recordatorios Recordatorio[]
 
-  @@index([eventoId, eliminadoEn], map: "programaciones_evento_evento_eliminado_idx")
-  @@index([inicio, eliminadoEn], map: "programaciones_evento_inicio_eliminado_idx")
-  @@map("programaciones_evento")
+  @@unique([idEvento, id], map: "programacion_evento_evento_programacion_key")
+  @@index([idEvento, estado, fechaHoraInicio], map: "programacion_evento_evento_estado_inicio_idx")
+  @@index([idLugar], map: "programacion_evento_lugar_idx")
+  @@map("programacion_evento")
 }
 
 model ImagenEvento {
-  id          String    @id @default(uuid()) @db.Uuid
-  eventoId    String    @map("evento_id") @db.Uuid
-  url         String    @db.VarChar(2048)
-  esPrincipal Boolean   @default(false) @map("es_principal")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime? @map("eliminado_en") @db.Timestamptz(3)
+  id              Int      @id @default(autoincrement()) @map("id_imagen")
+  idEvento        Int      @map("id_evento")
+  idProgramacion  Int?     @map("id_programacion")
+  idUsuarioSubida Int      @map("id_usuario_subida")
+  urlImagen       String   @map("url_imagen") @db.VarChar(2048)
+  tipoImagen      String   @map("tipo_imagen") @db.VarChar(30)
+  descripcion     String?  @db.VarChar(255)
+  esPrincipal     Boolean  @default(false) @map("es_principal")
+  fechaSubida     DateTime @default(now()) @map("fecha_subida") @db.Timestamp(3)
+  estado          Boolean  @default(true)
 
-  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  evento        Evento              @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  programacion  ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
+  usuarioSubida Usuario             @relation(fields: [idUsuarioSubida], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  @@index([eventoId, eliminadoEn], map: "imagenes_evento_evento_eliminado_idx")
-  @@map("imagenes_evento")
+  @@index([idEvento, estado], map: "imagen_evento_evento_estado_idx")
+  @@index([idEvento, idProgramacion], map: "imagen_evento_evento_programacion_idx")
+  @@map("imagen_evento")
 }
 
 model Recordatorio {
-  id          String             @id @default(uuid()) @db.Uuid
-  usuarioId   String             @map("usuario_id") @db.Uuid
-  eventoId    String             @map("evento_id") @db.Uuid
-  estado      EstadoRecordatorio @default(PENDIENTE)
-  procesadoEn DateTime?          @map("procesado_en") @db.Timestamptz(3)
-  error       String?            @db.Text
-  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
-  eliminadoEn DateTime?          @map("eliminado_en") @db.Timestamptz(3)
+  id                Int      @id @default(autoincrement()) @map("id_recordatorio")
+  idUsuario         Int      @map("id_usuario")
+  idEvento          Int      @map("id_evento")
+  idProgramacion    Int?     @map("id_programacion")
+  fechaNotificacion DateTime @map("fecha_notificacion") @db.Timestamp(3)
+  activo            Boolean  @default(true)
+  fechaCreacion     DateTime @default(now()) @map("fecha_creacion") @db.Timestamp(3)
 
-  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  evento  Evento  @relation(fields: [eventoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  usuario      Usuario             @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  evento       Evento              @relation(fields: [idEvento], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  programacion ProgramacionEvento? @relation(fields: [idEvento, idProgramacion], references: [idEvento, id], onDelete: Restrict, onUpdate: Cascade)
 
-  @@index([usuarioId, estado, eliminadoEn], map: "recordatorios_usuario_estado_idx")
-  @@index([eventoId, estado, eliminadoEn], map: "recordatorios_evento_estado_idx")
-  @@map("recordatorios")
+  @@index([idUsuario, activo, fechaNotificacion], map: "recordatorio_usuario_activo_fecha_idx")
+  @@index([idEvento, idProgramacion], map: "recordatorio_evento_programacion_idx")
+  @@map("recordatorio")
+}
+
+model UsuarioEventoFavorito {
+  idUsuario     Int      @map("id_usuario")
+  idEvento      Int      @map("id_evento")
+  fechaAgregado DateTime @default(now()) @map("fecha_agregado") @db.Timestamp(3)
+
+  usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  evento  Evento  @relation(fields: [idEvento], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([idUsuario, idEvento])
+  @@index([idEvento, idUsuario], map: "usuario_evento_favorito_evento_usuario_idx")
+  @@map("usuario_evento_favorito")
 }

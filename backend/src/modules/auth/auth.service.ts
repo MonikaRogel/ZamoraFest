@@ -8,17 +8,17 @@ import { env } from '../../config/env.js';
 import { prisma } from '../../infrastructure/database/prisma.js';
 import type { LoginInput, RefreshTokenInput, RegisterInput } from './auth.schemas.js';
 
-export type RolAutorizado = 'ASISTENTE' | 'ADMIN';
+export type RolAutorizado = 'VISITANTE' | 'ASISTENTE' | 'ADMINISTRADOR';
 
 export interface UsuarioAutenticado {
-  id: string;
+  id: number;
   nombre: string;
   email: string;
   rol: RolAutorizado;
 }
 
 export interface IdentidadAcceso {
-  id: string;
+  id: number;
   rol: RolAutorizado;
 }
 
@@ -38,8 +38,21 @@ interface ParTokens {
   };
 }
 
+interface UsuarioPersistido {
+  id: number;
+  nombreCompleto: string;
+  correo: string;
+  estado: boolean;
+  rol: {
+    nombre: string;
+    estado: boolean;
+  };
+}
+
 const ACCESS_TOKEN_SECONDS = 15 * 60;
 const REFRESH_TOKEN_SECONDS = 7 * 24 * 60 * 60;
+const PASSWORD_HASH_ROUNDS = 12;
+const ROL_REGISTRO_PUBLICO: RolAutorizado = 'VISITANTE';
 const JWT_ISSUER = 'zamorafest-backend';
 const JWT_AUDIENCE = 'zamorafest-api';
 
@@ -48,9 +61,15 @@ const refreshSecret = new TextEncoder().encode(env.JWT_REFRESH_SECRET);
 
 const usuarioPublicoSelect = {
   id: true,
-  nombre: true,
-  email: true,
-  rol: true,
+  nombreCompleto: true,
+  correo: true,
+  estado: true,
+  rol: {
+    select: {
+      nombre: true,
+      estado: true,
+    },
+  },
 } as const;
 
 function hashToken(token: string): string {
@@ -58,7 +77,34 @@ function hashToken(token: string): string {
 }
 
 function isRolAutorizado(value: unknown): value is RolAutorizado {
-  return value === 'ASISTENTE' || value === 'ADMIN';
+  return value === 'VISITANTE' || value === 'ASISTENTE' || value === 'ADMINISTRADOR';
+}
+
+function mapUsuarioAutenticado(usuario: UsuarioPersistido): UsuarioAutenticado | null {
+  if (!usuario.estado || !usuario.rol.estado || !isRolAutorizado(usuario.rol.nombre)) {
+    return null;
+  }
+
+  return {
+    id: usuario.id,
+    nombre: usuario.nombreCompleto,
+    email: usuario.correo,
+    rol: usuario.rol.nombre,
+  };
+}
+
+function parseUsuarioId(value: unknown): number | null {
+  if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) {
+    return null;
+  }
+
+  const id = Number(value);
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return null;
+  }
+
+  return id;
 }
 
 function invalidCredentialsError(): AppError {
@@ -83,7 +129,7 @@ async function createTokenPair(usuario: UsuarioAutenticado): Promise<ParTokens> 
     rol: usuario.rol,
   })
     .setProtectedHeader({ alg: 'HS256' })
-    .setSubject(usuario.id)
+    .setSubject(String(usuario.id))
     .setJti(randomUUID())
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
@@ -95,7 +141,7 @@ async function createTokenPair(usuario: UsuarioAutenticado): Promise<ParTokens> 
     type: 'refresh',
   })
     .setProtectedHeader({ alg: 'HS256' })
-    .setSubject(usuario.id)
+    .setSubject(String(usuario.id))
     .setJti(randomUUID())
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
@@ -119,10 +165,9 @@ async function createTokenPair(usuario: UsuarioAutenticado): Promise<ParTokens> 
 }
 
 async function register(input: RegisterInput): Promise<UsuarioAutenticado> {
-  const existingUser = await prisma.usuario.findFirst({
+  const existingUser = await prisma.usuario.findUnique({
     where: {
-      email: input.email,
-      eliminadoEn: null,
+      correo: input.email,
     },
     select: {
       id: true,
@@ -137,27 +182,54 @@ async function register(input: RegisterInput): Promise<UsuarioAutenticado> {
     );
   }
 
-  const passwordHash = await hashPassword(input.password, 12);
+  const rolVisitante = await prisma.rol.findUnique({
+    where: {
+      nombre: ROL_REGISTRO_PUBLICO,
+    },
+    select: {
+      id: true,
+      estado: true,
+    },
+  });
 
-  return prisma.usuario.create({
+  if (!rolVisitante?.estado) {
+    throw new AppError(
+      500,
+      'DEFAULT_ROLE_NOT_CONFIGURED',
+      'El rol predeterminado para nuevos usuarios no está disponible.',
+    );
+  }
+
+  const contrasenaHash = await hashPassword(input.password, PASSWORD_HASH_ROUNDS);
+
+  const usuarioCreado = await prisma.usuario.create({
     data: {
-      nombre: input.nombre,
-      email: input.email,
-      passwordHash,
+      idRol: rolVisitante.id,
+      nombreCompleto: input.nombre,
+      correo: input.email,
+      contrasenaHash,
+      estado: true,
     },
     select: usuarioPublicoSelect,
   });
+
+  const usuarioAutenticado = mapUsuarioAutenticado(usuarioCreado);
+
+  if (!usuarioAutenticado) {
+    throw new AppError(500, 'INVALID_USER_STATE', 'El usuario fue creado con un estado no válido.');
+  }
+
+  return usuarioAutenticado;
 }
 
 async function login(input: LoginInput): Promise<RespuestaTokens> {
-  const usuario = await prisma.usuario.findFirst({
+  const usuario = await prisma.usuario.findUnique({
     where: {
-      email: input.email,
-      eliminadoEn: null,
+      correo: input.email,
     },
     select: {
       ...usuarioPublicoSelect,
-      passwordHash: true,
+      contrasenaHash: true,
     },
   });
 
@@ -165,18 +237,17 @@ async function login(input: LoginInput): Promise<RespuestaTokens> {
     throw invalidCredentialsError();
   }
 
-  const validPassword = await compare(input.password, usuario.passwordHash);
+  const usuarioAutenticado = mapUsuarioAutenticado(usuario);
+
+  if (!usuarioAutenticado) {
+    throw invalidCredentialsError();
+  }
+
+  const validPassword = await compare(input.password, usuario.contrasenaHash);
 
   if (!validPassword) {
     throw invalidCredentialsError();
   }
-
-  const usuarioAutenticado: UsuarioAutenticado = {
-    id: usuario.id,
-    nombre: usuario.nombre,
-    email: usuario.email,
-    rol: usuario.rol,
-  };
 
   const tokenPair = await createTokenPair(usuarioAutenticado);
 
@@ -200,12 +271,9 @@ async function refresh(input: RefreshTokenInput): Promise<RespuestaTokens> {
     });
 
     const { payload } = verification;
+    const usuarioId = parseUsuarioId(payload.sub);
 
-    if (
-      payload.type !== 'refresh' ||
-      typeof payload.sub !== 'string' ||
-      typeof payload.exp !== 'number'
-    ) {
+    if (payload.type !== 'refresh' || usuarioId === null || typeof payload.exp !== 'number') {
       throw invalidRefreshTokenError();
     }
 
@@ -215,10 +283,7 @@ async function refresh(input: RefreshTokenInput): Promise<RespuestaTokens> {
       },
       include: {
         usuario: {
-          select: {
-            ...usuarioPublicoSelect,
-            eliminadoEn: true,
-          },
+          select: usuarioPublicoSelect,
         },
       },
     });
@@ -227,20 +292,18 @@ async function refresh(input: RefreshTokenInput): Promise<RespuestaTokens> {
 
     if (
       !storedToken ||
-      storedToken.usuarioId !== payload.sub ||
+      storedToken.usuarioId !== usuarioId ||
       storedToken.revocadoEn !== null ||
-      storedToken.expiraEn <= now ||
-      storedToken.usuario.eliminadoEn !== null
+      storedToken.expiraEn <= now
     ) {
       throw invalidRefreshTokenError();
     }
 
-    const usuarioAutenticado: UsuarioAutenticado = {
-      id: storedToken.usuario.id,
-      nombre: storedToken.usuario.nombre,
-      email: storedToken.usuario.email,
-      rol: storedToken.usuario.rol,
-    };
+    const usuarioAutenticado = mapUsuarioAutenticado(storedToken.usuario);
+
+    if (!usuarioAutenticado) {
+      throw invalidRefreshTokenError();
+    }
 
     const newTokenPair = await createTokenPair(usuarioAutenticado);
 
@@ -287,17 +350,14 @@ export async function verifyAccessToken(token: string): Promise<IdentidadAcceso>
     });
 
     const { payload } = verification;
+    const usuarioId = parseUsuarioId(payload.sub);
 
-    if (
-      payload.type !== 'access' ||
-      typeof payload.sub !== 'string' ||
-      !isRolAutorizado(payload.rol)
-    ) {
+    if (payload.type !== 'access' || usuarioId === null || !isRolAutorizado(payload.rol)) {
       throw new Error('Contenido del token inválido.');
     }
 
     return {
-      id: payload.sub,
+      id: usuarioId,
       rol: payload.rol,
     };
   } catch {

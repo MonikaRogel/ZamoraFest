@@ -1,8 +1,13 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 
+import { env } from './config/env.js';
+import { openApiDocument } from './docs/openapi.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
+import { categoriaRouter } from './modules/categorias/categoria.routes.js';
 import { eventoRouter } from './modules/eventos/evento.routes.js';
+import { favoritoRouter } from './modules/favoritos/favorito.routes.js';
 import { recordatorioRouter } from './modules/recordatorios/recordatorio.routes.js';
 import { healthRouter } from './routes/health.routes.js';
 
@@ -11,9 +16,26 @@ export const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
 
+if (env.NODE_ENV !== 'production') {
+  app.get('/api-docs.json', (_request, response) => {
+    response.status(200).json(openApiDocument);
+  });
+
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openApiDocument, {
+      customSiteTitle: 'ZamoraFest API',
+      explorer: false,
+    }),
+  );
+}
+
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/categorias', categoriaRouter);
 app.use('/api/v1/eventos', eventoRouter);
+app.use('/api/v1/favoritos', favoritoRouter);
 app.use('/api/v1/recordatorios', recordatorioRouter);
 
 app.use(notFoundHandler);
