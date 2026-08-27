@@ -12,6 +12,7 @@ node_modules/
 # Compilación y pruebas
 dist/
 build/
+.gradle/
 coverage/
 *.tsbuildinfo
 .eslintcache

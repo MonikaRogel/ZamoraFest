@@ -22,10 +22,10 @@ Las decisiones de esta feature seguirán este orden:
 1. Requerimientos académicos y rúbrica de Semana 9.
 2. Modelo canónico y propuesta vigente de ZamoraFest.
 3. Contratos reales del backend ya implementado.
-4. Buenas prácticas observadas en el repositorio de referencia del docente.
+4. Buenas prácticas profesionales aplicables al proyecto.
 5. Decisiones técnicas específicas necesarias para el equipo y el entorno de desarrollo.
 
-El repositorio CanchaGo del docente se utilizará como referencia de disciplina arquitectónica, no como código ni dominio para copiar.
+Las referencias técnicas externas se utilizarán únicamente para contrastar prácticas profesionales aplicables al proyecto.
 
 ## 3. Stack móvil seleccionado
 
@@ -108,7 +108,7 @@ Queda fuera del alcance de esta feature:
 - soporte iOS;
 - incorporación preventiva de librerías que todavía no sean necesarias.
 
-No se instalarán TanStack Query, Zustand, React Hook Form u otras librerías solo porque existan en el proyecto CanchaGo. Cada dependencia deberá tener una necesidad concreta en ZamoraFest.
+No se instalarán TanStack Query, Zustand, React Hook Form u otras librerías sin una necesidad concreta y verificada en ZamoraFest.
 
 ## 8. Reglas anti-espagueti
 

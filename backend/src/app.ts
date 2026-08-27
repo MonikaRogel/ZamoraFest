@@ -1,6 +1,8 @@
+import cors from 'cors';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 
+import { corsOptions } from './config/cors.js';
 import { env } from './config/env.js';
 import { openApiDocument } from './docs/openapi.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
@@ -14,6 +16,7 @@ import { healthRouter } from './routes/health.routes.js';
 export const app = express();
 
 app.disable('x-powered-by');
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 
 if (env.NODE_ENV !== 'production') {
