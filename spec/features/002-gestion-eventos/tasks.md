@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **Vigencia histórica de integración:** la rama `feat/002-gestion-eventos` en `aff25ff` fue integrada en `main` mediante el Pull Request #3 y el merge commit `5a7febc`. Los metadatos visibles del PR #3 describieron erróneamente autenticación, aunque el código fusionado corresponde a la funcionalidad 002.
+>
+> El Pull Request #4 se abrió posteriormente desde el mismo head, no fue fusionado y se cerró como redundante durante la auditoría.
+>
+> T030 permanece sin marcar porque este checklist histórico no fue actualizado después del merge real. El contenido original que sigue a esta nota se conserva sin modificaciones.
 # Tareas: gestión de eventos (002)
 
 ## Metadatos
