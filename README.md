@@ -257,6 +257,59 @@ npm run build
 npm start
 ```
 
+## Verificación reproducible para evaluación
+
+El repositorio está preparado para que un docente, revisor o desarrollador pueda reproducir el entorno sin necesidad de conocer las credenciales privadas utilizadas por otro equipo.
+
+### Backend
+
+Desde una copia limpia del repositorio:
+
+```powershell
+cd backend
+npm ci
+Copy-Item .env.example .env
+```
+
+En el archivo local `.env` se deben configurar las conexiones, secretos JWT y, si se desean usuarios de prueba, las variables `SEED_*`.
+
+A continuación:
+
+```powershell
+npm run prisma:generate
+npm run prisma:migrate:deploy
+npm run prisma:seed
+npm run dev
+```
+
+El estado básico del backend puede comprobarse mediante `GET /api/v1/health`.
+
+### Aplicación móvil
+
+Desde `mobile`:
+
+```powershell
+npm ci
+Copy-Item .env.example .env.local
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+En `.env.local` debe configurarse `VITE_API_BASE_URL` de acuerdo con el entorno utilizado: navegador, emulador Android o dispositivo físico.
+
+### Credenciales de prueba
+
+Las credenciales reales o de demostración no se almacenan en GitHub. El evaluador puede definir sus propias variables `SEED_*` y ejecutar nuevamente el seed para generar las cuentas de desarrollo.
+
+Si la evaluación requiere utilizar una cuenta específica preparada por la autora del proyecto, esas credenciales deben entregarse por un canal privado y separado del repositorio.
+
+Esta separación permite mantener simultáneamente la reproducibilidad del proyecto y la confidencialidad de la información sensible.
+
+La política completa se documenta en `SECURITY.md`.
+
+
 ## OpenAPI y Swagger
 
 La API vigente está descrita mediante OpenAPI 3.1.
