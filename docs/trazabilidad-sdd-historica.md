@@ -8,13 +8,13 @@ Las correcciones documentales posteriores no modifican los commits históricos. 
 
 ## Funcionalidad 002 — Gestión de eventos
 
-La rama `feat/002-gestion-eventos` originó el Pull Request #4. Este pull request permaneció abierto y no fue fusionado en `main`.
+La rama `feat/002-gestion-eventos`, en el commit `aff25ff`, fue integrada realmente en `main` mediante el Pull Request #3. Ese PR quedó registrado con título y descripción incorrectos relacionados con autenticación, pero su head y su merge commit `5a7febc` corresponden al CRUD de eventos de la funcionalidad 002.
 
-Por esta razón, la tarea T030 de `spec/features/002-gestion-eventos/tasks.md`, correspondiente a revisar y fusionar esa rama, se conserva sin marcar. No se modifica retrospectivamente porque hacerlo alteraría la representación del proceso realmente seguido.
+Posteriormente se abrió el Pull Request #4 desde el mismo head `aff25ff`. Ese segundo PR no fue fusionado y se cerró durante la auditoría al comprobarse que era una propuesta histórica redundante respecto de la integración ya realizada mediante el PR #3.
 
-La funcionalidad de gestión de eventos sí evolucionó posteriormente y el estado vigente de `main` contiene una implementación más amplia que incorpora autenticación, autorización, revisión, publicación y otras extensiones del dominio.
+La tarea T030 de `spec/features/002-gestion-eventos/tasks.md` permanece sin marcar porque el checklist histórico no fue actualizado después de la integración real. No se modifica retrospectivamente esa casilla; la presente nota documenta el estado comprobado mediante Git y GitHub.
 
-El Pull Request #4 debe considerarse una propuesta histórica reemplazada por la evolución posterior del proyecto y no debe fusionarse sobre el estado vigente.
+La funcionalidad de gestión de eventos continuó evolucionando posteriormente y el estado vigente de `main` contiene una implementación más amplia que incorpora autenticación, autorización, revisión, publicación y otras extensiones del dominio.
 
 ## Funcionalidad 003 — Autenticación y roles
 
