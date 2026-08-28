@@ -1,3 +1,4 @@
+import { truncates } from 'bcryptjs';
 import { z } from 'zod';
 
 const emailSchema = z
@@ -9,7 +10,10 @@ const emailSchema = z
 const passwordSchema = z
   .string()
   .min(8, 'La contraseña debe tener al menos 8 caracteres.')
-  .max(72, 'La contraseña no puede superar los 72 caracteres.');
+  .refine(
+    (password) => !truncates(password),
+    'La contraseña no puede superar los 72 bytes UTF-8.',
+  );
 
 export const registerSchema = z
   .object({
@@ -22,7 +26,13 @@ export const registerSchema = z
 export const loginSchema = z
   .object({
     email: emailSchema,
-    password: z.string().min(1).max(72),
+    password: z
+      .string()
+      .min(1)
+      .refine(
+        (password) => !truncates(password),
+        'La contraseña no puede superar los 72 bytes UTF-8.',
+      ),
   })
   .strict();
 

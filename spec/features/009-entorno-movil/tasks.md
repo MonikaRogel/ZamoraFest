@@ -12,7 +12,7 @@
 
 - Las tareas se ejecutarán en orden, salvo que se indique una independencia verificable.
 - Cada casilla se marcará únicamente después de completar su comprobación técnica.
-- Ninguna tarea incorporará autenticación, persistencia local o interfaz de Semana 10.
+- Solo se incorporará el login mínimo autorizado; persistencia de sesión e interfaz definitiva de Semana 10 continúan fuera del alcance.
 - Los comandos, versiones y resultados relevantes se conservarán como evidencia reproducible.
 - No se registrarán credenciales, secretos ni datos privados del entorno.
 - Cada cambio deberá superar su puerta de calidad antes de continuar.
@@ -71,36 +71,48 @@
 - [x] T035 Configurar en la variante debug el tráfico HTTP únicamente para los hosts locales necesarios.
 - [x] T036 Evitar permisos globales de tráfico sin cifrar en la configuración principal de Android.
 - [x] T037 Ejecutar build web, sincronización de Capacitor y compilación Android con API 36 y JDK 21.
-- [ ] T038 Instalar y ejecutar la aplicación en el Samsung `SM_A305G` mediante ADB.
 
-## 7. Ejecución y hot reload
+## 7. Extensión académica: login mínimo funcional
 
-- [ ] T039 Ejecutar el cliente web con la CLI local y comprobar el proyecto base.
-- [ ] T040 Ejecutar la aplicación Android sin hot reload y verificar el arranque nativo.
-- [ ] T041 Ejecutar hot reload con acceso externo y el target ADB `R28M41JD2QN`.
-- [ ] T042 Confirmar desde el dispositivo el consumo de health y eventos mediante la IP LAN.
-- [ ] T043 Revisar consola, Logcat y red para descartar errores de CORS, transporte o ejecución.
+- [x] T038 Verificar el contrato exacto de `POST /api/v1/auth/login` y la estructura segura del usuario retornado.
+- [x] T039 Confirmar un usuario de demostración válido sin versionar ni mostrar credenciales.
+- [x] T040 Incorporar los tipos mínimos necesarios para el contrato de login.
+- [x] T041 Ampliar `src/services/api/` con el login y descartar los tokens antes de entregar datos a la UI.
+- [x] T042 Implementar normalización y validaciones del formulario según el contrato real.
+- [x] T043 Crear la pantalla mínima de login y bloquear envíos duplicados.
+- [x] T044 Mostrar una confirmación posterior al acceso con información segura del usuario.
+- [x] T045 Añadir pruebas de contrato, validaciones, errores y ausencia de persistencia o exposición de tokens.
+- [x] T046 Ejecutar lint, typecheck, pruebas y build después de implementar el login.
+- [x] T047 Instalar y ejecutar la aplicación en el Samsung `SM_A305G` mediante ADB.
 
-## 8. Documentación y evidencia
+## 8. Ejecución y hot reload
 
-- [ ] T044 Documentar en el README requisitos, versiones exactas, instalación y diagnóstico.
-- [ ] T045 Documentar variables de entorno, scripts, Android, direccionamiento y hot reload.
-- [ ] T046 Fundamentar la elección de Ionic, Capacitor, Android y el dispositivo físico.
-- [ ] T047 Explicar la dirección usada para alcanzar el backend y las restricciones de HTTP local.
-- [ ] T048 Documentar limitaciones, dificultades encontradas y soluciones aplicadas.
-- [ ] T049 Registrar el uso de inteligencia artificial, consultas aprovechadas, ajustes y verificaciones.
-- [ ] T050 Preparar evidencias de versiones, diagnóstico completo, estructura, ejecución y recarga.
-- [ ] T051 Preparar evidencias de la solicitud exitosa hacia la API propia y su respuesta.
-- [ ] T052 Verificar el guion del video contra todos los criterios de evaluación de Semana 9.
+- [x] T048 Ejecutar el cliente web con la CLI local y comprobar el proyecto base.
+- [x] T049 Ejecutar la aplicación Android sin hot reload y verificar el arranque nativo.
+- [x] T050 Ejecutar hot reload con acceso externo y el target ADB `R28M41JD2QN`.
+- [x] T051 Confirmar desde el dispositivo el consumo de health y eventos mediante la IP LAN.
+- [x] T052 Revisar consola, Logcat y red para descartar errores de CORS, transporte o ejecución.
 
-## 9. Puertas finales y publicación
+## 9. Documentación y evidencia
 
-- [ ] T053 Ejecutar `npm ci`, build, typecheck, lint y pruebas del cliente móvil.
-- [ ] T054 Ejecutar las pruebas del backend y confirmar que la política CORS no produjo regresiones.
-- [ ] T055 Repetir build, sincronización y compilación Android desde un estado reproducible.
-- [ ] T056 Repetir instalación, ejecución, hot reload y consumo de la API en el Samsung.
-- [ ] T057 Auditar secretos, archivos generados, dependencias innecesarias y tráfico HTTP de desarrollo.
-- [ ] T058 Revisar el diff completo, actualizar estados y publicar la feature con el enlace funcional.
+- [x] T053 Documentar en el README requisitos, versiones exactas, instalación y diagnóstico.
+- [x] T054 Documentar variables de entorno, scripts, Android, direccionamiento y hot reload.
+- [x] T055 Fundamentar la elección de Ionic, Capacitor, Android y el dispositivo físico.
+- [x] T056 Explicar la dirección usada para alcanzar el backend y las restricciones de HTTP local.
+- [x] T057 Documentar limitaciones, dificultades encontradas y soluciones aplicadas.
+- [x] T058 Registrar el uso de inteligencia artificial, consultas aprovechadas, ajustes y verificaciones.
+- [x] T059 Preparar evidencias de versiones, diagnóstico completo, estructura, ejecución y recarga.
+- [x] T060 Preparar evidencias de la solicitud exitosa hacia la API propia y su respuesta.
+- [x] T061 Verificar el guion del video contra todos los criterios de evaluación de Semana 9.
+
+## 10. Puertas finales y publicación
+
+- [x] T062 Ejecutar `npm ci`, build, typecheck, lint y pruebas del cliente móvil.
+- [x] T063 Ejecutar las pruebas del backend y confirmar que la política CORS no produjo regresiones.
+- [x] T064 Repetir build, sincronización y compilación Android desde un estado reproducible.
+- [x] T065 Repetir instalación, ejecución, hot reload y consumo de la API en el Samsung.
+- [x] T066 Auditar secretos, archivos generados, dependencias innecesarias y tráfico HTTP de desarrollo.
+- [x] T067 Revisar el diff completo, actualizar estados y publicar la feature con el enlace funcional.
 
 ## Criterio de cierre
 

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        ZAMORAFEST EMBLEM V7
+
+        Concepto:
+        Z = Zamora / territorio.
+        F = Fest / cultura.
+        Colibri = fauna.
+        Hojas = biodiversidad.
+        Ondas = rios y cascadas.
+        Dorado = alegria y celebracion.
+
+        Diseñado especificamente para launcher Android.
+    -->
+
+    <!-- ================================================= -->
+    <!-- MEDALLON -->
+    <!-- ================================================= -->
+
+    <!-- DISCO CREMA -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M54,12
+            A42,42 0,1 1 54,96
+            A42,42 0,1 1 54,12
+            Z" />
+
+    <!-- ARO PETROLEO -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#236A70"
+        android:strokeWidth="3"
+        android:pathData="
+            M54,11
+            A43,43 0,1 1 54,97
+            A43,43 0,1 1 54,11
+            Z" />
+
+    <!-- BORDE DE LUZ -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#73C8BC"
+        android:strokeWidth="1"
+        android:pathData="
+            M54,15
+            A39,39 0,1 1 54,93
+            A39,39 0,1 1 54,15
+            Z" />
+
+    <!-- ACENTO DORADO MUY FINO -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#D6A04A"
+        android:strokeWidth="0.8"
+        android:pathData="
+            M21,29
+            C30,17 43,13 55,13" />
+
+    <!-- ================================================= -->
+    <!-- SOL / FEST -->
+    <!-- ================================================= -->
+
+    <path
+        android:fillColor="#E4A43C"
+        android:pathData="
+            M54,19
+            A6,6 0,1 1 54,31
+            A6,6 0,1 1 54,19
+            Z" />
+
+    <path
+        android:fillColor="#F1C66C"
+        android:pathData="
+            M55,21
+            A3.3,3.3 0,1 1 55,27.6
+            A3.3,3.3 0,1 1 55,21
+            Z" />
+
+    <!-- ================================================= -->
+    <!-- VEGETACION -->
+    <!-- ================================================= -->
+
+    <!-- HOJA CENTRAL -->
+    <path
+        android:fillColor="#176D5D"
+        android:pathData="
+            M54,39
+            C49,31 50,22 55,15
+            C61,23 61,32 56,39
+            Z" />
+
+    <!-- HOJA CENTRAL DERECHA -->
+    <path
+        android:fillColor="#238E69"
+        android:pathData="
+            M58,39
+            C59,28 65,21 71,18
+            C73,29 68,36 60,41
+            Z" />
+
+    <!-- HOJA DERECHA -->
+    <path
+        android:fillColor="#2F75A3"
+        android:pathData="
+            M62,41
+            C67,31 75,27 82,28
+            C79,37 72,42 63,43
+            Z" />
+
+    <!-- HOJA CENTRAL IZQUIERDA -->
+    <path
+        android:fillColor="#2A986D"
+        android:pathData="
+            M50,40
+            C42,35 39,27 41,20
+            C50,24 55,31 53,40
+            Z" />
+
+    <!-- HOJA IZQUIERDA -->
+    <path
+        android:fillColor="#244F8D"
+        android:pathData="
+            M47,42
+            C37,40 31,34 29,27
+            C39,28 47,33 51,40
+            Z" />
+
+    <!-- NERVADURAS CONTROLADAS -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#81C7A6"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"
+        android:pathData="
+            M55,36 L55,19
+            M59,37 L69,22
+            M50,37 L42,23" />
+
+    <!-- ================================================= -->
+    <!-- Z - ZAMORA -->
+    <!-- ================================================= -->
+
+    <!-- CUERPO Z -->
+    <path
+        android:fillColor="#116D63"
+        android:pathData="
+            M20,38
+            L53,38
+            L53,47
+            L35,68
+            L53,68
+            L53,78
+            L20,78
+            L20,70
+            L39,48
+            L20,48
+            Z" />
+
+    <!-- PROFUNDIDAD Z -->
+    <path
+        android:fillColor="#084C48"
+        android:pathData="
+            M35,68
+            L53,68
+            L53,78
+            L20,78
+            L24,73
+            L47,73
+            L48,71
+            L31,71
+            Z" />
+
+    <!-- LUZ SUPERIOR Z -->
+    <path
+        android:fillColor="#35A18E"
+        android:pathData="
+            M24,41
+            L49,41
+            L46,45
+            L24,45
+            Z" />
+
+    <!-- FLUJO DE AGUA EN LA DIAGONAL -->
+    <path
+        android:fillColor="#40BFB3"
+        android:pathData="
+            M44,48
+            L50,48
+            L34,67
+            C31,70 28,72 25,73
+            C27,68 30,64 33,60
+            Z" />
+
+    <!-- REFLEJO DEL AGUA -->
+    <path
+        android:fillColor="#B9EDE5"
+        android:pathData="
+            M46,50
+            L48,50
+            L34,66
+            C32,68 30,70 28,70
+            C30,66 32,63 35,60
+            Z" />
+
+    <!-- ================================================= -->
+    <!-- F - FEST -->
+    <!-- ================================================= -->
+
+    <!-- CUERPO F -->
+    <path
+        android:fillColor="#244F8D"
+        android:pathData="
+            M57,38
+            L87,38
+            L87,48
+            L70,48
+            L70,56
+            L83,56
+            L83,66
+            L70,66
+            L70,78
+            L57,78
+            Z" />
+
+    <!-- PROFUNDIDAD F -->
+    <path
+        android:fillColor="#183C72"
+        android:pathData="
+            M57,38
+            L62,43
+            L62,74
+            L70,74
+            L70,78
+            L57,78
+            Z" />
+
+    <!-- LUZ F -->
+    <path
+        android:fillColor="#3477B2"
+        android:pathData="
+            M61,41
+            L83,41
+            L80,45
+            L65,45
+            L65,59
+            L79,59
+            L77,62
+            L65,62
+            L65,73
+            L61,73
+            Z" />
+
+    <!-- PEQUEÑO ACENTO FEST -->
+    <path
+        android:fillColor="#E3A23D"
+        android:pathData="
+            M79,56
+            L84,56
+            L82,62
+            L79,62
+            Z" />
+
+    <!-- ================================================= -->
+    <!-- COLIBRI INTEGRADO EN F -->
+    <!-- ================================================= -->
+
+    <!--
+        Se utiliza el mismo crema del fondo para
+        producir un efecto de espacio negativo.
+    -->
+
+    <!-- CUERPO -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M65,43
+            C69,40 73,41 76,44
+            C73,47 69,48 65,45
+            Z" />
+
+    <!-- ALA SUPERIOR -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M69,43
+            C72,36 78,33 83,34
+            C80,39 76,43 72,45
+            Z" />
+
+    <!-- ALA INFERIOR -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M70,45
+            C76,46 80,49 82,53
+            C77,52 73,49 69,46
+            Z" />
+
+    <!-- CABEZA -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M64,41
+            A3,3 0,1 1 64,47
+            A3,3 0,1 1 64,41
+            Z" />
+
+    <!-- PICO -->
+    <path
+        android:fillColor="#F4F1E9"
+        android:pathData="
+            M61,43
+            L53,44
+            L61,45
+            Z" />
+
+    <!-- ================================================= -->
+    <!-- AGUA / RIOS -->
+    <!-- ================================================= -->
+
+    <!-- ONDA PRINCIPAL -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#176D73"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:pathData="
+            M21,81
+            C31,75 40,76 49,81
+            C59,87 70,88 87,80" />
+
+    <!-- SEGUNDA ONDA -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#45BEB0"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:pathData="
+            M23,87
+            C34,81 42,82 51,87
+            C61,92 72,92 85,86" />
+
+</vector>

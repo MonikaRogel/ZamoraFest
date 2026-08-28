@@ -202,7 +202,7 @@ El formulario de login respetará el contrato real vigente:
 - formato de correo válido;
 - longitud máxima de correo de 254 caracteres;
 - contraseña obligatoria;
-- contraseña con longitud máxima de 72 caracteres;
+- contraseña con longitud máxima de 72 bytes UTF-8;
 - no imponer en login el mínimo de 8 caracteres utilizado para registro, porque son contratos distintos;
 - impedir envíos duplicados mientras una solicitud de autenticación se encuentre en curso;
 - mostrar errores de autenticación sin revelar si la cuenta existe o cuál dato concreto falló.
@@ -377,3 +377,86 @@ Semana 9 debe terminar con una base pequeña, comprensible y extensible.
 La estructura debe permitir que Semana 10 agregue ingeniería de interfaz y componentes sin tener que reorganizar un cliente creado apresuradamente.
 
 La calidad se medirá tanto por lo que se implementa como por lo que deliberadamente se evita implementar antes de tiempo.
+
+## 19. Addendum académico: login mínimo funcional
+
+### 19.1. Motivo y alcance
+
+Para la demostración académica de Semana 9 se incorpora un login mínimo funcional conectado al backend real de ZamoraFest.
+
+Este addendum prevalece únicamente sobre las exclusiones anteriores relacionadas con el formulario de login. No autoriza una implementación completa de sesión ni adelanta la interfaz definitiva de Semana 10.
+
+La aplicación deberá:
+
+- mostrar un formulario mínimo de correo y contraseña;
+- consumir exclusivamente `POST /api/v1/auth/login`;
+- impedir envíos duplicados mientras exista una solicitud activa;
+- mostrar errores de autenticación mediante un mensaje genérico;
+- mostrar después del acceso únicamente información segura del usuario autenticado;
+- mantener `src/services/api/` como única frontera HTTP.
+
+Continúan fuera del alcance:
+
+- registro de usuarios;
+- recuperación de contraseña;
+- persistencia de `accessToken` o `refreshToken`;
+- `localStorage` o `sessionStorage` para autenticación;
+- renovación automática de tokens;
+- recuperación de sesión;
+- guards de navegación;
+- autorización del frontend basada exclusivamente en roles;
+- interfaz definitiva de Semana 10.
+
+### 19.2. Contrato real
+
+Endpoint:
+
+`POST /api/v1/auth/login`
+
+Body exacto:
+
+- `email`;
+- `password`.
+
+La respuesta exitosa utiliza el envelope `{ data: session }` y contiene `accessToken`, `refreshToken`, `tokenType`, `expiresIn` y `usuario`.
+
+La interfaz utilizará únicamente los campos seguros de `usuario`:
+
+- `id`;
+- `nombre`;
+- `email`;
+- `rol`.
+
+### 19.3. Validaciones
+
+El cliente deberá aplicar:
+
+- correo obligatorio;
+- `trim` antes del envío;
+- formato de correo válido;
+- máximo 254 caracteres para correo;
+- contraseña obligatoria;
+- máximo 72 bytes UTF-8 para contraseña;
+- no exigir mínimo de 8 caracteres en login;
+- impedir doble submit.
+
+El backend continuará siendo la autoridad final para autenticación, roles y permisos.
+
+### 19.4. Tratamiento de tokens
+
+Los tokens podrán existir únicamente de forma transitoria durante el procesamiento de la respuesta.
+
+No se imprimirán, mostrarán, persistirán ni escribirán en archivos. Tampoco se almacenarán en variables `VITE_*`, `localStorage` o `sessionStorage`.
+
+Al reiniciar la aplicación, el estado autenticado podrá perderse. Esta conducta es intencional dentro del alcance mínimo de Semana 9.
+
+### 19.5. Criterios adicionales de aceptación
+
+1. Un usuario válido puede autenticarse contra el backend real.
+2. Credenciales inválidas producen un mensaje genérico.
+3. Ninguna contraseña ni token aparece en logs o pantalla.
+4. Ningún token queda persistido.
+5. La aplicación muestra únicamente información segura del usuario autenticado.
+6. El login utiliza `VITE_API_BASE_URL` y la capa HTTP existente.
+7. Lint, typecheck, pruebas y build continúan aprobando.
+8. El login puede demostrarse en el dispositivo Android seleccionado.

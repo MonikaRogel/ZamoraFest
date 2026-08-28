@@ -248,3 +248,98 @@ Limitaciones documentadas:
 - video explicativo con la demostración completa del entorno;
 - README reproducible y enlace de GitHub funcional;
 - ausencia de secretos y funcionalidades de Semana 10.
+
+## 16. Extensión técnica: login mínimo funcional
+
+Esta extensión implementa únicamente el login necesario para la demostración académica de Semana 9, manteniendo fuera del alcance la gestión completa de sesión.
+
+### 16.1. Contrato utilizado
+
+Se utilizará exclusivamente:
+
+`POST /api/v1/auth/login`
+
+La solicitud enviará únicamente:
+
+- `email`;
+- `password`.
+
+La respuesta real contiene tokens y un objeto `usuario`. La capa de presentación utilizará únicamente los datos seguros del usuario.
+
+### 16.2. Arquitectura
+
+La implementación conservará las fronteras existentes:
+
+- `src/types/`: tipos mínimos del contrato de login;
+- `src/services/api/`: solicitud HTTP y validación de respuesta;
+- `src/features/auth/`: validación y normalización del formulario cuando corresponda;
+- `src/pages/`: formulario y confirmación mínima posterior al acceso;
+- `src/App.tsx`: orquestación del estado volátil del usuario.
+
+Ninguna página o componente ejecutará `fetch` directamente.
+
+### 16.3. Estado de autenticación
+
+La aplicación conservará únicamente en memoria la información segura del usuario autenticado.
+
+No se persistirán `accessToken` ni `refreshToken`.
+
+No se incorporará:
+
+- almacenamiento persistente;
+- refresh automático;
+- recuperación de sesión;
+- guards;
+- logout de servidor;
+- RBAC completo en interfaz.
+
+Al reiniciar la aplicación, el usuario volverá al formulario de login.
+
+### 16.4. Validaciones
+
+Antes de enviar la solicitud se aplicará:
+
+- `trim` del correo;
+- formato válido de correo;
+- máximo 254 caracteres para correo;
+- contraseña obligatoria;
+- máximo 72 bytes UTF-8 para contraseña;
+- ninguna longitud mínima de 8 caracteres en login;
+- bloqueo de doble submit.
+
+La respuesta `401` se presentará mediante un mensaje genérico.
+
+### 16.5. Pruebas
+
+Se verificarán como mínimo:
+
+- normalización y validación de correo;
+- contraseña vacía;
+- contraseña mayor a 72 bytes UTF-8;
+- ausencia deliberada del mínimo de 8 caracteres;
+- request `POST` correcto;
+- header `Content-Type: application/json`;
+- body exacto `{ email, password }`;
+- respuesta válida;
+- respuesta incompatible;
+- error HTTP;
+- credenciales inválidas;
+- ausencia de tokens en los datos entregados a la UI;
+- prevención de doble submit.
+
+### 16.6. Secuencia de implementación
+
+1. Verificar nuevamente el contrato local del backend.
+2. Confirmar un usuario de demostración válido sin versionar credenciales.
+3. Definir tipos mínimos.
+4. Extender el servicio HTTP existente.
+5. Implementar validaciones de formulario.
+6. Crear pantalla mínima de login.
+7. Crear confirmación posterior al acceso.
+8. Añadir pruebas.
+9. Auditar logs y persistencia.
+10. Ejecutar lint, typecheck, pruebas y build.
+11. Sincronizar Android.
+12. Verificar login real en el dispositivo físico.
+
+No se añadirán Axios, Zustand, TanStack Query, React Hook Form, Zod u otras dependencias mientras el alcance pueda resolverse con el stack ya instalado.

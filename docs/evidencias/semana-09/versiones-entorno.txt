@@ -1,0 +1,25 @@
+# Evidencia de versiones - Semana 9
+
+Rama: feat/009-entorno-movil
+HEAD base: da01c11
+
+Node.js: v24.14.0
+npm: 11.9.0
+Git: git version 2.52.0.windows.1
+Ionic CLI: 7.2.1
+@ionic/react: 8.8.19
+@ionic/react-router: 8.8.19
+@capacitor/core: 8.5.0
+@capacitor/android: 8.5.0
+@capacitor/cli: 8.5.0
+React: 19.0.0
+React DOM: 19.0.0
+TypeScript: 5.9.3
+Vite: 8.2.2
+Vitest: 4.1.11
+OpenJDK: 21.0.12.1 LTS
+Gradle: 8.14.3
+ADB: 37.0.1-15733141
+Dispositivo: SM-A305G
+Android: 11
+SDK: 30

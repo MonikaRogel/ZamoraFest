@@ -1,10 +1,12 @@
 import { getApiBaseUrl, parseApiBaseUrl } from '../../config/env';
 import type {
+  AuthenticatedUser,
   Canton,
   Categoria,
   Evento,
   EventosResponse,
   HealthResponse,
+  LoginRequest,
   Lugar,
   PaginationMeta,
   Parroquia,
@@ -22,9 +24,20 @@ interface CreateApiOptions {
   readonly fetcher?: Fetcher;
 }
 
+interface LoginEnvelope {
+  readonly data: {
+    readonly accessToken: string;
+    readonly refreshToken: string;
+    readonly tokenType: 'Bearer';
+    readonly expiresIn: number;
+    readonly usuario: AuthenticatedUser;
+  };
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
   getEventos(): Promise<EventosResponse>;
+  login(input: LoginRequest): Promise<AuthenticatedUser>;
 }
 
 export class ApiRequestError extends Error {
@@ -191,6 +204,50 @@ function isHealthResponse(value: unknown): value is HealthResponse {
   );
 }
 
+function isAuthRole(
+  value: unknown,
+): value is AuthenticatedUser['rol'] {
+  return (
+    value === 'VISITANTE' ||
+    value === 'ASISTENTE' ||
+    value === 'ADMINISTRADOR'
+  );
+}
+
+function isAuthenticatedUser(
+  value: unknown,
+): value is AuthenticatedUser {
+  return (
+    isRecord(value) &&
+    isInteger(value.id) &&
+    value.id > 0 &&
+    isString(value.nombre) &&
+    value.nombre.length > 0 &&
+    isString(value.email) &&
+    value.email.length > 0 &&
+    isAuthRole(value.rol)
+  );
+}
+
+function isLoginEnvelope(value: unknown): value is LoginEnvelope {
+  if (!isRecord(value) || !isRecord(value.data)) {
+    return false;
+  }
+
+  const data = value.data;
+
+  return (
+    isString(data.accessToken) &&
+    data.accessToken.length > 0 &&
+    isString(data.refreshToken) &&
+    data.refreshToken.length > 0 &&
+    data.tokenType === 'Bearer' &&
+    isInteger(data.expiresIn) &&
+    data.expiresIn > 0 &&
+    isAuthenticatedUser(data.usuario)
+  );
+}
+
 function isEventosResponse(value: unknown): value is EventosResponse {
   return (
     isRecord(value) &&
@@ -204,16 +261,17 @@ async function requestJson<T>(
   url: URL,
   validator: ResponseValidator<T>,
   fetcher: Fetcher,
+  init: RequestInit = {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+  },
 ): Promise<T> {
   let response: Response;
 
   try {
-    response = await fetcher(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    response = await fetcher(url, init);
   } catch (cause) {
     throw new ApiRequestError(
       'No se pudo establecer conexión con la API.',
@@ -277,6 +335,26 @@ export function createZamoraFestApi(
 
       return requestJson(url, isEventosResponse, fetcher);
     },
+
+    async login(input: LoginRequest) {
+      const url = new URL('/api/v1/auth/login', resolveBaseUrl());
+
+      const response = await requestJson(
+        url,
+        isLoginEnvelope,
+        fetcher,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        },
+      );
+
+      return response.data.usuario;
+    },
   };
 }
 
@@ -287,5 +365,9 @@ export const zamoraFestApi: ZamoraFestApi = {
 
   getEventos() {
     return createZamoraFestApi().getEventos();
+  },
+
+  login(input: LoginRequest) {
+    return createZamoraFestApi().login(input);
   },
 };

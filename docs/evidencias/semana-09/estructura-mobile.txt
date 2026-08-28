@@ -1,0 +1,19 @@
+# Estructura principal del cliente movil - Semana 9
+
+[OK] mobile/src/config
+[OK] mobile/src/services
+[OK] mobile/src/services/api
+[OK] mobile/src/features
+[OK] mobile/src/pages
+[NO EXISTE] mobile/src/components
+[OK] mobile/android
+
+Archivos principales:
+[OK] mobile/package.json
+[OK] mobile/package-lock.json
+[OK] mobile/capacitor.config.ts
+[OK] mobile/src/App.tsx
+[OK] mobile/src/pages/LoginPage.tsx
+[OK] mobile/src/pages/LoginPage.css
+[OK] mobile/src/services/api/zamorafest-api.ts
+[OK] mobile/src/features/auth/login-validation.ts

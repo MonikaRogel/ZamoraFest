@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from './App';
 
 vi.mock('./services/api/zamorafest-api', () => ({
   ApiRequestError: class ApiRequestError extends Error {},
   zamoraFestApi: {
+    login: vi.fn(),
     getHealth: vi.fn(async () => ({
       status: 'ok',
       service: 'zamorafest-backend',
@@ -28,7 +29,29 @@ vi.mock('./services/api/zamorafest-api', () => ({
 }));
 
 describe('App', () => {
-  it('muestra la respuesta verificada sin solicitudes reales', async () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/');
+  });
+
+  it('inicia el flujo académico en la pantalla de login', async () => {
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Iniciar sesión',
+      }),
+    ).toBeInTheDocument();
+
+    const submitButton = screen.getByText('Ingresar', {
+      selector: 'ion-button',
+    });
+
+    expect(submitButton).toHaveAttribute('type', 'submit');
+  });
+
+  it('conserva la pantalla de verificación del entorno', async () => {
+    window.history.pushState({}, '', '/environment');
+
     render(<App />);
 
     expect(

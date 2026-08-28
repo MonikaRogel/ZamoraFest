@@ -88,3 +88,20 @@ export interface EventosResponse {
   readonly data: readonly Evento[];
   readonly meta: PaginationMeta;
 }
+
+export type AuthRole =
+  | 'VISITANTE'
+  | 'ASISTENTE'
+  | 'ADMINISTRADOR';
+
+export interface LoginRequest {
+  readonly email: string;
+  readonly password: string;
+}
+
+export interface AuthenticatedUser {
+  readonly id: number;
+  readonly nombre: string;
+  readonly email: string;
+  readonly rol: AuthRole;
+}

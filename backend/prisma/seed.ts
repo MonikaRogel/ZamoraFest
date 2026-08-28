@@ -1,4 +1,4 @@
-import { compare, hash as hashPassword } from 'bcryptjs';
+import { compare, hash as hashPassword, truncates } from 'bcryptjs';
 
 import { prisma } from '../src/infrastructure/database/prisma.js';
 
@@ -113,9 +113,9 @@ function resolveSeedUsers(): UsuarioSeed[] {
   }
 
   for (const usuario of usuarios) {
-    if (usuario.password.length < 8 || usuario.password.length > 72) {
+    if (usuario.password.length < 8 || truncates(usuario.password)) {
       throw new Error(
-        `La contraseña local de ${usuario.rol} debe tener entre 8 y 72 caracteres.`,
+        `La contraseña local de ${usuario.rol} debe tener al menos 8 caracteres y no superar 72 bytes UTF-8.`,
       );
     }
 
