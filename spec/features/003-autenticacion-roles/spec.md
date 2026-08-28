@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **Vigencia histórica de este archivo:** el commit original `b9af830` creó `plan.md` y `tasks.md` vacíos y almacenó en este `spec.md` contenido con estructura de tareas. Esta anomalía se conserva como parte del historial y no se corrige reescribiendo retrospectivamente el contenido original.
+>
+> Durante la auditoría posterior se añadieron un plan y una matriz de verificación expresamente identificados como reconstrucciones retrospectivas. Para el contexto completo consulte `docs/trazabilidad-sdd-historica.md`.
+>
+> El contenido que aparece a continuación se mantiene sin modificaciones como evidencia del artefacto original de la funcionalidad 003.
 # Tareas: autenticación y roles (003)
 
 ## Metadatos
