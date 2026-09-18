@@ -1,0 +1,45 @@
+.zf-async-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zf-space-4);
+  min-height: 12rem;
+  padding: var(--zf-space-6);
+  text-align: center;
+  color: var(--zf-color-text-primary);
+  background: var(--zf-color-surface);
+  border: var(--zf-border-width) solid var(--zf-color-border);
+  border-radius: var(--zf-radius-lg);
+}
+
+.zf-async-state__spinner {
+  width: 2rem;
+  height: 2rem;
+  color: var(--zf-color-primary);
+}
+
+.zf-async-state__copy {
+  max-width: 32rem;
+}
+
+.zf-async-state__copy h2 {
+  margin: 0;
+  font-size: var(--zf-font-size-heading);
+  line-height: var(--zf-line-height-tight);
+}
+
+.zf-async-state__copy p {
+  margin: var(--zf-space-2) 0 0;
+  font-size: var(--zf-font-size-body);
+  line-height: var(--zf-line-height-body);
+  color: var(--zf-color-text-secondary);
+}
+
+.zf-async-state__action {
+  width: min(100%, 18rem);
+}
+
+.zf-async-state--error {
+  border-color: var(--zf-color-error);
+}

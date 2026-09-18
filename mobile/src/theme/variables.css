@@ -1,2 +1,231 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
+:root {
+  /* ====================================================== */
+  /* ZAMORAFEST - DESIGN TOKENS                             */
+  /* Sistema visual base - Semana 10                       */
+  /* ====================================================== */
+
+  /* ------------------------------------------------------ */
+  /* Primitivos: verdes naturales                           */
+  /* ------------------------------------------------------ */
+  --zf-green-950: #0e211a;
+  --zf-green-900: #17382c;
+  --zf-green-800: #245c46;
+  --zf-green-700: #2f7559;
+  --zf-green-500: #4ead82;
+  --zf-green-400: #69d6a3;
+  --zf-green-300: #72d9aa;
+  --zf-green-200: #a9e8cc;
+  --zf-green-100: #ddf5e9;
+  --zf-green-050: #effaf4;
+
+  /* ------------------------------------------------------ */
+  /* Primitivos: dorados suaves                             */
+  /* ------------------------------------------------------ */
+  --zf-gold-500: #c7a14a;
+  --zf-gold-400: #d7b45f;
+  --zf-gold-300: #e7c875;
+  --zf-gold-200: #f3dfab;
+  --zf-gold-100: #fbf3dd;
+
+  /* ------------------------------------------------------ */
+  /* Neutros con matiz natural                              */
+  /* ------------------------------------------------------ */
+  --zf-neutral-950: #0e1d18;
+  --zf-neutral-900: #17211d;
+  --zf-neutral-850: #15352a;
+  --zf-neutral-800: #1b3e31;
+  --zf-neutral-750: #244a3b;
+  --zf-neutral-700: #5c8b76;
+  --zf-neutral-600: #53645c;
+  --zf-neutral-500: #789888;
+  --zf-neutral-400: #b9cbc2;
+  --zf-neutral-300: #b9cec3;
+  --zf-neutral-200: #e3f2ea;
+  --zf-neutral-100: #eef7f2;
+  --zf-neutral-050: #f7fbf9;
+  --zf-white: #ffffff;
+
+  /* ------------------------------------------------------ */
+  /* Estados                                                */
+  /* ------------------------------------------------------ */
+  --zf-red-700: #b42318;
+  --zf-red-300: #ff9a91;
+  --zf-amber-700: #8c5700;
+  --zf-amber-300: #f2c879;
+
+  /* ------------------------------------------------------ */
+  /* Semánticos: modo claro                                 */
+  /* ------------------------------------------------------ */
+  --zf-color-background: var(--zf-neutral-050);
+
+  --zf-color-surface: var(--zf-white);
+  --zf-color-surface-muted: var(--zf-neutral-100);
+  --zf-color-surface-raised: var(--zf-neutral-200);
+
+  --zf-color-text-primary: var(--zf-neutral-900);
+  --zf-color-text-secondary: var(--zf-neutral-600);
+
+  --zf-color-primary: var(--zf-green-700);
+  --zf-color-primary-soft: var(--zf-green-100);
+  --zf-color-on-primary: var(--zf-white);
+  --zf-color-on-primary-soft: var(--zf-green-900);
+
+  --zf-color-success: var(--zf-green-700);
+  --zf-color-warning: var(--zf-amber-700);
+  --zf-color-error: var(--zf-red-700);
+
+  --zf-color-border: var(--zf-neutral-300);
+  --zf-color-border-strong: var(--zf-neutral-500);
+
+  --zf-color-focus: var(--zf-green-700);
+
+  /* ------------------------------------------------------ */
+  /* Evento destacado                                       */
+  /* ------------------------------------------------------ */
+  --zf-color-featured-start: var(--zf-white);
+  --zf-color-featured-end: var(--zf-green-050);
+
+  --zf-color-featured-border: var(--zf-gold-500);
+  --zf-color-featured-border-soft: rgb(199 161 74 / 38%);
+  --zf-color-featured-glow: rgb(215 180 95 / 14%);
+  --zf-color-featured-highlight: rgb(255 255 255 / 55%);
+
+  --zf-color-accent-warm: var(--zf-gold-500);
+
+  /* ------------------------------------------------------ */
+  /* Tipografía                                             */
+  /* ------------------------------------------------------ */
+  --zf-font-family:
+    Roboto,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  --zf-font-size-caption: 0.75rem;
+  --zf-font-size-label: 0.875rem;
+  --zf-font-size-body: 1rem;
+  --zf-font-size-heading: 1.125rem;
+  --zf-font-size-title: 1.375rem;
+  --zf-font-size-display: clamp(1.75rem, 5vw, 2.125rem);
+
+  --zf-font-weight-medium: 500;
+  --zf-font-weight-semibold: 600;
+  --zf-font-weight-bold: 700;
+
+  --zf-line-height-tight: 1.2;
+  --zf-line-height-body: 1.5;
+
+  /* ------------------------------------------------------ */
+  /* Espaciado - base 4 px                                  */
+  /* ------------------------------------------------------ */
+  --zf-space-1: 0.25rem;
+  --zf-space-2: 0.5rem;
+  --zf-space-3: 0.75rem;
+  --zf-space-4: 1rem;
+  --zf-space-5: 1.25rem;
+  --zf-space-6: 1.5rem;
+  --zf-space-8: 2rem;
+
+  /* ------------------------------------------------------ */
+  /* Radios                                                 */
+  /* ------------------------------------------------------ */
+  --zf-radius-sm: 0.5rem;
+  --zf-radius-md: 0.75rem;
+  --zf-radius-lg: 1rem;
+  --zf-radius-xl: 1.25rem;
+  --zf-radius-pill: 999px;
+
+  /* ------------------------------------------------------ */
+  /* Elevación                                              */
+  /* ------------------------------------------------------ */
+  --zf-shadow-sm:
+    0 2px 8px rgb(14 29 24 / 8%);
+
+  --zf-shadow-md:
+    0 8px 24px rgb(14 29 24 / 12%);
+
+/* ------------------------------------------------------ */
+/* Interacción y accesibilidad                            */
+/* ------------------------------------------------------ */
+--zf-control-min-size: 3rem;
+--zf-border-width: 1px;
+--zf-focus-ring-width: 3px;
+--zf-focus-ring-offset: 2px;
+--zf-disabled-opacity: 0.6;
+
+  /* ------------------------------------------------------ */
+  /* Componentes                                            */
+  /* ------------------------------------------------------ */
+  --zf-event-card-radius: var(--zf-radius-xl);
+  --zf-event-card-padding: var(--zf-space-4);
+
+  --zf-filter-chip-min-height: var(--zf-control-min-size);
+
+  --zf-badge-min-height: 1.75rem;
+  --zf-badge-radius: var(--zf-radius-pill);
+
+  /* ------------------------------------------------------ */
+  /* Ionic                                                  */
+  /* ------------------------------------------------------ */
+  --ion-font-family: var(--zf-font-family);
+  --ion-background-color: var(--zf-color-background);
+  --ion-text-color: var(--zf-color-text-primary);
+
+  --ion-color-primary: var(--zf-color-primary);
+  --ion-color-primary-contrast: var(--zf-color-on-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Fondo */
+    --zf-color-background: var(--zf-neutral-950);
+
+    /* Superficies */
+    --zf-color-surface: var(--zf-neutral-850);
+    --zf-color-surface-muted: var(--zf-neutral-800);
+    --zf-color-surface-raised: var(--zf-neutral-750);
+
+    /* Texto */
+    --zf-color-text-primary: #f4f8f6;
+    --zf-color-text-secondary: var(--zf-neutral-400);
+
+    /* Identidad */
+    --zf-color-primary: var(--zf-green-300);
+    --zf-color-primary-soft: var(--zf-green-900);
+    --zf-color-on-primary: var(--zf-neutral-950);
+    --zf-color-on-primary-soft: var(--zf-green-200);
+
+    /* Estados */
+    --zf-color-success: var(--zf-green-300);
+    --zf-color-warning: var(--zf-amber-300);
+    --zf-color-error: var(--zf-red-300);
+
+    /* Bordes */
+    --zf-color-border: var(--zf-neutral-700);
+    --zf-color-border-strong: var(--zf-green-400);
+
+    /* Foco */
+    --zf-color-focus: var(--zf-green-300);
+
+    /* Evento destacado */
+    --zf-color-featured-start: var(--zf-neutral-850);
+    --zf-color-featured-end: #194434;
+
+    --zf-color-featured-border: var(--zf-gold-400);
+    --zf-color-featured-border-soft: rgb(231 200 117 / 28%);
+    --zf-color-featured-glow: rgb(231 200 117 / 15%);
+    --zf-color-featured-highlight: rgb(255 255 255 / 5%);
+
+    --zf-color-accent-warm: var(--zf-gold-300);
+
+    /* Elevación */
+    --zf-shadow-sm:
+      0 2px 10px rgb(0 0 0 / 18%);
+
+    --zf-shadow-md:
+      0 10px 28px rgb(0 0 0 / 24%);
+  }
+}
