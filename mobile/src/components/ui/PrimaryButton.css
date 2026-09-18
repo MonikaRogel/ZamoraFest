@@ -1,0 +1,23 @@
+.zf-primary-button {
+  --background: var(--zf-color-primary);
+  --color: var(--zf-color-on-primary);
+  --border-radius: var(--zf-radius-md);
+  --box-shadow: none;
+  min-height: var(--zf-control-min-size);
+  font-size: var(--zf-font-size-body);
+  font-weight: var(--zf-font-weight-bold);
+  line-height: var(--zf-line-height-body);
+  text-transform: none;
+}
+
+.zf-primary-button__loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zf-space-2);
+}
+
+.zf-primary-button::part(native):focus-visible {
+  outline: var(--zf-focus-ring-width) solid var(--zf-color-focus);
+  outline-offset: var(--zf-focus-ring-offset);
+}

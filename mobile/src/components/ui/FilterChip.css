@@ -1,0 +1,32 @@
+.zf-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--zf-filter-chip-min-height);
+  padding: 0 var(--zf-space-4);
+  font: inherit;
+  font-size: var(--zf-font-size-label);
+  font-weight: var(--zf-font-weight-bold);
+  line-height: var(--zf-line-height-body);
+  color: var(--zf-color-text-primary);
+  background: var(--zf-color-surface);
+  border: var(--zf-border-width) solid var(--zf-color-border);
+  border-radius: var(--zf-radius-pill);
+  cursor: pointer;
+}
+
+.zf-filter-chip--selected {
+  color: var(--zf-color-on-primary);
+  background: var(--zf-color-primary);
+  border-color: var(--zf-color-primary);
+}
+
+.zf-filter-chip:focus-visible {
+  outline: var(--zf-focus-ring-width) solid var(--zf-color-focus);
+  outline-offset: var(--zf-focus-ring-offset);
+}
+
+.zf-filter-chip:disabled {
+  cursor: not-allowed;
+  opacity: var(--zf-disabled-opacity);
+}
