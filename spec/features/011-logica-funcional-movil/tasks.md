@@ -135,14 +135,14 @@
 
 ## 10. Evolución del login
 
-- [ ] T098 Integrar `LoginPage` con el estado global.
-- [ ] T099 Eliminar dependencia de usuario autenticado únicamente como estado local.
-- [ ] T100 Conservar validaciones existentes.
-- [ ] T101 Conservar manejo seguro de credenciales incorrectas.
-- [ ] T102 Conservar bloqueo de envíos duplicados.
-- [ ] T103 Guardar sesión completa después de login.
-- [ ] T104 Aplicar destino pendiente después del login.
-- [ ] T105 Actualizar pruebas de `LoginPage`.
+- [x] T098 Integrar `LoginPage` con el estado global.
+- [x] T099 Eliminar dependencia de usuario autenticado únicamente como estado local.
+- [x] T100 Conservar validaciones existentes.
+- [x] T101 Conservar manejo seguro de credenciales incorrectas.
+- [x] T102 Conservar bloqueo de envíos duplicados.
+- [x] T103 Guardar sesión completa después de login.
+- [x] T104 Aplicar destino pendiente después del login.
+- [x] T105 Actualizar pruebas de `LoginPage`.
 
 ## 11. Registro de visitante
 

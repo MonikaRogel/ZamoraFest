@@ -907,8 +907,104 @@ Estado:
 
 `INFRAESTRUCTURA COMPLETADA Y VERIFICADA; REGISTRO DE RUTAS FINALES PENDIENTE`
 
-## 25. Próxima evidencia a obtener
+## 25. Evolución del login
 
-La siguiente fase inmediata corresponde a auditar y completar la evolución del login, tareas `T098` a `T105`.
+Se auditó la evolución de `LoginPage` después de incorporar el estado global y la protección de rutas.
 
-Varias de estas tareas ya fueron implementadas durante los bloques anteriores, por lo que primero se verificará su estado real antes de introducir cambios adicionales.
+La pantalla de login utiliza actualmente `useApplicationState()` como fuente de autenticación.
+
+Después de una autenticación correcta:
+
+1. `zamoraFestApi.login()` devuelve la sesión completa;
+2. `LoginPage` ejecuta `login(session)`;
+3. la sesión completa se incorpora al estado global;
+4. el usuario autenticado se deriva desde el contexto;
+5. `LoginRoute` determina el destino seguro posterior al login.
+
+La sesión almacenada contiene:
+
+- access token;
+- refresh token;
+- tipo de token;
+- expiración;
+- usuario autenticado;
+- rol.
+
+`LoginPage` ya no utiliza un estado local independiente para representar al usuario autenticado.
+
+Se conservaron las validaciones existentes del formulario mediante `validateLoginForm`.
+
+También se conserva el manejo seguro de errores:
+
+- `401` muestra un mensaje genérico de credenciales incorrectas;
+- `400` y `422` solicitan corregir los datos;
+- fallos de conexión no exponen detalles técnicos;
+- los mensajes internos del backend no se presentan directamente al usuario.
+
+El bloqueo de envíos duplicados continúa implementado mediante una referencia de solicitud activa, evitando ejecutar dos llamadas simultáneas de login.
+
+El retorno posterior a la autenticación se implementa mediante `LoginRoute`.
+
+El flujo:
+
+1. lee el parámetro `redirect`;
+2. valida que corresponda a una ruta interna protegida reconocida;
+3. conserva el destino en el estado global;
+4. realiza el login;
+5. recupera el destino pendiente;
+6. navega hacia el destino autorizado;
+7. limpia el destino pendiente después de utilizarlo.
+
+Si el parámetro de retorno es inválido o externo, se utiliza `/explore` como destino seguro.
+
+Las pruebas existentes y actualizadas cubren:
+
+- validación del formulario;
+- login correcto;
+- almacenamiento de sesión global;
+- ausencia de tokens en la interfaz;
+- credenciales incorrectas;
+- errores `400`;
+- errores `422`;
+- fallos de conexión;
+- bloqueo de doble envío;
+- conservación del destino protegido;
+- retorno a `/gestion`;
+- retorno a `/gestion/eventos/nuevo`;
+- rechazo de redirecciones externas;
+- mantenimiento de sesión cuando el rol no es suficiente.
+
+La última verificación funcional ejecutada antes de esta auditoría obtuvo:
+
+- 18 archivos de prueba aprobados;
+- 84 pruebas aprobadas;
+- 0 pruebas fallidas;
+- `npm run typecheck` correcto;
+- `npm run lint` correcto;
+- `npm run build` correcto.
+
+No fue necesario introducir código adicional durante esta auditoría porque las tareas `T098` a `T105` ya estaban satisfechas por los incrementos anteriores.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 26. Próxima evidencia a obtener
+
+La siguiente fase corresponde al registro público de visitantes, tareas `T106` a `T113`.
+
+Antes de implementar la interfaz se auditará el contrato real de:
+
+`POST /api/v1/auth/register`
+
+para derivar exactamente:
+
+- campos permitidos;
+- campos obligatorios;
+- longitudes;
+- validaciones;
+- formato de errores;
+- respuesta exitosa;
+- garantía de creación exclusiva del rol `VISITANTE`.
+
+No se permitirán desde el cliente campos de rol, identificadores de rol ni atributos administrativos.
