@@ -1114,19 +1114,135 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 27. Próxima evidencia a obtener
+## 27. Separación de datos de eventos
 
-La siguiente fase corresponde a la separación de datos de eventos, tareas `T114` a `T120`.
+Se introdujo una capa de repositorio para desacoplar la interfaz de exploración de la implementación HTTP.
 
-Antes de modificar `ExploreEventsPage`, se auditará la capa actual de acceso a datos para introducir `EventRepository` sin alterar el comportamiento ya validado de Feature 010.
+Se definió el contrato:
 
-La migración deberá conservar:
+`EventRepository`
 
-- estados remotos cerrados;
+con la operación:
+
+`listEvents(): Promise<readonly Evento[]>`
+
+La pantalla `ExploreEventsPage` ya no consume directamente `zamoraFestApi`.
+
+La arquitectura resultante es:
+
+`ExploreEventsPage`
+
+→ `EventRepository`
+
+→ `RemoteEventRepository`
+
+→ `zamoraFestApi`
+
+→ API REST
+
+`zamoraFestApi` se mantiene como la capa HTTP de bajo nivel y continúa siendo responsable de:
+
+- construir URLs;
+- ejecutar solicitudes HTTP;
+- validar respuestas del backend;
+- conservar estados HTTP;
+- representar errores de transporte.
+
+`RemoteEventRepository` utiliza esa capa HTTP y expone a la interfaz únicamente datos de dominio y errores propios del repositorio.
+
+Se incorporó `EventRepositoryError` con las categorías:
+
+- `connection`;
+- `server`;
+- `request`;
+- `unexpected`.
+
+De esta manera, la pantalla ya no necesita conocer `ApiRequestError` ni detalles de transporte HTTP.
+
+`ExploreEventsPage` fue migrada para utilizar:
+
+`eventRepository.listEvents()`
+
+Se conservaron sin cambios funcionales los comportamientos previamente validados de Feature 010:
+
+- estado de carga;
+- estado de error;
+- estado vacío;
+- listado de eventos;
+- evento futuro más próximo destacado;
 - filtrado por categoría;
-- evento próximo destacado;
-- componentes reutilizables;
-- contrato HTTP existente;
-- pruebas actuales de exploración.
+- reutilización de `EventCard`;
+- reutilización de `FilterChip`;
+- reutilización de `ScreenHeader`;
+- reutilización de `AsyncStateView`;
+- estado remoto cerrado mediante `RemoteData`.
 
-`zamoraFestApi` permanecerá como capa HTTP de bajo nivel y la página dejará de depender directamente de dicha capa.
+Los componentes reutilizables continúan sin conocer:
+
+- endpoints;
+- URLs;
+- métodos HTTP;
+- códigos de estado HTTP;
+- cliente REST.
+
+Se añadieron pruebas del repositorio remoto para comprobar:
+
+- obtención de eventos mediante la capa HTTP;
+- extracción únicamente de `data`;
+- traducción de fallos de conexión;
+- traducción de errores HTTP 5xx;
+- traducción de errores HTTP no 5xx;
+- encapsulamiento de errores inesperados.
+
+Las pruebas de `ExploreEventsPage` fueron migradas para simular el repositorio y no la capa HTTP.
+
+La verificación específica obtuvo:
+
+- 2 archivos de prueba aprobados;
+- 9 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 22 archivos de prueba aprobados;
+- 111 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- `:host-context` de Ionic procesado mediante LightningCSS;
+- tamaño de algunos chunks generados por Vite.
+
+La separación introducida prepara la aplicación para incorporar posteriormente almacenamiento local, estrategias local-first y sincronización sin acoplar las pantallas directamente al transporte HTTP.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 28. Próxima evidencia a obtener
+
+La siguiente fase corresponde al detalle público de eventos, tareas `T121` a `T133`.
+
+Antes de implementar la pantalla se auditará el contrato real del backend para:
+
+`GET /api/v1/eventos/:id`
+
+Se deberá confirmar:
+
+- formato exacto de la respuesta;
+- comportamiento ante identificadores inválidos;
+- respuesta cuando el evento no existe;
+- reglas de publicación o visibilidad;
+- reutilización del repositorio;
+- apertura directa mediante URL;
+- navegación desde `ExploreEventsPage`.
+
+La pantalla de detalle deberá reconstruirse exclusivamente a partir del identificador de la ruta y nunca depender de recibir el objeto completo de evento mediante estado de navegación.

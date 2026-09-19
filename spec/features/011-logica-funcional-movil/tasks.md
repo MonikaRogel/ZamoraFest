@@ -157,13 +157,13 @@
 
 ## 12. Separación de datos de eventos
 
-- [ ] T114 Definir contrato de `EventRepository`.
-- [ ] T115 Implementar fuente remota de eventos.
-- [ ] T116 Mantener `zamoraFestApi` como capa HTTP de bajo nivel.
-- [ ] T117 Migrar `ExploreEventsPage` para consumir repositorio.
-- [ ] T118 Confirmar que `ExploreEventsPage` conserva su comportamiento de Feature 010.
-- [ ] T119 Confirmar que componentes reutilizables no conocen endpoints.
-- [ ] T120 Añadir pruebas del repositorio remoto.
+- [x] T114 Definir contrato de `EventRepository`.
+- [x] T115 Implementar fuente remota de eventos.
+- [x] T116 Mantener `zamoraFestApi` como capa HTTP de bajo nivel.
+- [x] T117 Migrar `ExploreEventsPage` para consumir repositorio.
+- [x] T118 Confirmar que `ExploreEventsPage` conserva su comportamiento de Feature 010.
+- [x] T119 Confirmar que componentes reutilizables no conocen endpoints.
+- [x] T120 Añadir pruebas del repositorio remoto.
 
 ## 13. Detalle de evento
 

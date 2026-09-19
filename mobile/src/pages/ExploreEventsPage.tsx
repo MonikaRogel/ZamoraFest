@@ -17,9 +17,11 @@ import EventCard from '../components/ui/EventCard';
 import FilterChip from '../components/ui/FilterChip';
 import ScreenHeader from '../components/ui/ScreenHeader';
 import {
-  ApiRequestError,
-  zamoraFestApi,
-} from '../services/api/zamorafest-api';
+  EventRepositoryError,
+} from '../features/events/event-repository';
+import {
+  eventRepository,
+} from '../features/events/remote-event-repository';
 import {
   remoteError,
   remoteLoading,
@@ -30,43 +32,77 @@ import type { Evento } from '../types/api';
 
 import './ExploreEventsPage.css';
 
-function formatEventDate(value: string): string {
+function formatEventDate(
+  value: string,
+): string {
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
     return 'Fecha por confirmar';
   }
 
-  return new Intl.DateTimeFormat('es-EC', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    'es-EC',
+    {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    },
+  ).format(date);
 }
 
-function formatEventCost(value: number): string {
+function formatEventCost(
+  value: number,
+): string {
   if (value === 0) {
     return 'Gratuito';
   }
 
-  return new Intl.NumberFormat('es-EC', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(value);
+  return new Intl.NumberFormat(
+    'es-EC',
+    {
+      style: 'currency',
+      currency: 'USD',
+    },
+  ).format(value);
 }
 
-function getEventStartTime(event: Evento): number | null {
-  const startTime = new Date(event.fechaInicio).getTime();
+function getEventStartTime(
+  event: Evento,
+): number | null {
+  const startTime =
+    new Date(
+      event.fechaInicio,
+    ).getTime();
 
-  return Number.isNaN(startTime) ? null : startTime;
+  return Number.isNaN(
+    startTime,
+  )
+    ? null
+    : startTime;
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiRequestError) {
-    if (error.status === null) {
+function getErrorMessage(
+  error: unknown,
+): string {
+  if (
+    error instanceof
+    EventRepositoryError
+  ) {
+    if (
+      error.kind ===
+      'connection'
+    ) {
       return 'No fue posible conectarse con ZamoraFest. Revise su conexión e intente nuevamente.';
     }
 
-    if (error.status >= 500) {
+    if (
+      error.kind ===
+      'server'
+    ) {
       return 'El servicio de eventos no está disponible temporalmente. Intente nuevamente en unos momentos.';
     }
   }
@@ -75,28 +111,55 @@ function getErrorMessage(error: unknown): string {
 }
 
 function ExploreEventsPage() {
-  const [eventsState, setEventsState] = useState<
-    RemoteData<readonly Evento[], string>
-  >(remoteLoading());
+  const [
+    eventsState,
+    setEventsState,
+  ] = useState<
+    RemoteData<
+      readonly Evento[],
+      string
+    >
+  >(
+    remoteLoading(),
+  );
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<string | null>(null);
+  const [
+    selectedCategory,
+    setSelectedCategory,
+  ] =
+    useState<
+      string | null
+    >(null);
 
-  const loadEvents = useCallback(async () => {
-    setEventsState(remoteLoading());
+  const loadEvents =
+    useCallback(
+      async () => {
+        setEventsState(
+          remoteLoading(),
+        );
 
-    try {
-      const response = await zamoraFestApi.getEventos();
+        try {
+          const events =
+            await eventRepository
+              .listEvents();
 
-      setEventsState(
-        remoteSuccess(response.data),
-      );
-    } catch (error) {
-      setEventsState(
-        remoteError(getErrorMessage(error)),
-      );
-    }
-  }, []);
+          setEventsState(
+            remoteSuccess(
+              events,
+            ),
+          );
+        } catch (error) {
+          setEventsState(
+            remoteError(
+              getErrorMessage(
+                error,
+              ),
+            ),
+          );
+        }
+      },
+      [],
+    );
 
   useEffect(() => {
     void loadEvents();
@@ -104,7 +167,8 @@ function ExploreEventsPage() {
 
   const events = useMemo(
     () =>
-      eventsState.status === 'success'
+      eventsState.status ===
+      'success'
         ? eventsState.data
         : [],
     [eventsState],
@@ -114,62 +178,131 @@ function ExploreEventsPage() {
     () =>
       Array.from(
         new Set(
-          events.flatMap((event) =>
-            event.categorias.map(
-              (category) => category.nombre,
-            ),
+          events.flatMap(
+            (event) =>
+              event.categorias.map(
+                (
+                  category,
+                ) =>
+                  category.nombre,
+              ),
           ),
         ),
-      ).sort((a, b) => a.localeCompare(b, 'es')),
+      ).sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            'es',
+          ),
+      ),
     [events],
   );
 
-  const visibleEvents = useMemo(() => {
-    if (selectedCategory === null) {
-      return events;
-    }
+  const visibleEvents =
+    useMemo(
+      () => {
+        if (
+          selectedCategory ===
+          null
+        ) {
+          return events;
+        }
 
-    return events.filter((event) =>
-      event.categorias.some(
-        (category) =>
-          category.nombre === selectedCategory,
-      ),
+        return events.filter(
+          (event) =>
+            event.categorias.some(
+              (
+                category,
+              ) =>
+                category.nombre ===
+                selectedCategory,
+            ),
+        );
+      },
+      [
+        events,
+        selectedCategory,
+      ],
     );
-  }, [events, selectedCategory]);
 
-  const nextEvent = useMemo(() => {
-    const now = Date.now();
+  const nextEvent =
+    useMemo(
+      () => {
+        const now =
+          Date.now();
 
-    return (
-      [...visibleEvents]
-        .filter((event) => {
-          const startTime = getEventStartTime(event);
+        return (
+          [
+            ...visibleEvents,
+          ]
+            .filter(
+              (event) => {
+                const startTime =
+                  getEventStartTime(
+                    event,
+                  );
 
-          return startTime !== null && startTime >= now;
-        })
-        .sort((firstEvent, secondEvent) => {
-          const firstStart =
-            getEventStartTime(firstEvent);
-          const secondStart =
-            getEventStartTime(secondEvent);
+                return (
+                  startTime !==
+                    null &&
+                  startTime >=
+                    now
+                );
+              },
+            )
+            .sort(
+              (
+                firstEvent,
+                secondEvent,
+              ) => {
+                const firstStart =
+                  getEventStartTime(
+                    firstEvent,
+                  );
 
-          return (
-            (firstStart ?? Number.POSITIVE_INFINITY) -
-            (secondStart ?? Number.POSITIVE_INFINITY)
-          );
-        })[0] ?? null
+                const secondStart =
+                  getEventStartTime(
+                    secondEvent,
+                  );
+
+                return (
+                  (
+                    firstStart ??
+                    Number
+                      .POSITIVE_INFINITY
+                  ) -
+                  (
+                    secondStart ??
+                    Number
+                      .POSITIVE_INFINITY
+                  )
+                );
+              },
+            )[0] ??
+          null
+        );
+      },
+      [
+        visibleEvents,
+      ],
     );
-  }, [visibleEvents]);
 
-  const remainingEvents = useMemo(
-    () =>
-      nextEvent === null
-        ? visibleEvents
-        : visibleEvents.filter(
-            (event) => event.id !== nextEvent.id,
-          ),
-    [nextEvent, visibleEvents],
-  );
+  const remainingEvents =
+    useMemo(
+      () =>
+        nextEvent ===
+        null
+          ? visibleEvents
+          : visibleEvents.filter(
+              (event) =>
+                event.id !==
+                nextEvent.id,
+            ),
+      [
+        nextEvent,
+        visibleEvents,
+      ],
+    );
 
   return (
     <IonPage>
@@ -186,7 +319,8 @@ function ExploreEventsPage() {
             />
 
             <span className="zf-app-brand__descriptor">
-              Agenda cultural y festiva
+              Agenda cultural
+              y festiva
             </span>
           </IonTitle>
         </IonToolbar>
@@ -199,8 +333,12 @@ function ExploreEventsPage() {
             description="Fiestas, ferias, música y tradiciones de la provincia."
           />
 
-          {(eventsState.status === 'idle' ||
-            eventsState.status === 'loading') && (
+          {(
+            eventsState.status ===
+              'idle' ||
+            eventsState.status ===
+              'loading'
+          ) && (
             <AsyncStateView
               state="loading"
               title="Cargando eventos"
@@ -208,19 +346,24 @@ function ExploreEventsPage() {
             />
           )}
 
-          {eventsState.status === 'error' && (
+          {eventsState.status ===
+            'error' && (
             <AsyncStateView
               state="error"
               title="No pudimos cargar los eventos"
-              message={eventsState.error}
+              message={
+                eventsState.error
+              }
               onAction={() => {
                 void loadEvents();
               }}
             />
           )}
 
-          {eventsState.status === 'success' &&
-            events.length === 0 && (
+          {eventsState.status ===
+            'success' &&
+            events.length ===
+              0 && (
               <AsyncStateView
                 state="empty"
                 title="No hay eventos disponibles"
@@ -228,10 +371,13 @@ function ExploreEventsPage() {
               />
             )}
 
-          {eventsState.status === 'success' &&
-            events.length > 0 && (
+          {eventsState.status ===
+            'success' &&
+            events.length >
+              0 && (
               <>
-                {categories.length > 0 && (
+                {categories.length >
+                  0 && (
                   <section
                     className="zf-explore__filters"
                     aria-label="Filtrar eventos por categoría"
@@ -239,29 +385,44 @@ function ExploreEventsPage() {
                     <FilterChip
                       label="Todos"
                       selected={
-                        selectedCategory === null
+                        selectedCategory ===
+                        null
                       }
                       onClick={() => {
-                        setSelectedCategory(null);
+                        setSelectedCategory(
+                          null,
+                        );
                       }}
                     />
 
-                    {categories.map((category) => (
-                      <FilterChip
-                        key={category}
-                        label={category}
-                        selected={
-                          selectedCategory === category
-                        }
-                        onClick={() => {
-                          setSelectedCategory(category);
-                        }}
-                      />
-                    ))}
+                    {categories.map(
+                      (
+                        category,
+                      ) => (
+                        <FilterChip
+                          key={
+                            category
+                          }
+                          label={
+                            category
+                          }
+                          selected={
+                            selectedCategory ===
+                            category
+                          }
+                          onClick={() => {
+                            setSelectedCategory(
+                              category,
+                            );
+                          }}
+                        />
+                      ),
+                    )}
                   </section>
                 )}
 
-                {visibleEvents.length === 0 ? (
+                {visibleEvents.length ===
+                0 ? (
                   <AsyncStateView
                     state="empty"
                     title="Sin coincidencias"
@@ -276,13 +437,16 @@ function ExploreEventsPage() {
                       >
                         <div className="zf-explore__section-heading">
                           <h2 id="zf-next-event-heading">
-                            Próximo evento
+                            Próximo
+                            evento
                           </h2>
                         </div>
 
                         <EventCard
                           variant="featured"
-                          title={nextEvent.titulo}
+                          title={
+                            nextEvent.titulo
+                          }
                           description={
                             nextEvent.descripcion
                           }
@@ -290,20 +454,26 @@ function ExploreEventsPage() {
                             nextEvent.fechaInicio,
                           )}
                           locationLabel={
-                            nextEvent.lugar.nombre
+                            nextEvent
+                              .lugar
+                              .nombre
                           }
                           categoryLabels={nextEvent.categorias.map(
-                            (category) =>
+                            (
+                              category,
+                            ) =>
                               category.nombre,
                           )}
                           costLabel={formatEventCost(
-                            nextEvent.costoReferencial,
+                            nextEvent
+                              .costoReferencial,
                           )}
                         />
                       </section>
                     )}
 
-                    {remainingEvents.length > 0 && (
+                    {remainingEvents.length >
+                      0 && (
                       <section
                         className="zf-explore__events"
                         aria-labelledby="zf-more-events-heading"
@@ -321,11 +491,17 @@ function ExploreEventsPage() {
                           aria-label="Eventos disponibles"
                         >
                           {remainingEvents.map(
-                            (event) => (
+                            (
+                              event,
+                            ) => (
                               <EventCard
-                                key={event.id}
+                                key={
+                                  event.id
+                                }
                                 variant="compact"
-                                title={event.titulo}
+                                title={
+                                  event.titulo
+                                }
                                 description={
                                   event.descripcion
                                 }
@@ -333,10 +509,14 @@ function ExploreEventsPage() {
                                   event.fechaInicio,
                                 )}
                                 locationLabel={
-                                  event.lugar.nombre
+                                  event
+                                    .lugar
+                                    .nombre
                                 }
                                 categoryLabels={event.categorias.map(
-                                  (category) =>
+                                  (
+                                    category,
+                                  ) =>
                                     category.nombre,
                                 )}
                                 costLabel={formatEventCost(
