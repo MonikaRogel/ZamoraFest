@@ -16,10 +16,16 @@ vi.mock('../services/api/zamorafest-api', () => ({
 describe('LoginPage', () => {
   it('muestra el usuario seguro después de un login exitoso', async () => {
     vi.mocked(zamoraFestApi.login).mockResolvedValueOnce({
-      id: 7,
-      nombre: 'Usuario Demo',
-      email: 'demo@zamorafest.ec',
-      rol: 'VISITANTE',
+      accessToken: 'token-acceso-secreto',
+      refreshToken: 'token-refresh-secreto',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      usuario: {
+        id: 7,
+        nombre: 'Usuario Demo',
+        email: 'demo@zamorafest.ec',
+        rol: 'VISITANTE',
+      },
     });
 
     const { container } = render(<LoginPage />);
@@ -67,7 +73,11 @@ describe('LoginPage', () => {
     expect(screen.getByText('demo@zamorafest.ec')).toBeInTheDocument();
     expect(screen.getByText('VISITANTE')).toBeInTheDocument();
 
-    expect(container.textContent).not.toContain('accessToken');
-    expect(container.textContent).not.toContain('refreshToken');
+    expect(container.textContent).not.toContain(
+      'token-acceso-secreto',
+    );
+    expect(container.textContent).not.toContain(
+      'token-refresh-secreto',
+    );
   });
 });

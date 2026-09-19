@@ -46,7 +46,7 @@ function getLoginErrorMessage(error: unknown): string {
     return 'El correo o la contraseña son incorrectos.';
   }
 
-  if (error.status === 400) {
+  if (error.status === 400 || error.status === 422) {
     return 'Revise los datos ingresados e intente nuevamente.';
   }
 
@@ -97,7 +97,9 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
     setIsSubmitting(true);
 
     try {
-      const user = await zamoraFestApi.login(validation.input);
+      const session = await zamoraFestApi.login(validation.input);
+      const user = session.usuario;
+
       setAuthenticatedUser(user);
       onAuthenticated?.(user);
     } catch (error) {

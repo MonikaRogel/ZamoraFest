@@ -499,15 +499,92 @@ Estado actual:
 
 `PENDIENTE`
 
-## 21. Próxima evidencia a obtener
+## 21. Modelo de sesión móvil
 
-La siguiente fase técnica será la corrección controlada de los contratos backend necesarios para Feature 011.
+Durante Feature 011 se evolucionó el contrato de autenticación del cliente móvil para conservar la sesión completa devuelta por el backend.
 
-La primera evidencia nueva deberá demostrar:
+Se definió `AuthSession` con:
 
-- comportamiento correcto de validación `422`;
-- conservación de `400` para solicitudes realmente malformadas;
-- pruebas automatizadas correspondientes;
-- consulta pública controlada de lugares activos.
+- `accessToken`;
+- `refreshToken`;
+- `tokenType`;
+- `expiresIn`;
+- `usuario`.
 
-No se considerará completada hasta ejecutar las pruebas reales.
+El objeto `usuario` conserva:
+
+- identificador;
+- nombre;
+- correo electrónico;
+- rol autenticado.
+
+`zamoraFestApi.login()` dejó de descartar los tokens y ahora devuelve la sesión autenticada completa.
+
+La validación del contrato HTTP continúa siendo estricta. Una respuesta `200` que no incluya todos los campos requeridos de la sesión es rechazada como incompatible con el contrato esperado.
+
+También se comprueba que únicamente se acepten los roles:
+
+- `VISITANTE`;
+- `ASISTENTE`;
+- `ADMINISTRADOR`.
+
+`LoginPage` consume la sesión completa, pero únicamente presenta en pantalla los datos seguros del usuario. Los tokens no se muestran en la interfaz.
+
+Además, la pantalla reconoce tanto `400` como `422` como errores corregibles de los datos enviados.
+
+Se actualizaron las pruebas:
+
+- `src/services/api/auth-login-contract.test.ts`;
+- `src/pages/LoginPage.test.tsx`;
+- `src/pages/LoginPage.security.test.tsx`.
+
+Las pruebas específicas del flujo de autenticación obtuvieron:
+
+- 3 archivos de prueba aprobados;
+- 10 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 12 archivos de prueba aprobados;
+- 52 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente. Se mantienen advertencias no bloqueantes procedentes del procesamiento CSS de Ionic mediante LightningCSS y del tamaño de algunos chunks generados por Vite. Estas advertencias no impidieron la generación del build.
+
+Para Semana 11, los tokens permanecen únicamente en memoria. Se verificó el código fuente móvil buscando:
+
+- `localStorage`;
+- `sessionStorage`;
+- escritura de `accessToken`;
+- escritura de `refreshToken`.
+
+No se detectó persistencia de tokens mediante esos mecanismos.
+
+El almacenamiento seguro y la recuperación persistente de sesión quedan reservados para la fase correspondiente de Semana 12.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 22. Próxima evidencia a obtener
+
+La siguiente fase corresponde al estado global de aplicación:
+
+- contexto global de autenticación;
+- reducer tipado;
+- inicio y cierre de sesión;
+- exposición del usuario y rol autenticado;
+- conservación de tokens únicamente en memoria;
+- destino protegido pendiente;
+- borrador de creación de evento;
+- separación entre estado efímero y estado de aplicación;
+- pruebas automatizadas del estado global.
+
+Esta fase corresponde a las tareas `T069` a `T079`.

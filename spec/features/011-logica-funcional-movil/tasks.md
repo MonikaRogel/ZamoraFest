@@ -84,16 +84,16 @@
 
 ## 6. Modelo de sesión móvil
 
-- [ ] T059 Definir tipo de sesión autenticada.
-- [ ] T060 Incluir usuario autenticado dentro de la sesión.
-- [ ] T061 Incluir rol dentro de la sesión.
-- [ ] T062 Incluir access token dentro de la sesión.
-- [ ] T063 Incluir refresh token dentro de la sesión.
-- [ ] T064 Incluir tipo de token y expiración disponible.
-- [ ] T065 Evolucionar `zamoraFestApi.login()` para devolver la sesión completa.
-- [ ] T066 Mantener validación estricta del contrato recibido desde backend.
-- [ ] T067 Actualizar pruebas del contrato de login.
-- [ ] T068 Confirmar que ningún token se guarda en `localStorage`.
+- [x] T059 Definir tipo de sesión autenticada.
+- [x] T060 Incluir usuario autenticado dentro de la sesión.
+- [x] T061 Incluir rol dentro de la sesión.
+- [x] T062 Incluir access token dentro de la sesión.
+- [x] T063 Incluir refresh token dentro de la sesión.
+- [x] T064 Incluir tipo de token y expiración disponible.
+- [x] T065 Evolucionar `zamoraFestApi.login()` para devolver la sesión completa.
+- [x] T066 Mantener validación estricta del contrato recibido desde backend.
+- [x] T067 Actualizar pruebas del contrato de login.
+- [x] T068 Confirmar que ningún token se guarda en `localStorage`.
 
 ## 7. Estado global de aplicación
 

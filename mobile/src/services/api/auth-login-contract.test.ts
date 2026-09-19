@@ -6,7 +6,7 @@ import {
 } from './zamorafest-api';
 
 describe('contrato HTTP de login', () => {
-  it('envía POST al endpoint real y devuelve solo el usuario seguro', async () => {
+  it('envía POST al endpoint real y devuelve la sesión autenticada completa', async () => {
     const fetcher = vi.fn<typeof fetch>(
       async () =>
         new Response(
@@ -26,7 +26,9 @@ describe('contrato HTTP de login', () => {
           }),
           {
             status: 200,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
         ),
     );
@@ -36,7 +38,7 @@ describe('contrato HTTP de login', () => {
       fetcher: fetcher as typeof fetch,
     });
 
-    const user = await api.login({
+    const session = await api.login({
       email: 'demo@zamorafest.ec',
       password: 'ClaveDemo123',
     });
@@ -48,22 +50,121 @@ describe('contrato HTTP de login', () => {
     expect(requestUrl.toString()).toBe(
       'http://127.0.0.1:3000/api/v1/auth/login',
     );
+
     expect(requestInit?.method).toBe('POST');
+
+    expect(requestInit?.headers).toEqual({
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    });
 
     expect(JSON.parse(String(requestInit?.body))).toEqual({
       email: 'demo@zamorafest.ec',
       password: 'ClaveDemo123',
     });
 
-    expect(user).toEqual({
-      id: 7,
-      nombre: 'Usuario Demo',
-      email: 'demo@zamorafest.ec',
-      rol: 'VISITANTE',
+    expect(session).toEqual({
+      accessToken: 'token-acceso-secreto',
+      refreshToken: 'token-refresh-secreto',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      usuario: {
+        id: 7,
+        nombre: 'Usuario Demo',
+        email: 'demo@zamorafest.ec',
+        rol: 'VISITANTE',
+      },
     });
 
-    expect(user).not.toHaveProperty('accessToken');
-    expect(user).not.toHaveProperty('refreshToken');
+    expect(session.accessToken).toBe('token-acceso-secreto');
+    expect(session.refreshToken).toBe('token-refresh-secreto');
+    expect(session.tokenType).toBe('Bearer');
+    expect(session.expiresIn).toBe(900);
+    expect(session.usuario.rol).toBe('VISITANTE');
+  });
+
+  it('rechaza una respuesta exitosa incompatible con el contrato de sesión', async () => {
+    const fetcher = vi.fn<typeof fetch>(
+      async () =>
+        new Response(
+          JSON.stringify({
+            data: {
+              accessToken: 'token-acceso-secreto',
+              tokenType: 'Bearer',
+              expiresIn: 900,
+              usuario: {
+                id: 7,
+                nombre: 'Usuario Demo',
+                email: 'demo@zamorafest.ec',
+                rol: 'VISITANTE',
+              },
+            },
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+    );
+
+    const api = createZamoraFestApi({
+      baseUrl: 'http://127.0.0.1:3000',
+      fetcher: fetcher as typeof fetch,
+    });
+
+    await expect(
+      api.login({
+        email: 'demo@zamorafest.ec',
+        password: 'ClaveDemo123',
+      }),
+    ).rejects.toMatchObject({
+      name: 'ApiRequestError',
+      message:
+        'La API devolvió una respuesta incompatible con el contrato esperado.',
+      status: 200,
+    });
+  });
+
+  it('rechaza roles fuera del contrato autenticado', async () => {
+    const fetcher = vi.fn<typeof fetch>(
+      async () =>
+        new Response(
+          JSON.stringify({
+            data: {
+              accessToken: 'token-acceso-secreto',
+              refreshToken: 'token-refresh-secreto',
+              tokenType: 'Bearer',
+              expiresIn: 900,
+              usuario: {
+                id: 7,
+                nombre: 'Usuario Demo',
+                email: 'demo@zamorafest.ec',
+                rol: 'SUPERUSUARIO',
+              },
+            },
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+    );
+
+    const api = createZamoraFestApi({
+      baseUrl: 'http://127.0.0.1:3000',
+      fetcher: fetcher as typeof fetch,
+    });
+
+    await expect(
+      api.login({
+        email: 'demo@zamorafest.ec',
+        password: 'ClaveDemo123',
+      }),
+    ).rejects.toBeInstanceOf(ApiRequestError);
   });
 
   it('conserva el estado HTTP 401 sin devolver datos sensibles', async () => {
@@ -78,7 +179,9 @@ describe('contrato HTTP de login', () => {
           }),
           {
             status: 401,
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
         ),
     );

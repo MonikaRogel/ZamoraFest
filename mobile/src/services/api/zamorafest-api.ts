@@ -1,6 +1,7 @@
 import { getApiBaseUrl, parseApiBaseUrl } from '../../config/env';
 import type {
   AuthenticatedUser,
+  AuthSession,
   Canton,
   Categoria,
   Evento,
@@ -25,19 +26,13 @@ interface CreateApiOptions {
 }
 
 interface LoginEnvelope {
-  readonly data: {
-    readonly accessToken: string;
-    readonly refreshToken: string;
-    readonly tokenType: 'Bearer';
-    readonly expiresIn: number;
-    readonly usuario: AuthenticatedUser;
-  };
+  readonly data: AuthSession;
 }
 
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
   getEventos(): Promise<EventosResponse>;
-  login(input: LoginRequest): Promise<AuthenticatedUser>;
+  login(input: LoginRequest): Promise<AuthSession>;
 }
 
 export class ApiRequestError extends Error {
@@ -353,7 +348,7 @@ export function createZamoraFestApi(
         },
       );
 
-      return response.data.usuario;
+      return response.data;
     },
   };
 }

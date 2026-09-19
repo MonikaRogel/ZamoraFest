@@ -5,7 +5,7 @@ import {
   ApiRequestError,
   zamoraFestApi,
 } from '../services/api/zamorafest-api';
-import type { AuthenticatedUser } from '../types/api';
+import type { AuthSession } from '../types/api';
 import LoginPage from './LoginPage';
 
 vi.mock('../services/api/zamorafest-api', () => ({
@@ -96,6 +96,27 @@ describe('seguridad y errores de LoginPage', () => {
     );
   });
 
+  it('traduce HTTP 422 a un mensaje de corrección', async () => {
+    vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
+      new ApiRequestError('VALIDATION_ERROR', 422),
+    );
+
+    const { container } = render(<LoginPage />);
+    const form = completeForm(container);
+
+    fireEvent.submit(form);
+
+    expect(
+      await screen.findByText(
+        'Revise los datos ingresados e intente nuevamente.',
+      ),
+    ).toBeInTheDocument();
+
+    expect(container.textContent).not.toContain(
+      'VALIDATION_ERROR',
+    );
+  });
+
   it('traduce un fallo de conexión sin exponer detalles técnicos', async () => {
     vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
       new ApiRequestError('ECONNREFUSED 127.0.0.1', null),
@@ -118,9 +139,9 @@ describe('seguridad y errores de LoginPage', () => {
   });
 
   it('bloquea dos envíos consecutivos mientras existe una solicitud activa', async () => {
-    let resolveLogin!: (user: AuthenticatedUser) => void;
+    let resolveLogin!: (session: AuthSession) => void;
 
-    const pendingLogin = new Promise<AuthenticatedUser>((resolve) => {
+    const pendingLogin = new Promise<AuthSession>((resolve) => {
       resolveLogin = resolve;
     });
 
@@ -135,10 +156,16 @@ describe('seguridad y errores de LoginPage', () => {
     expect(zamoraFestApi.login).toHaveBeenCalledTimes(1);
 
     resolveLogin({
-      id: 7,
-      nombre: 'Usuario Demo',
-      email: 'usuario@zamorafest.ec',
-      rol: 'VISITANTE',
+      accessToken: 'token-acceso-secreto',
+      refreshToken: 'token-refresh-secreto',
+      tokenType: 'Bearer',
+      expiresIn: 900,
+      usuario: {
+        id: 7,
+        nombre: 'Usuario Demo',
+        email: 'usuario@zamorafest.ec',
+        rol: 'VISITANTE',
+      },
     });
 
     expect(
@@ -146,5 +173,12 @@ describe('seguridad y errores de LoginPage', () => {
         name: 'Acceso confirmado',
       }),
     ).toBeInTheDocument();
+
+    expect(container.textContent).not.toContain(
+      'token-acceso-secreto',
+    );
+    expect(container.textContent).not.toContain(
+      'token-refresh-secreto',
+    );
   });
 });
