@@ -4,7 +4,7 @@ import { Redirect, Route } from 'react-router-dom';
 
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
-import LoginPage from './pages/LoginPage';
+import LoginRoute from './routing/LoginRoute';
 import { ApplicationStateProvider } from './state/ApplicationStateContext';
 
 import '@ionic/react/css/core.css';
@@ -32,7 +32,7 @@ function App() {
             <Route
               exact
               path="/login"
-              component={LoginPage}
+              component={LoginRoute}
             />
 
             <Route

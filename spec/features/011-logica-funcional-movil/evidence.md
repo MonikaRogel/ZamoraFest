@@ -789,19 +789,126 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 24. Próxima evidencia a obtener
+## 24. Infraestructura de protección de rutas
 
-La siguiente fase corresponde a la protección de rutas.
+Durante Feature 011 se implementó la infraestructura de protección de navegación compatible con Ionic React Router y React Router 5.
 
-Se implementarán las tareas `T088` a `T097`:
+Se incorporó `ProtectedRoute` como guard reutilizable para distinguir:
 
-- protección compatible con Ionic React Router y React Router 5;
-- protección de `/gestion`;
-- protección de `/gestion/eventos/nuevo`;
-- conservación del destino solicitado;
-- redirección al login;
-- validación de destinos internos;
-- prevención de redirecciones abiertas;
-- retorno al destino pendiente;
-- mantenimiento de sesión ante `403`;
-- pruebas automatizadas de rutas protegidas.
+- usuario sin sesión;
+- usuario autenticado;
+- usuario autenticado con rol permitido;
+- usuario autenticado sin el rol requerido.
+
+Cuando no existe sesión, una ruta protegida genera una redirección hacia `/login` incluyendo el destino interno solicitado mediante el parámetro `redirect`.
+
+Ejemplo:
+
+`/gestion/eventos/nuevo`
+
+se transforma en:
+
+`/login?redirect=%2Fgestion%2Feventos%2Fnuevo`
+
+Se implementó una capa específica de seguridad de rutas mediante:
+
+- `sanitizeInternalAppDestination`;
+- `sanitizeProtectedDestination`;
+- `buildLoginRedirect`;
+- `resolvePostLoginDestination`.
+
+La validación no confía únicamente en que el destino comience con `/`.
+
+También comprueba que:
+
+- la ruta pertenezca a ZamoraFest;
+- sea una ruta interna reconocida;
+- las URLs absolutas externas sean rechazadas;
+- las URLs protocol-relative sean rechazadas;
+- las rutas desconocidas no se utilicen como destino de retorno.
+
+De esta manera se evita una vulnerabilidad de redirección abierta.
+
+También se implementó `LoginRoute`, responsable de integrar la pantalla de inicio de sesión con la navegación.
+
+`LoginRoute`:
+
+1. lee el parámetro `redirect`;
+2. valida que corresponda a un destino protegido permitido;
+3. conserva el destino en el estado global de aplicación;
+4. ejecuta el flujo normal de login;
+5. después de una autenticación correcta regresa al destino solicitado;
+6. elimina el destino pendiente después de utilizarlo;
+7. utiliza `/explore` como destino seguro cuando el retorno es inválido.
+
+El flujo conserva además la política de autorización definida para ZamoraFest.
+
+La ruta de creación de eventos requiere específicamente el rol:
+
+`ASISTENTE`
+
+Un usuario autenticado con un rol diferente no pierde su sesión.
+
+La falta de rol:
+
+- no ejecuta logout;
+- no elimina usuario ni tokens;
+- redirige hacia una pantalla pública segura.
+
+Esta distinción prepara el tratamiento explícito de `403 Forbidden` que se completará en la fase correspondiente.
+
+Se añadieron pruebas automatizadas para:
+
+- aceptación de rutas internas reconocidas;
+- conservación de query y hash;
+- rechazo de URLs externas absolutas;
+- rechazo de URLs protocol-relative;
+- rechazo de rutas internas desconocidas;
+- codificación del parámetro `redirect`;
+- fallback seguro;
+- redirección de usuario sin sesión;
+- conservación del destino anidado;
+- acceso con sesión;
+- autorización específica de `ASISTENTE`;
+- mantenimiento de sesión ante rol insuficiente;
+- conservación del destino en estado global;
+- retorno a `/gestion`;
+- retorno a `/gestion/eventos/nuevo`;
+- rechazo de redirect externo durante login.
+
+La verificación específica del bloque obtuvo:
+
+- 4 archivos de prueba aprobados;
+- 20 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 18 archivos de prueba aprobados;
+- 84 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas de:
+
+- procesamiento de `:host-context` de Ionic mediante LightningCSS;
+- tamaño de algunos chunks generados por Vite.
+
+Las tareas `T089` y `T090` permanecen pendientes hasta registrar las rutas reales `/gestion` y `/gestion/eventos/nuevo` con `ManagementPage` y `CreateEventPage`.
+
+Estado:
+
+`INFRAESTRUCTURA COMPLETADA Y VERIFICADA; REGISTRO DE RUTAS FINALES PENDIENTE`
+
+## 25. Próxima evidencia a obtener
+
+La siguiente fase inmediata corresponde a auditar y completar la evolución del login, tareas `T098` a `T105`.
+
+Varias de estas tareas ya fueron implementadas durante los bloques anteriores, por lo que primero se verificará su estado real antes de introducir cambios adicionales.

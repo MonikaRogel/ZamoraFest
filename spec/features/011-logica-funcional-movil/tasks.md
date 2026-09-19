@@ -122,16 +122,16 @@
 
 ## 9. Protección de rutas
 
-- [ ] T088 Implementar protección compatible con Ionic React Router y React Router 5.
+- [x] T088 Implementar protección compatible con Ionic React Router y React Router 5.
 - [ ] T089 Proteger `/gestion`.
 - [ ] T090 Proteger `/gestion/eventos/nuevo`.
-- [ ] T091 Conservar destino solicitado cuando no existe sesión.
-- [ ] T092 Redirigir al login cuando corresponde.
-- [ ] T093 Validar que el destino de retorno sea una ruta interna.
-- [ ] T094 Evitar redirecciones abiertas hacia URLs externas.
-- [ ] T095 Volver al destino protegido después de login exitoso cuando esté autorizado.
-- [ ] T096 Mantener sesión ante falta de rol.
-- [ ] T097 Añadir pruebas de rutas protegidas.
+- [x] T091 Conservar destino solicitado cuando no existe sesión.
+- [x] T092 Redirigir al login cuando corresponde.
+- [x] T093 Validar que el destino de retorno sea una ruta interna.
+- [x] T094 Evitar redirecciones abiertas hacia URLs externas.
+- [x] T095 Volver al destino protegido después de login exitoso cuando esté autorizado.
+- [x] T096 Mantener sesión ante falta de rol.
+- [x] T097 Añadir pruebas de rutas protegidas.
 
 ## 10. Evolución del login
 
