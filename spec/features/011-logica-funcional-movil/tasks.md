@@ -111,14 +111,14 @@
 
 ## 8. Estado remoto cerrado
 
-- [ ] T080 Definir tipo reusable `RemoteData` o equivalente.
-- [ ] T081 Incluir caso `idle`.
-- [ ] T082 Incluir caso `loading`.
-- [ ] T083 Incluir caso `success`.
-- [ ] T084 Incluir caso `error`.
-- [ ] T085 Evitar combinaciones de estado contradictorias mediante TypeScript.
-- [ ] T086 Integrar el estado remoto con `AsyncStateView`.
-- [ ] T087 Añadir pruebas del tipo y flujo remoto.
+- [x] T080 Definir tipo reusable `RemoteData` o equivalente.
+- [x] T081 Incluir caso `idle`.
+- [x] T082 Incluir caso `loading`.
+- [x] T083 Incluir caso `success`.
+- [x] T084 Incluir caso `error`.
+- [x] T085 Evitar combinaciones de estado contradictorias mediante TypeScript.
+- [x] T086 Integrar el estado remoto con `AsyncStateView`.
+- [x] T087 Añadir pruebas del tipo y flujo remoto.
 
 ## 9. Protección de rutas
 

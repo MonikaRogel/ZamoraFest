@@ -684,16 +684,124 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 23. Próxima evidencia a obtener
+## 23. Estado remoto cerrado
 
-La siguiente fase corresponde al modelado del estado remoto mediante un tipo cerrado y reutilizable.
+Durante Feature 011 se implementó un modelo reusable y cerrado para representar operaciones remotas.
 
-Se implementarán las tareas `T080` a `T087`:
+Se creó el tipo genérico:
+
+`RemoteData<T, E>`
+
+El modelo utiliza una unión discriminada mediante la propiedad `status` y contempla exclusivamente los estados:
+
+- `idle`;
+- `loading`;
+- `success`;
+- `error`.
+
+Cada estado contiene únicamente la información válida para ese momento del flujo.
+
+`idle` no contiene datos ni error.
+
+`loading` no contiene datos ni error.
+
+`success` contiene obligatoriamente los datos obtenidos.
+
+`error` contiene obligatoriamente la información del error.
+
+Esta estructura impide mediante TypeScript combinaciones contradictorias como:
+
+- carga y error simultáneos;
+- éxito sin datos;
+- error con datos de éxito;
+- estados booleanos independientes incompatibles entre sí.
+
+También se implementaron funciones auxiliares:
+
+- `remoteIdle`;
+- `remoteLoading`;
+- `remoteSuccess`;
+- `remoteError`.
+
+`ExploreEventsPage` fue migrada desde tres estados independientes:
+
+- eventos;
+- estado de carga;
+- mensaje de error;
+
+hacia un único:
+
+`RemoteData<readonly Evento[], string>`
+
+El flujo remoto de eventos quedó definido de la siguiente forma:
+
+1. la consulta inicia en `loading`;
+2. una respuesta válida produce `success`;
+3. un fallo produce `error`;
+4. los datos solo se consumen cuando el estado es `success`.
+
+`AsyncStateView` continúa siendo el componente reutilizable encargado de representar visualmente:
+
+- carga;
+- error;
+- ausencia de datos.
+
+El filtro por categoría permanece como estado efímero local de `ExploreEventsPage`, ya que no forma parte del estado remoto.
+
+Se implementaron pruebas para:
 
 - estado `idle`;
 - estado `loading`;
 - estado `success`;
 - estado `error`;
-- exclusión de combinaciones contradictorias;
-- integración con `AsyncStateView`;
-- pruebas automatizadas del flujo remoto.
+- discriminación del tipo;
+- integración con `ExploreEventsPage`;
+- integración con `AsyncStateView`.
+
+La verificación específica obtuvo:
+
+- 3 archivos de prueba aprobados;
+- 12 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 15 archivos de prueba aprobados;
+- 66 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente.
+
+Se mantienen únicamente advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` de Ionic mediante LightningCSS;
+- tamaño de algunos chunks de Vite.
+
+Estas advertencias no impidieron la generación del build.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 24. Próxima evidencia a obtener
+
+La siguiente fase corresponde a la protección de rutas.
+
+Se implementarán las tareas `T088` a `T097`:
+
+- protección compatible con Ionic React Router y React Router 5;
+- protección de `/gestion`;
+- protección de `/gestion/eventos/nuevo`;
+- conservación del destino solicitado;
+- redirección al login;
+- validación de destinos internos;
+- prevención de redirecciones abiertas;
+- retorno al destino pendiente;
+- mantenimiento de sesión ante `403`;
+- pruebas automatizadas de rutas protegidas.
