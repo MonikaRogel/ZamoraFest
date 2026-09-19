@@ -5,6 +5,7 @@ import {
   ApiRequestError,
   zamoraFestApi,
 } from '../services/api/zamorafest-api';
+import { ApplicationStateProvider } from '../state/ApplicationStateContext';
 import type { AuthSession } from '../types/api';
 import LoginPage from './LoginPage';
 
@@ -23,6 +24,14 @@ vi.mock('../services/api/zamorafest-api', () => ({
   },
 }));
 
+function renderLoginPage() {
+  return render(
+    <ApplicationStateProvider>
+      <LoginPage />
+    </ApplicationStateProvider>,
+  );
+}
+
 function completeForm(container: HTMLElement) {
   const inputs = container.querySelectorAll('ion-input');
   const form = container.querySelector('form');
@@ -34,7 +43,9 @@ function completeForm(container: HTMLElement) {
     inputs.item(0),
     new CustomEvent('ionInput', {
       bubbles: true,
-      detail: { value: 'usuario@zamorafest.ec' },
+      detail: {
+        value: 'usuario@zamorafest.ec',
+      },
     }),
   );
 
@@ -42,7 +53,9 @@ function completeForm(container: HTMLElement) {
     inputs.item(1),
     new CustomEvent('ionInput', {
       bubbles: true,
-      detail: { value: 'ClaveDemo123' },
+      detail: {
+        value: 'ClaveDemo123',
+      },
     }),
   );
 
@@ -56,10 +69,13 @@ describe('seguridad y errores de LoginPage', () => {
 
   it('muestra un mensaje genérico para credenciales inválidas 401', async () => {
     vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
-      new ApiRequestError('Detalle técnico del backend', 401),
+      new ApiRequestError(
+        'Detalle técnico del backend',
+        401,
+      ),
     );
 
-    const { container } = render(<LoginPage />);
+    const { container } = renderLoginPage();
     const form = completeForm(container);
 
     fireEvent.submit(form);
@@ -77,10 +93,13 @@ describe('seguridad y errores de LoginPage', () => {
 
   it('traduce HTTP 400 a un mensaje de corrección', async () => {
     vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
-      new ApiRequestError('VALIDATION_ERROR', 400),
+      new ApiRequestError(
+        'VALIDATION_ERROR',
+        400,
+      ),
     );
 
-    const { container } = render(<LoginPage />);
+    const { container } = renderLoginPage();
     const form = completeForm(container);
 
     fireEvent.submit(form);
@@ -98,10 +117,13 @@ describe('seguridad y errores de LoginPage', () => {
 
   it('traduce HTTP 422 a un mensaje de corrección', async () => {
     vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
-      new ApiRequestError('VALIDATION_ERROR', 422),
+      new ApiRequestError(
+        'VALIDATION_ERROR',
+        422,
+      ),
     );
 
-    const { container } = render(<LoginPage />);
+    const { container } = renderLoginPage();
     const form = completeForm(container);
 
     fireEvent.submit(form);
@@ -119,10 +141,13 @@ describe('seguridad y errores de LoginPage', () => {
 
   it('traduce un fallo de conexión sin exponer detalles técnicos', async () => {
     vi.mocked(zamoraFestApi.login).mockRejectedValueOnce(
-      new ApiRequestError('ECONNREFUSED 127.0.0.1', null),
+      new ApiRequestError(
+        'ECONNREFUSED 127.0.0.1',
+        null,
+      ),
     );
 
-    const { container } = render(<LoginPage />);
+    const { container } = renderLoginPage();
     const form = completeForm(container);
 
     fireEvent.submit(form);
@@ -145,9 +170,11 @@ describe('seguridad y errores de LoginPage', () => {
       resolveLogin = resolve;
     });
 
-    vi.mocked(zamoraFestApi.login).mockReturnValueOnce(pendingLogin);
+    vi.mocked(zamoraFestApi.login).mockReturnValueOnce(
+      pendingLogin,
+    );
 
-    const { container } = render(<LoginPage />);
+    const { container } = renderLoginPage();
     const form = completeForm(container);
 
     fireEvent.submit(form);
@@ -177,6 +204,7 @@ describe('seguridad y errores de LoginPage', () => {
     expect(container.textContent).not.toContain(
       'token-acceso-secreto',
     );
+
     expect(container.textContent).not.toContain(
       'token-refresh-secreto',
     );

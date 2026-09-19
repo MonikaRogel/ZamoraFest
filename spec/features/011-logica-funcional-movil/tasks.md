@@ -97,17 +97,17 @@
 
 ## 7. Estado global de aplicación
 
-- [ ] T069 Implementar contexto global de autenticación.
-- [ ] T070 Implementar reducer o mecanismo equivalente tipado para sesión.
-- [ ] T071 Implementar acción de inicio de sesión.
-- [ ] T072 Implementar acción de cierre de sesión.
-- [ ] T073 Exponer usuario autenticado.
-- [ ] T074 Exponer rol autenticado.
-- [ ] T075 Exponer tokens únicamente en memoria.
-- [ ] T076 Definir estado para destino protegido pendiente.
-- [ ] T077 Definir estado para borrador de creación de evento.
-- [ ] T078 Diferenciar estado efímero de estado de aplicación.
-- [ ] T079 Crear pruebas del estado global.
+- [x] T069 Implementar contexto global de autenticación.
+- [x] T070 Implementar reducer o mecanismo equivalente tipado para sesión.
+- [x] T071 Implementar acción de inicio de sesión.
+- [x] T072 Implementar acción de cierre de sesión.
+- [x] T073 Exponer usuario autenticado.
+- [x] T074 Exponer rol autenticado.
+- [x] T075 Exponer tokens únicamente en memoria.
+- [x] T076 Definir estado para destino protegido pendiente.
+- [x] T077 Definir estado para borrador de creación de evento.
+- [x] T078 Diferenciar estado efímero de estado de aplicación.
+- [x] T079 Crear pruebas del estado global.
 
 ## 8. Estado remoto cerrado
 

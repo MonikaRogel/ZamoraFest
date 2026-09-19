@@ -29,6 +29,7 @@ import {
   ApiRequestError,
   zamoraFestApi,
 } from '../services/api/zamorafest-api';
+import { useApplicationState } from '../state/ApplicationStateContext';
 import type { AuthenticatedUser } from '../types/api';
 
 import './LoginPage.css';
@@ -62,14 +63,18 @@ function getLoginErrorMessage(error: unknown): string {
 }
 
 function LoginPage({ onAuthenticated }: LoginPageProps) {
+  const {
+    login,
+    user: authenticatedUser,
+  } = useApplicationState();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState<string>();
   const [passwordError, setPasswordError] = useState<string>();
   const [requestError, setRequestError] = useState<string>();
-  const [authenticatedUser, setAuthenticatedUser] =
-    useState<AuthenticatedUser>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const inFlightRef = useRef(false);
 
   async function handleSubmit() {
@@ -98,10 +103,9 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
 
     try {
       const session = await zamoraFestApi.login(validation.input);
-      const user = session.usuario;
 
-      setAuthenticatedUser(user);
-      onAuthenticated?.(user);
+      login(session);
+      onAuthenticated?.(session.usuario);
     } catch (error) {
       setRequestError(getLoginErrorMessage(error));
     } finally {
@@ -110,7 +114,7 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
     }
   }
 
-  if (authenticatedUser !== undefined) {
+  if (authenticatedUser !== null) {
     return (
       <IonPage className="zf-auth-page">
         <IonHeader className="zf-auth-header">
@@ -121,7 +125,10 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
 
         <IonContent fullscreen className="zf-auth-content">
           <main className="zf-auth-shell">
-            <section className="zf-brand-block" aria-label="ZamoraFest">
+            <section
+              className="zf-brand-block"
+              aria-label="ZamoraFest"
+            >
               <div className="zf-mark" aria-hidden="true">
                 <IonIcon icon={leafOutline} />
               </div>
@@ -188,7 +195,10 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
 
       <IonContent fullscreen className="zf-auth-content">
         <main className="zf-auth-shell">
-          <section className="zf-brand-block" aria-label="ZamoraFest">
+          <section
+            className="zf-brand-block"
+            aria-label="ZamoraFest"
+          >
             <div className="zf-mark" aria-hidden="true">
               <IonIcon icon={leafOutline} />
             </div>
@@ -294,7 +304,10 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                 </IonList>
 
                 {requestError !== undefined && (
-                  <IonText className="zf-request-error" role="alert">
+                  <IonText
+                    className="zf-request-error"
+                    role="alert"
+                  >
                     <p>{requestError}</p>
                   </IonText>
                 )}

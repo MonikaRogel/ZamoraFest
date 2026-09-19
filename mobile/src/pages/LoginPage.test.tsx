@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { zamoraFestApi } from '../services/api/zamorafest-api';
+import { ApplicationStateProvider } from '../state/ApplicationStateContext';
 import LoginPage from './LoginPage';
 
 vi.mock('../services/api/zamorafest-api', () => ({
@@ -14,7 +15,7 @@ vi.mock('../services/api/zamorafest-api', () => ({
 }));
 
 describe('LoginPage', () => {
-  it('muestra el usuario seguro después de un login exitoso', async () => {
+  it('guarda la sesión global y muestra únicamente el usuario seguro', async () => {
     vi.mocked(zamoraFestApi.login).mockResolvedValueOnce({
       accessToken: 'token-acceso-secreto',
       refreshToken: 'token-refresh-secreto',
@@ -28,7 +29,11 @@ describe('LoginPage', () => {
       },
     });
 
-    const { container } = render(<LoginPage />);
+    const { container } = render(
+      <ApplicationStateProvider>
+        <LoginPage />
+      </ApplicationStateProvider>,
+    );
 
     const inputs = container.querySelectorAll('ion-input');
     const emailInput = inputs.item(0);
@@ -42,7 +47,9 @@ describe('LoginPage', () => {
       emailInput,
       new CustomEvent('ionInput', {
         bubbles: true,
-        detail: { value: '  DEMO@ZAMORAFEST.EC  ' },
+        detail: {
+          value: '  DEMO@ZAMORAFEST.EC  ',
+        },
       }),
     );
 
@@ -50,7 +57,9 @@ describe('LoginPage', () => {
       passwordInput,
       new CustomEvent('ionInput', {
         bubbles: true,
-        detail: { value: 'ClaveDemo123' },
+        detail: {
+          value: 'ClaveDemo123',
+        },
       }),
     );
 
@@ -63,6 +72,7 @@ describe('LoginPage', () => {
     ).toBeInTheDocument();
 
     expect(zamoraFestApi.login).toHaveBeenCalledTimes(1);
+
     expect(zamoraFestApi.login).toHaveBeenCalledWith({
       email: 'demo@zamorafest.ec',
       password: 'ClaveDemo123',
@@ -70,12 +80,15 @@ describe('LoginPage', () => {
 
     expect(screen.getByText('7')).toBeInTheDocument();
     expect(screen.getByText('Usuario Demo')).toBeInTheDocument();
-    expect(screen.getByText('demo@zamorafest.ec')).toBeInTheDocument();
+    expect(
+      screen.getByText('demo@zamorafest.ec'),
+    ).toBeInTheDocument();
     expect(screen.getByText('VISITANTE')).toBeInTheDocument();
 
     expect(container.textContent).not.toContain(
       'token-acceso-secreto',
     );
+
     expect(container.textContent).not.toContain(
       'token-refresh-secreto',
     );

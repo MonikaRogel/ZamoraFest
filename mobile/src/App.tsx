@@ -5,6 +5,7 @@ import { Redirect, Route } from 'react-router-dom';
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
 import LoginPage from './pages/LoginPage';
+import { ApplicationStateProvider } from './state/ApplicationStateContext';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -24,32 +25,37 @@ setupIonicReact();
 
 function App() {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route
-            exact
-            path="/login"
-            component={LoginPage}
-          />
-          <Route
-            exact
-            path="/environment"
-            component={EnvironmentStatusPage}
-          />
-          <Route
-            exact
-            path="/explore"
-            component={ExploreEventsPage}
-          />
-          <Route
-            exact
-            path="/"
-            render={() => <Redirect to="/login" />}
-          />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <ApplicationStateProvider>
+      <IonApp>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            <Route
+              exact
+              path="/login"
+              component={LoginPage}
+            />
+
+            <Route
+              exact
+              path="/environment"
+              component={EnvironmentStatusPage}
+            />
+
+            <Route
+              exact
+              path="/explore"
+              component={ExploreEventsPage}
+            />
+
+            <Route
+              exact
+              path="/"
+              render={() => <Redirect to="/login" />}
+            />
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </ApplicationStateProvider>
   );
 }
 

@@ -573,18 +573,127 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 22. Próxima evidencia a obtener
+## 22. Estado global de aplicación
 
-La siguiente fase corresponde al estado global de aplicación:
+Durante Feature 011 se implementó un estado global de aplicación basado en React Context y `useReducer`.
 
-- contexto global de autenticación;
-- reducer tipado;
-- inicio y cierre de sesión;
-- exposición del usuario y rol autenticado;
-- conservación de tokens únicamente en memoria;
+La aplicación incorpora:
+
+- `ApplicationStateProvider`;
+- `useApplicationState`;
+- `applicationReducer`;
+- estado inicial tipado;
+- acciones explícitas para login, logout, destino pendiente y borrador de evento.
+
+La sesión autenticada se conserva únicamente en memoria y contiene:
+
+- usuario autenticado;
+- rol;
+- access token;
+- refresh token;
+- tipo de token;
+- expiración.
+
+El contexto expone de forma centralizada:
+
+- `session`;
+- `user`;
+- `role`;
+- `accessToken`;
+- `refreshToken`;
+- `pendingDestination`;
+- `eventDraft`.
+
+El inicio de sesión incorpora la sesión completa mediante la acción `LOGIN`.
+
+El cierre de sesión mediante `LOGOUT` elimina:
+
+- sesión;
+- usuario;
+- tokens;
 - destino protegido pendiente;
-- borrador de creación de evento;
-- separación entre estado efímero y estado de aplicación;
-- pruebas automatizadas del estado global.
+- borrador del evento.
 
-Esta fase corresponde a las tareas `T069` a `T079`.
+También se definió un estado compartido para conservar el destino protegido solicitado y poder utilizarlo posteriormente durante la navegación autenticada.
+
+El borrador de creación de evento se mantiene como estado de aplicación para evitar pérdida de información durante la navegación entre pantallas.
+
+Se diferenció explícitamente el estado efímero del estado de aplicación.
+
+En `LoginPage` permanecen como estado efímero local:
+
+- correo electrónico;
+- contraseña;
+- errores de campos;
+- error de solicitud;
+- estado de envío.
+
+En el estado global permanecen:
+
+- sesión;
+- usuario;
+- rol;
+- tokens;
+- destino protegido pendiente;
+- borrador del evento.
+
+`App.tsx` incorpora `ApplicationStateProvider` por encima de las rutas, permitiendo que las pantallas compartan el mismo estado de aplicación.
+
+`LoginPage` dejó de conservar localmente el usuario autenticado. Después de una autenticación correcta, la sesión completa se incorpora al estado global mediante `login(session)`.
+
+Se implementaron pruebas específicas para:
+
+- reducer;
+- login;
+- logout;
+- usuario y rol;
+- tokens en memoria;
+- destino pendiente;
+- borrador de evento;
+- integración de `LoginPage`;
+- integración del provider con `App`.
+
+La verificación específica del bloque obtuvo:
+
+- 5 archivos de prueba aprobados;
+- 17 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 14 archivos de prueba aprobados;
+- 61 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente.
+
+Se mantienen las advertencias no bloqueantes ya identificadas anteriormente relacionadas con:
+
+- procesamiento de `:host-context` de Ionic mediante LightningCSS;
+- tamaño de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build y no fueron introducidas por el estado global.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 23. Próxima evidencia a obtener
+
+La siguiente fase corresponde al modelado del estado remoto mediante un tipo cerrado y reutilizable.
+
+Se implementarán las tareas `T080` a `T087`:
+
+- estado `idle`;
+- estado `loading`;
+- estado `success`;
+- estado `error`;
+- exclusión de combinaciones contradictorias;
+- integración con `AsyncStateView`;
+- pruebas automatizadas del flujo remoto.
