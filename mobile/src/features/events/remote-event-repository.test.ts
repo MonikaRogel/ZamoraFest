@@ -5,7 +5,9 @@ import {
   vi,
 } from 'vitest';
 
-import { ApiRequestError } from '../../services/api/zamorafest-api';
+import {
+  ApiRequestError,
+} from '../../services/api/zamorafest-api';
 import type {
   Evento,
   EventosResponse,
@@ -19,15 +21,18 @@ import {
 
 const event: Evento = {
   id: 1,
-  titulo: 'Festival Cultural de Zamora',
+  titulo:
+    'Festival Cultural de Zamora',
   descripcion:
     'Música, danza y tradiciones locales.',
   fechaInicio:
     '2026-09-20T18:00:00.000Z',
   fechaFin: null,
   costoReferencial: 0,
-  estadoEvento: 'PROGRAMADO',
-  estadoRevision: 'APROBADO',
+  estadoEvento:
+    'PROGRAMADO',
+  estadoRevision:
+    'APROBADO',
   fuenteInformacion: null,
   fechaCreacion:
     '2026-09-01T12:00:00.000Z',
@@ -36,8 +41,10 @@ const event: Evento = {
   fechaRevision: null,
   lugar: {
     id: 1,
-    nombre: 'Parque Central de Zamora',
-    tipoLugar: 'PARQUE',
+    nombre:
+      'Parque Central de Zamora',
+    tipoLugar:
+      'PARQUE',
     direccionReferencial:
       'Centro de Zamora',
     referencia: null,
@@ -45,21 +52,28 @@ const event: Evento = {
     longitud: -78.956,
     sector: {
       id: 1,
-      nombre: 'Centro',
-      tipoSector: 'URBANO',
+      nombre:
+        'Centro',
+      tipoSector:
+        'URBANO',
       parroquia: {
         id: 1,
-        nombre: 'Zamora',
-        codigoDpa: '190101',
+        nombre:
+          'Zamora',
+        codigoDpa:
+          '190101',
         canton: {
           id: 1,
-          nombre: 'Zamora',
-          codigoDpa: '1901',
+          nombre:
+            'Zamora',
+          codigoDpa:
+            '1901',
           provincia: {
             id: 1,
             nombre:
               'Zamora Chinchipe',
-            codigoDpa: '19',
+            codigoDpa:
+              '19',
           },
         },
       },
@@ -71,21 +85,26 @@ const event: Evento = {
       'Gestor Cultural',
     rol: {
       id: 2,
-      nombre: 'ASISTENTE',
+      nombre:
+        'ASISTENTE',
     },
   },
   usuarioRevisor: null,
   categorias: [
     {
       id: 1,
-      nombre: 'Cultura',
+      nombre:
+        'Cultura',
       descripcion: null,
     },
   ],
 };
 
-const response: EventosResponse = {
-  data: [event],
+const response:
+  EventosResponse = {
+  data: [
+    event,
+  ],
   meta: {
     page: 1,
     limit: 5,
@@ -94,6 +113,10 @@ const response: EventosResponse = {
   },
 };
 
+function createGetEventoByIdMock() {
+  return vi.fn();
+}
+
 describe(
   'RemoteEventRepository',
   () => {
@@ -101,13 +124,18 @@ describe(
       'obtiene eventos mediante la capa HTTP y devuelve únicamente los datos',
       async () => {
         const getEventos =
-          vi.fn().mockResolvedValueOnce(
-            response,
-          );
+          vi.fn()
+            .mockResolvedValueOnce(
+              response,
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
 
         const repository =
           createRemoteEventRepository({
             getEventos,
+            getEventoById,
           });
 
         await expect(
@@ -118,7 +146,13 @@ describe(
 
         expect(
           getEventos,
-        ).toHaveBeenCalledTimes(1);
+        ).toHaveBeenCalledTimes(
+          1,
+        );
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
       },
     );
 
@@ -126,16 +160,21 @@ describe(
       'traduce un fallo de conexión',
       async () => {
         const getEventos =
-          vi.fn().mockRejectedValueOnce(
-            new ApiRequestError(
-              'Network error',
-              null,
-            ),
-          );
+          vi.fn()
+            .mockRejectedValueOnce(
+              new ApiRequestError(
+                'Network error',
+                null,
+              ),
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
 
         const repository =
           createRemoteEventRepository({
             getEventos,
+            getEventoById,
           });
 
         await expect(
@@ -143,9 +182,14 @@ describe(
         ).rejects.toMatchObject({
           name:
             'EventRepositoryError',
-          kind: 'connection',
+          kind:
+            'connection',
           status: null,
         });
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
       },
     );
 
@@ -153,16 +197,21 @@ describe(
       'traduce un error HTTP 5xx como fallo del servidor',
       async () => {
         const getEventos =
-          vi.fn().mockRejectedValueOnce(
-            new ApiRequestError(
-              'HTTP 503',
-              503,
-            ),
-          );
+          vi.fn()
+            .mockRejectedValueOnce(
+              new ApiRequestError(
+                'HTTP 503',
+                503,
+              ),
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
 
         const repository =
           createRemoteEventRepository({
             getEventos,
+            getEventoById,
           });
 
         await expect(
@@ -170,9 +219,14 @@ describe(
         ).rejects.toMatchObject({
           name:
             'EventRepositoryError',
-          kind: 'server',
+          kind:
+            'server',
           status: 503,
         });
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
       },
     );
 
@@ -180,16 +234,21 @@ describe(
       'traduce un error HTTP no 5xx como rechazo de solicitud',
       async () => {
         const getEventos =
-          vi.fn().mockRejectedValueOnce(
-            new ApiRequestError(
-              'HTTP 400',
-              400,
-            ),
-          );
+          vi.fn()
+            .mockRejectedValueOnce(
+              new ApiRequestError(
+                'HTTP 400',
+                400,
+              ),
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
 
         const repository =
           createRemoteEventRepository({
             getEventos,
+            getEventoById,
           });
 
         await expect(
@@ -197,9 +256,14 @@ describe(
         ).rejects.toMatchObject({
           name:
             'EventRepositoryError',
-          kind: 'request',
+          kind:
+            'request',
           status: 400,
         });
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
       },
     );
 
@@ -207,15 +271,20 @@ describe(
       'encapsula errores inesperados sin exponer la implementación HTTP',
       async () => {
         const getEventos =
-          vi.fn().mockRejectedValueOnce(
-            new TypeError(
-              'Unexpected failure',
-            ),
-          );
+          vi.fn()
+            .mockRejectedValueOnce(
+              new TypeError(
+                'Unexpected failure',
+              ),
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
 
         const repository =
           createRemoteEventRepository({
             getEventos,
+            getEventoById,
           });
 
         const request =
@@ -230,9 +299,14 @@ describe(
         await expect(
           request,
         ).rejects.toMatchObject({
-          kind: 'unexpected',
+          kind:
+            'unexpected',
           status: null,
         });
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
       },
     );
   },

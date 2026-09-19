@@ -10,7 +10,7 @@ import {
 
 type EventsApi = Pick<
   ZamoraFestApi,
-  'getEventos'
+  'getEventos' | 'getEventoById'
 >;
 
 function mapRemoteError(
@@ -62,6 +62,25 @@ export function createRemoteEventRepository(
 
         return response.data;
       } catch (error) {
+        throw mapRemoteError(error);
+      }
+    },
+
+    async getEventById(
+      id: number,
+    ) {
+      try {
+        return await api.getEventoById(
+          id,
+        );
+      } catch (error) {
+        if (
+          error instanceof ApiRequestError &&
+          error.status === 404
+        ) {
+          return null;
+        }
+
         throw mapRemoteError(error);
       }
     },

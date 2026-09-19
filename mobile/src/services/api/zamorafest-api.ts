@@ -1,4 +1,7 @@
-import { getApiBaseUrl, parseApiBaseUrl } from '../../config/env';
+import {
+  getApiBaseUrl,
+  parseApiBaseUrl,
+} from '../../config/env';
 import type {
   AuthenticatedUser,
   AuthSession,
@@ -20,7 +23,9 @@ import type {
 } from '../../types/api';
 
 type Fetcher = typeof fetch;
-type ResponseValidator<T> = (value: unknown) => value is T;
+
+type ResponseValidator<T> =
+  (value: unknown) => value is T;
 
 interface CreateApiOptions {
   readonly baseUrl?: string;
@@ -35,16 +40,30 @@ interface RegisterEnvelope {
   readonly data: RegisteredVisitor;
 }
 
+interface EventoEnvelope {
+  readonly data: Evento;
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
+
   getEventos(): Promise<EventosResponse>;
-  login(input: LoginRequest): Promise<AuthSession>;
+
+  getEventoById(
+    id: number,
+  ): Promise<Evento>;
+
+  login(
+    input: LoginRequest,
+  ): Promise<AuthSession>;
+
   register(
     input: RegisterRequest,
   ): Promise<RegisteredVisitor>;
 }
 
-export class ApiRequestError extends Error {
+export class ApiRequestError
+  extends Error {
   readonly status: number | null;
 
   constructor(
@@ -52,52 +71,87 @@ export class ApiRequestError extends Error {
     status: number | null = null,
     options?: ErrorOptions,
   ) {
-    super(message, options);
-    this.name = 'ApiRequestError';
-    this.status = status;
+    super(
+      message,
+      options,
+    );
+
+    this.name =
+      'ApiRequestError';
+
+    this.status =
+      status;
   }
 }
 
 function isRecord(
   value: unknown,
-): value is Record<string, unknown> {
+): value is Record<
+  string,
+  unknown
+> {
   return (
-    typeof value === 'object' &&
+    typeof value ===
+      'object' &&
     value !== null &&
-    !Array.isArray(value)
+    !Array.isArray(
+      value,
+    )
   );
 }
 
-function isString(value: unknown): value is string {
-  return typeof value === 'string';
+function isString(
+  value: unknown,
+): value is string {
+  return (
+    typeof value ===
+    'string'
+  );
 }
 
 function isNullableString(
   value: unknown,
 ): value is string | null {
-  return value === null || isString(value);
+  return (
+    value === null ||
+    isString(value)
+  );
 }
 
 function isFiniteNumber(
   value: unknown,
 ): value is number {
   return (
-    typeof value === 'number' &&
-    Number.isFinite(value)
+    typeof value ===
+      'number' &&
+    Number.isFinite(
+      value,
+    )
   );
 }
 
-function isInteger(value: unknown): value is number {
+function isInteger(
+  value: unknown,
+): value is number {
   return (
-    isFiniteNumber(value) &&
-    Number.isInteger(value)
+    isFiniteNumber(
+      value,
+    ) &&
+    Number.isInteger(
+      value,
+    )
   );
 }
 
 function isNullableNumber(
   value: unknown,
 ): value is number | null {
-  return value === null || isFiniteNumber(value);
+  return (
+    value === null ||
+    isFiniteNumber(
+      value,
+    )
+  );
 }
 
 function isProvincia(
@@ -105,9 +159,15 @@ function isProvincia(
 ): value is Provincia {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isString(value.codigoDpa)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.codigoDpa,
+    )
   );
 }
 
@@ -116,10 +176,18 @@ function isCanton(
 ): value is Canton {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isString(value.codigoDpa) &&
-    isProvincia(value.provincia)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.codigoDpa,
+    ) &&
+    isProvincia(
+      value.provincia,
+    )
   );
 }
 
@@ -128,10 +196,18 @@ function isParroquia(
 ): value is Parroquia {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isString(value.codigoDpa) &&
-    isCanton(value.canton)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.codigoDpa,
+    ) &&
+    isCanton(
+      value.canton,
+    )
   );
 }
 
@@ -140,10 +216,18 @@ function isSector(
 ): value is Sector {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isString(value.tipoSector) &&
-    isParroquia(value.parroquia)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.tipoSector,
+    ) &&
+    isParroquia(
+      value.parroquia,
+    )
   );
 }
 
@@ -152,14 +236,31 @@ function isLugar(
 ): value is Lugar {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isString(value.tipoLugar) &&
-    isString(value.direccionReferencial) &&
-    isNullableString(value.referencia) &&
-    isNullableNumber(value.latitud) &&
-    isNullableNumber(value.longitud) &&
-    isSector(value.sector)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.tipoLugar,
+    ) &&
+    isString(
+      value
+        .direccionReferencial,
+    ) &&
+    isNullableString(
+      value.referencia,
+    ) &&
+    isNullableNumber(
+      value.latitud,
+    ) &&
+    isNullableNumber(
+      value.longitud,
+    ) &&
+    isSector(
+      value.sector,
+    )
   );
 }
 
@@ -168,8 +269,12 @@ function isRolResumen(
 ): value is RolResumen {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    )
   );
 }
 
@@ -178,18 +283,28 @@ function isUsuarioResumen(
 ): value is UsuarioResumen {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombreCompleto) &&
-    isRolResumen(value.rol)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombreCompleto,
+    ) &&
+    isRolResumen(
+      value.rol,
+    )
   );
 }
 
 function isNullableUsuario(
   value: unknown,
-): value is UsuarioResumen | null {
+): value is
+  | UsuarioResumen
+  | null {
   return (
     value === null ||
-    isUsuarioResumen(value)
+    isUsuarioResumen(
+      value,
+    )
   );
 }
 
@@ -198,9 +313,15 @@ function isCategoria(
 ): value is Categoria {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.nombre) &&
-    isNullableString(value.descripcion)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isNullableString(
+      value.descripcion,
+    )
   );
 }
 
@@ -209,23 +330,60 @@ function isEvento(
 ): value is Evento {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
-    isString(value.titulo) &&
-    isString(value.descripcion) &&
-    isString(value.fechaInicio) &&
-    isNullableString(value.fechaFin) &&
-    isFiniteNumber(value.costoReferencial) &&
-    isString(value.estadoEvento) &&
-    isString(value.estadoRevision) &&
-    isNullableString(value.fuenteInformacion) &&
-    isString(value.fechaCreacion) &&
-    isString(value.fechaActualizacion) &&
-    isNullableString(value.fechaRevision) &&
-    isLugar(value.lugar) &&
-    isUsuarioResumen(value.usuarioCreador) &&
-    isNullableUsuario(value.usuarioRevisor) &&
-    Array.isArray(value.categorias) &&
-    value.categorias.every(isCategoria)
+    isInteger(
+      value.id,
+    ) &&
+    isString(
+      value.titulo,
+    ) &&
+    isNullableString(
+      value.descripcion,
+    ) &&
+    isString(
+      value.fechaInicio,
+    ) &&
+    isNullableString(
+      value.fechaFin,
+    ) &&
+    isFiniteNumber(
+      value
+        .costoReferencial,
+    ) &&
+    isString(
+      value.estadoEvento,
+    ) &&
+    isString(
+      value.estadoRevision,
+    ) &&
+    isNullableString(
+      value
+        .fuenteInformacion,
+    ) &&
+    isString(
+      value.fechaCreacion,
+    ) &&
+    isNullableString(
+      value
+        .fechaActualizacion,
+    ) &&
+    isNullableString(
+      value.fechaRevision,
+    ) &&
+    isLugar(
+      value.lugar,
+    ) &&
+    isUsuarioResumen(
+      value.usuarioCreador,
+    ) &&
+    isNullableUsuario(
+      value.usuarioRevisor,
+    ) &&
+    Array.isArray(
+      value.categorias,
+    ) &&
+    value.categorias.every(
+      isCategoria,
+    )
   );
 }
 
@@ -234,10 +392,18 @@ function isPaginationMeta(
 ): value is PaginationMeta {
   return (
     isRecord(value) &&
-    isInteger(value.page) &&
-    isInteger(value.limit) &&
-    isInteger(value.total) &&
-    isInteger(value.totalPages)
+    isInteger(
+      value.page,
+    ) &&
+    isInteger(
+      value.limit,
+    ) &&
+    isInteger(
+      value.total,
+    ) &&
+    isInteger(
+      value.totalPages,
+    )
   );
 }
 
@@ -246,18 +412,24 @@ function isHealthResponse(
 ): value is HealthResponse {
   return (
     isRecord(value) &&
-    value.status === 'ok' &&
-    value.service === 'zamorafest-backend'
+    value.status ===
+      'ok' &&
+    value.service ===
+      'zamorafest-backend'
   );
 }
 
 function isAuthRole(
   value: unknown,
-): value is AuthenticatedUser['rol'] {
+): value is
+  AuthenticatedUser['rol'] {
   return (
-    value === 'VISITANTE' ||
-    value === 'ASISTENTE' ||
-    value === 'ADMINISTRADOR'
+    value ===
+      'VISITANTE' ||
+    value ===
+      'ASISTENTE' ||
+    value ===
+      'ADMINISTRADOR'
   );
 }
 
@@ -266,13 +438,23 @@ function isAuthenticatedUser(
 ): value is AuthenticatedUser {
   return (
     isRecord(value) &&
-    isInteger(value.id) &&
+    isInteger(
+      value.id,
+    ) &&
     value.id > 0 &&
-    isString(value.nombre) &&
-    value.nombre.length > 0 &&
-    isString(value.email) &&
-    value.email.length > 0 &&
-    isAuthRole(value.rol)
+    isString(
+      value.nombre,
+    ) &&
+    value.nombre.length >
+      0 &&
+    isString(
+      value.email,
+    ) &&
+    value.email.length >
+      0 &&
+    isAuthRole(
+      value.rol,
+    )
   );
 }
 
@@ -280,8 +462,11 @@ function isRegisteredVisitor(
   value: unknown,
 ): value is RegisteredVisitor {
   return (
-    isAuthenticatedUser(value) &&
-    value.rol === 'VISITANTE'
+    isAuthenticatedUser(
+      value,
+    ) &&
+    value.rol ===
+      'VISITANTE'
   );
 }
 
@@ -290,22 +475,37 @@ function isLoginEnvelope(
 ): value is LoginEnvelope {
   if (
     !isRecord(value) ||
-    !isRecord(value.data)
+    !isRecord(
+      value.data,
+    )
   ) {
     return false;
   }
 
-  const data = value.data;
+  const data =
+    value.data;
 
   return (
-    isString(data.accessToken) &&
-    data.accessToken.length > 0 &&
-    isString(data.refreshToken) &&
-    data.refreshToken.length > 0 &&
-    data.tokenType === 'Bearer' &&
-    isInteger(data.expiresIn) &&
-    data.expiresIn > 0 &&
-    isAuthenticatedUser(data.usuario)
+    isString(
+      data.accessToken,
+    ) &&
+    data.accessToken.length >
+      0 &&
+    isString(
+      data.refreshToken,
+    ) &&
+    data.refreshToken.length >
+      0 &&
+    data.tokenType ===
+      'Bearer' &&
+    isInteger(
+      data.expiresIn,
+    ) &&
+    data.expiresIn >
+      0 &&
+    isAuthenticatedUser(
+      data.usuario,
+    )
   );
 }
 
@@ -314,7 +514,9 @@ function isRegisterEnvelope(
 ): value is RegisterEnvelope {
   return (
     isRecord(value) &&
-    isRegisteredVisitor(value.data)
+    isRegisteredVisitor(
+      value.data,
+    )
   );
 }
 
@@ -323,58 +525,92 @@ function isEventosResponse(
 ): value is EventosResponse {
   return (
     isRecord(value) &&
-    Array.isArray(value.data) &&
-    value.data.every(isEvento) &&
-    isPaginationMeta(value.meta)
+    Array.isArray(
+      value.data,
+    ) &&
+    value.data.every(
+      isEvento,
+    ) &&
+    isPaginationMeta(
+      value.meta,
+    )
+  );
+}
+
+function isEventoEnvelope(
+  value: unknown,
+): value is EventoEnvelope {
+  return (
+    isRecord(value) &&
+    isEvento(
+      value.data,
+    )
   );
 }
 
 async function requestJson<T>(
   url: URL,
-  validator: ResponseValidator<T>,
+  validator:
+    ResponseValidator<T>,
   fetcher: Fetcher,
   init: RequestInit = {
     method: 'GET',
     headers: {
-      Accept: 'application/json',
+      Accept:
+        'application/json',
     },
   },
 ): Promise<T> {
-  let response: Response;
+  let response:
+    Response;
 
   try {
-    response = await fetcher(
-      url,
-      init,
-    );
+    response =
+      await fetcher(
+        url,
+        init,
+      );
   } catch (cause) {
     throw new ApiRequestError(
       'No se pudo establecer conexión con la API.',
       null,
-      { cause },
+      {
+        cause,
+      },
     );
   }
 
-  if (!response.ok) {
+  if (
+    !response.ok
+  ) {
     throw new ApiRequestError(
       `La API respondió con el estado HTTP ${response.status}.`,
       response.status,
     );
   }
 
-  let payload: unknown;
+  let payload:
+    unknown;
 
   try {
-    payload = await response.json();
+    payload =
+      await response
+        .json();
   } catch (cause) {
     throw new ApiRequestError(
       'La API devolvió una respuesta que no contiene JSON válido.',
       response.status,
-      { cause },
+      {
+        cause,
+      },
     );
   }
 
-  if (!validator(payload)) {
+  if (
+    !validator(
+      payload,
+    )
+  ) {
     throw new ApiRequestError(
       'La API devolvió una respuesta incompatible con el contrato esperado.',
       response.status,
@@ -385,26 +621,34 @@ async function requestJson<T>(
 }
 
 export function createZamoraFestApi(
-  options: CreateApiOptions = {},
+  options:
+    CreateApiOptions = {},
 ): ZamoraFestApi {
   const fetcher =
     options.fetcher ??
-    globalThis.fetch.bind(globalThis);
+    globalThis.fetch.bind(
+      globalThis,
+    );
 
-  function resolveBaseUrl(): string {
-    return options.baseUrl === undefined
-      ? getApiBaseUrl()
-      : parseApiBaseUrl(
-          options.baseUrl,
-        );
+  function resolveBaseUrl():
+    string {
+    return (
+      options.baseUrl ===
+      undefined
+        ? getApiBaseUrl()
+        : parseApiBaseUrl(
+            options.baseUrl,
+          )
+    );
   }
 
   return {
     getHealth() {
-      const url = new URL(
-        '/api/v1/health',
-        resolveBaseUrl(),
-      );
+      const url =
+        new URL(
+          '/api/v1/health',
+          resolveBaseUrl(),
+        );
 
       return requestJson(
         url,
@@ -414,10 +658,11 @@ export function createZamoraFestApi(
     },
 
     getEventos() {
-      const url = new URL(
-        '/api/v1/eventos',
-        resolveBaseUrl(),
-      );
+      const url =
+        new URL(
+          '/api/v1/eventos',
+          resolveBaseUrl(),
+        );
 
       url.searchParams.set(
         'page',
@@ -436,13 +681,34 @@ export function createZamoraFestApi(
       );
     },
 
-    async login(
-      input: LoginRequest,
+    getEventoById(
+      id: number,
     ) {
-      const url = new URL(
-        '/api/v1/auth/login',
-        resolveBaseUrl(),
+      const url =
+        new URL(
+          `/api/v1/eventos/${id}`,
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isEventoEnvelope,
+        fetcher,
+      ).then(
+        (response) =>
+          response.data,
       );
+    },
+
+    async login(
+      input:
+        LoginRequest,
+    ) {
+      const url =
+        new URL(
+          '/api/v1/auth/login',
+          resolveBaseUrl(),
+        );
 
       const response =
         await requestJson(
@@ -450,46 +716,53 @@ export function createZamoraFestApi(
           isLoginEnvelope,
           fetcher,
           {
-            method: 'POST',
+            method:
+              'POST',
             headers: {
               Accept:
                 'application/json',
               'Content-Type':
                 'application/json',
             },
-            body: JSON.stringify(
-              input,
-            ),
+            body:
+              JSON.stringify(
+                input,
+              ),
           },
         );
 
-      return response.data;
+      return (
+        response.data
+      );
     },
 
     async register(
-      input: RegisterRequest,
+      input:
+        RegisterRequest,
     ) {
-      const url = new URL(
-        '/api/v1/auth/register',
-        resolveBaseUrl(),
-      );
+      const url =
+        new URL(
+          '/api/v1/auth/register',
+          resolveBaseUrl(),
+        );
 
       /*
-       * Se reconstruye expresamente el
-       * cuerpo permitido por el backend.
+       * Se reconstruye
+       * expresamente el cuerpo
+       * permitido por el backend.
        *
-       * De esta manera no pueden enviarse
-       * accidentalmente propiedades como:
-       *
-       * rol
-       * idRol
-       * estado
-       * u otros atributos privilegiados.
+       * De esta manera no pueden
+       * enviarse accidentalmente
+       * propiedades privilegiadas.
        */
-      const safeInput: RegisterRequest = {
-        nombre: input.nombre,
-        email: input.email,
-        password: input.password,
+      const safeInput:
+        RegisterRequest = {
+        nombre:
+          input.nombre,
+        email:
+          input.email,
+        password:
+          input.password,
       };
 
       const response =
@@ -498,46 +771,76 @@ export function createZamoraFestApi(
           isRegisterEnvelope,
           fetcher,
           {
-            method: 'POST',
+            method:
+              'POST',
             headers: {
               Accept:
                 'application/json',
               'Content-Type':
                 'application/json',
             },
-            body: JSON.stringify(
-              safeInput,
-            ),
+            body:
+              JSON.stringify(
+                safeInput,
+              ),
           },
         );
 
-      return response.data;
+      return (
+        response.data
+      );
     },
   };
 }
 
-export const zamoraFestApi: ZamoraFestApi = {
+export const zamoraFestApi:
+  ZamoraFestApi = {
   getHealth() {
-    return createZamoraFestApi().getHealth();
+    return (
+      createZamoraFestApi()
+        .getHealth()
+    );
   },
 
   getEventos() {
-    return createZamoraFestApi().getEventos();
+    return (
+      createZamoraFestApi()
+        .getEventos()
+    );
+  },
+
+  getEventoById(
+    id: number,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getEventoById(
+          id,
+        )
+    );
   },
 
   login(
-    input: LoginRequest,
+    input:
+      LoginRequest,
   ) {
-    return createZamoraFestApi().login(
-      input,
+    return (
+      createZamoraFestApi()
+        .login(
+          input,
+        )
     );
   },
 
   register(
-    input: RegisterRequest,
+    input:
+      RegisterRequest,
   ) {
-    return createZamoraFestApi().register(
-      input,
+    return (
+      createZamoraFestApi()
+        .register(
+          input,
+        )
     );
   },
 };

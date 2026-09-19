@@ -167,19 +167,19 @@
 
 ## 13. Detalle de evento
 
-- [ ] T121 Crear `EventDetailPage`.
-- [ ] T122 Registrar ruta pública `/eventos/:id`.
-- [ ] T123 Leer únicamente `id` desde la ruta.
-- [ ] T124 Validar identificador entero positivo.
-- [ ] T125 Implementar `GET /api/v1/eventos/:id` en la capa de datos.
-- [ ] T126 Representar loading.
-- [ ] T127 Representar error.
-- [ ] T128 Representar evento no encontrado.
-- [ ] T129 Representar éxito.
-- [ ] T130 Permitir apertura directa de `/eventos/:id`.
-- [ ] T131 Conectar navegación desde `ExploreEventsPage`.
-- [ ] T132 Mantener `EventCard` independiente de rutas.
-- [ ] T133 Implementar pruebas de detalle y navegación.
+- [x] T121 Crear `EventDetailPage`.
+- [x] T122 Registrar ruta pública `/eventos/:id`.
+- [x] T123 Leer únicamente `id` desde la ruta.
+- [x] T124 Validar identificador entero positivo.
+- [x] T125 Implementar `GET /api/v1/eventos/:id` en la capa de datos.
+- [x] T126 Representar loading.
+- [x] T127 Representar error.
+- [x] T128 Representar evento no encontrado.
+- [x] T129 Representar éxito.
+- [x] T130 Permitir apertura directa de `/eventos/:id`.
+- [x] T131 Conectar navegación desde `ExploreEventsPage`.
+- [x] T132 Mantener `EventCard` independiente de rutas.
+- [x] T133 Implementar pruebas de detalle y navegación.
 
 ## 14. Área protegida
 

@@ -1227,22 +1227,265 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 28. Próxima evidencia a obtener
+## 28. Detalle público de eventos
 
-La siguiente fase corresponde al detalle público de eventos, tareas `T121` a `T133`.
+Se implementó y verificó el detalle público de eventos correspondiente a las tareas `T121` a `T133` de Feature 011.
 
-Antes de implementar la pantalla se auditará el contrato real del backend para:
+La navegación pública incorpora la ruta:
+
+`/eventos/:id`
+
+La pantalla asociada es:
+
+`EventDetailPage`
+
+La ruta puede abrirse directamente sin depender de una navegación previa desde otra pantalla.
+
+La pantalla obtiene exclusivamente el parámetro:
+
+`id`
+
+desde la URL.
+
+No se transporta el objeto completo `Evento` mediante estado de navegación, parámetros adicionales ni memoria temporal de la pantalla anterior.
+
+La reconstrucción del detalle sigue el flujo:
+
+`/eventos/:id`
+
+→ `EventDetailPage`
+
+→ `EventRepository`
+
+→ `RemoteEventRepository`
+
+→ `zamoraFestApi`
+
+→ `GET /api/v1/eventos/:id`
+
+De esta manera, una apertura directa de una dirección como:
+
+`/eventos/7`
+
+puede reconstruir el estado de la pantalla consultando el evento correspondiente mediante su identificador.
+
+### Validación del identificador
+
+El parámetro de ruta se valida antes de consultar el repositorio.
+
+Se aceptan únicamente identificadores representados como enteros positivos canónicos.
+
+La validación rechaza, entre otros:
+
+- `0`;
+- valores negativos;
+- decimales;
+- identificadores con cero inicial;
+- representaciones no decimales;
+- valores superiores al límite de `INTEGER` utilizado por PostgreSQL.
+
+También se comprueba que el valor convertido sea un entero seguro de JavaScript.
+
+Cuando el identificador de la ruta no es válido, la pantalla muestra un estado controlado y no realiza una solicitud al backend.
+
+### Contrato HTTP
+
+Se auditó el contrato vigente del backend para:
 
 `GET /api/v1/eventos/:id`
 
-Se deberá confirmar:
+La operación es pública.
 
-- formato exacto de la respuesta;
-- comportamiento ante identificadores inválidos;
-- respuesta cuando el evento no existe;
-- reglas de publicación o visibilidad;
-- reutilización del repositorio;
-- apertura directa mediante URL;
-- navegación desde `ExploreEventsPage`.
+La capa HTTP móvil incorporó:
 
-La pantalla de detalle deberá reconstruirse exclusivamente a partir del identificador de la ruta y nunca depender de recibir el objeto completo de evento mediante estado de navegación.
+`getEventoById(id)`
+
+La respuesta se valida antes de entregarla al repositorio.
+
+El contrato móvil fue además alineado con los campos nullable permitidos por el backend.
+
+En particular:
+
+- `descripcion` puede ser `null`;
+- `fechaActualizacion` puede ser `null`.
+
+Esta corrección evita rechazar respuestas válidas producidas por el backend.
+
+### Repositorio de eventos
+
+El contrato `EventRepository` fue ampliado con:
+
+`getEventById(id)`
+
+La implementación remota utiliza `zamoraFestApi` como capa HTTP de bajo nivel.
+
+El repositorio conserva la separación arquitectónica establecida previamente:
+
+`Pantalla`
+
+→ `Repositorio`
+
+→ `Capa HTTP`
+
+→ `API REST`
+
+Una respuesta HTTP `404` se transforma en ausencia de evento:
+
+`null`
+
+Esto permite que la interfaz represente el caso "evento no encontrado" como un estado funcional explícito y no como un fallo técnico genérico.
+
+Los demás errores continúan encapsulados mediante `EventRepositoryError`.
+
+### Estados de la pantalla
+
+`EventDetailPage` representa de forma mutuamente excluyente:
+
+- carga;
+- error;
+- evento no encontrado;
+- éxito.
+
+Para ello reutiliza el modelo cerrado:
+
+`RemoteData`
+
+y el componente visual:
+
+`AsyncStateView`
+
+El estado exitoso muestra información real del evento obtenida desde el repositorio, incluyendo:
+
+- título;
+- descripción cuando existe;
+- fecha de inicio;
+- fecha final cuando existe;
+- lugar;
+- dirección referencial;
+- cantón;
+- costo;
+- categorías;
+- fuente de información cuando existe.
+
+### Navegación desde exploración
+
+`ExploreEventsPage` incorpora navegación hacia el detalle.
+
+La navegación utiliza únicamente el identificador:
+
+`/eventos/{id}`
+
+Por ejemplo:
+
+`/eventos/1`
+
+No se transmite el objeto `Evento` completo entre pantallas.
+
+`EventCard` permanece independiente de React Router.
+
+El componente reutilizable continúa exponiendo únicamente una acción genérica:
+
+`onAction`
+
+Por tanto, `EventCard` no conoce:
+
+- rutas;
+- parámetros de URL;
+- `useHistory`;
+- `Route`;
+- endpoints;
+- cliente HTTP.
+
+La decisión de navegación permanece en `ExploreEventsPage`.
+
+### Pruebas específicas
+
+Se implementaron y actualizaron pruebas para comprobar:
+
+- contrato HTTP de detalle;
+- respuesta válida del backend;
+- aceptación de campos nullable;
+- conservación de HTTP `404`;
+- obtención del evento mediante el repositorio;
+- transformación de `404` en ausencia de evento;
+- tratamiento de errores de servidor;
+- estado de carga;
+- estado de éxito;
+- estado de evento no encontrado;
+- estado de error;
+- apertura directa de `/eventos/:id`;
+- reconstrucción del evento únicamente mediante `id`;
+- rechazo de identificadores inválidos;
+- ausencia de consulta al backend para identificadores inválidos;
+- navegación desde `ExploreEventsPage`;
+- conservación de `EventCard` como componente independiente de rutas.
+
+La verificación específica final obtuvo:
+
+- 4 archivos de prueba aprobados;
+- 20 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+La prueba específica de navegación de `ExploreEventsPage` obtuvo adicionalmente:
+
+- 1 archivo de prueba aprobado;
+- 5 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+### Verificación global móvil
+
+Después de completar el detalle público se ejecutó la suite móvil completa.
+
+Resultado:
+
+- 25 archivos de prueba aprobados;
+- 127 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `git diff --check`.
+
+El build de producción se ejecutó mediante:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 249 módulos y finalizó el build de producción en aproximadamente 9 segundos.
+
+Se mantienen únicamente advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del directorio `dist` y no fueron introducidas por el detalle público de eventos.
+
+El bloque `T121` a `T133` queda funcionalmente implementado y automatizadamente verificado.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 29. Próxima evidencia a obtener
+
+La siguiente fase de Feature 011 corresponde al área protegida, tareas `T134` a `T141`.
+
+La implementación siguiente deberá incorporar:
+
+- `ManagementPage`;
+- ruta protegida `/gestion`;
+- identidad del usuario autenticado;
+- rol del usuario;
+- acciones compatibles con autorización;
+- acceso a creación para `ASISTENTE`;
+- cierre de sesión;
+- pruebas de `ManagementPage`.
+
+Las tareas `T089` y `T090` de protección de rutas continuarán pendientes hasta registrar las rutas reales `/gestion` y `/gestion/eventos/nuevo`.
+
+No se iniciarán todavía las tareas de persistencia local, sincronización u operación offline correspondientes a semanas posteriores.

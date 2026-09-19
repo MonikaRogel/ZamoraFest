@@ -11,6 +11,9 @@ import {
   useMemo,
   useState,
 } from 'react';
+import {
+  useHistory,
+} from 'react-router-dom';
 
 import AsyncStateView from '../components/ui/AsyncStateView';
 import EventCard from '../components/ui/EventCard';
@@ -28,14 +31,17 @@ import {
   remoteSuccess,
   type RemoteData,
 } from '../state/remote-data';
-import type { Evento } from '../types/api';
+import type {
+  Evento,
+} from '../types/api';
 
 import './ExploreEventsPage.css';
 
 function formatEventDate(
   value: string,
 ): string {
-  const date = new Date(value);
+  const date =
+    new Date(value);
 
   if (
     Number.isNaN(
@@ -57,7 +63,9 @@ function formatEventDate(
 function formatEventCost(
   value: number,
 ): string {
-  if (value === 0) {
+  if (
+    value === 0
+  ) {
     return 'Gratuito';
   }
 
@@ -111,6 +119,9 @@ function getErrorMessage(
 }
 
 function ExploreEventsPage() {
+  const history =
+    useHistory();
+
   const [
     eventsState,
     setEventsState,
@@ -126,10 +137,11 @@ function ExploreEventsPage() {
   const [
     selectedCategory,
     setSelectedCategory,
-  ] =
-    useState<
-      string | null
-    >(null);
+  ] = useState<
+    string | null
+  >(
+    null,
+  );
 
   const loadEvents =
     useCallback(
@@ -161,42 +173,67 @@ function ExploreEventsPage() {
       [],
     );
 
+  const openEventDetail =
+    useCallback(
+      (
+        eventId: number,
+      ) => {
+        history.push(
+          `/eventos/${eventId}`,
+        );
+      },
+      [
+        history,
+      ],
+    );
+
   useEffect(() => {
     void loadEvents();
-  }, [loadEvents]);
+  }, [
+    loadEvents,
+  ]);
 
-  const events = useMemo(
-    () =>
-      eventsState.status ===
-      'success'
-        ? eventsState.data
-        : [],
-    [eventsState],
-  );
+  const events =
+    useMemo(
+      () =>
+        eventsState.status ===
+        'success'
+          ? eventsState.data
+          : [],
+      [
+        eventsState,
+      ],
+    );
 
-  const categories = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          events.flatMap(
-            (event) =>
-              event.categorias.map(
-                (
-                  category,
-                ) =>
-                  category.nombre,
-              ),
+  const categories =
+    useMemo(
+      () =>
+        Array.from(
+          new Set(
+            events.flatMap(
+              (event) =>
+                event.categorias.map(
+                  (
+                    category,
+                  ) =>
+                    category.nombre,
+                ),
+            ),
           ),
-        ),
-      ).sort(
-        (a, b) =>
-          a.localeCompare(
+        ).sort(
+          (
+            a,
             b,
-            'es',
-          ),
-      ),
-    [events],
-  );
+          ) =>
+            a.localeCompare(
+              b,
+              'es',
+            ),
+        ),
+      [
+        events,
+      ],
+    );
 
   const visibleEvents =
     useMemo(
@@ -319,8 +356,7 @@ function ExploreEventsPage() {
             />
 
             <span className="zf-app-brand__descriptor">
-              Agenda cultural
-              y festiva
+              Agenda cultural y festiva
             </span>
           </IonTitle>
         </IonToolbar>
@@ -437,8 +473,7 @@ function ExploreEventsPage() {
                       >
                         <div className="zf-explore__section-heading">
                           <h2 id="zf-next-event-heading">
-                            Próximo
-                            evento
+                            Próximo evento
                           </h2>
                         </div>
 
@@ -448,26 +483,42 @@ function ExploreEventsPage() {
                             nextEvent.titulo
                           }
                           description={
-                            nextEvent.descripcion
+                            nextEvent.descripcion ??
+                            undefined
                           }
-                          dateLabel={formatEventDate(
-                            nextEvent.fechaInicio,
-                          )}
+                          dateLabel={
+                            formatEventDate(
+                              nextEvent
+                                .fechaInicio,
+                            )
+                          }
                           locationLabel={
                             nextEvent
                               .lugar
                               .nombre
                           }
-                          categoryLabels={nextEvent.categorias.map(
-                            (
-                              category,
-                            ) =>
-                              category.nombre,
-                          )}
-                          costLabel={formatEventCost(
+                          categoryLabels={
                             nextEvent
-                              .costoReferencial,
-                          )}
+                              .categorias
+                              .map(
+                                (
+                                  category,
+                                ) =>
+                                  category
+                                    .nombre,
+                              )
+                          }
+                          costLabel={
+                            formatEventCost(
+                              nextEvent
+                                .costoReferencial,
+                            )
+                          }
+                          onAction={() => {
+                            openEventDetail(
+                              nextEvent.id,
+                            );
+                          }}
                         />
                       </section>
                     )}
@@ -503,25 +554,42 @@ function ExploreEventsPage() {
                                   event.titulo
                                 }
                                 description={
-                                  event.descripcion
+                                  event.descripcion ??
+                                  undefined
                                 }
-                                dateLabel={formatEventDate(
-                                  event.fechaInicio,
-                                )}
+                                dateLabel={
+                                  formatEventDate(
+                                    event
+                                      .fechaInicio,
+                                  )
+                                }
                                 locationLabel={
                                   event
                                     .lugar
                                     .nombre
                                 }
-                                categoryLabels={event.categorias.map(
-                                  (
-                                    category,
-                                  ) =>
-                                    category.nombre,
-                                )}
-                                costLabel={formatEventCost(
-                                  event.costoReferencial,
-                                )}
+                                categoryLabels={
+                                  event
+                                    .categorias
+                                    .map(
+                                      (
+                                        category,
+                                      ) =>
+                                        category
+                                          .nombre,
+                                    )
+                                }
+                                costLabel={
+                                  formatEventCost(
+                                    event
+                                      .costoReferencial,
+                                  )
+                                }
+                                onAction={() => {
+                                  openEventDetail(
+                                    event.id,
+                                  );
+                                }}
                               />
                             ),
                           )}

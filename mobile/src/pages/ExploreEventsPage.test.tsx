@@ -12,6 +12,11 @@ import {
   it,
   vi,
 } from 'vitest';
+import {
+  MemoryRouter,
+  Route,
+  useLocation,
+} from 'react-router-dom';
 
 import {
   EventRepositoryError,
@@ -28,8 +33,8 @@ vi.mock(
   '../features/events/remote-event-repository',
   () => ({
     eventRepository: {
-      listEvents:
-        vi.fn(),
+      listEvents: vi.fn(),
+      getEventById: vi.fn(),
     },
   }),
 );
@@ -199,6 +204,41 @@ const eventos:
   },
 ];
 
+function DetailRouteProbe() {
+  const location =
+    useLocation();
+
+  return (
+    <p data-testid="detail-route">
+      {location.pathname}
+    </p>
+  );
+}
+
+function renderExplore() {
+  return render(
+    <MemoryRouter
+      initialEntries={[
+        '/explore',
+      ]}
+    >
+      <Route
+        exact
+        path="/explore"
+      >
+        <ExploreEventsPage />
+      </Route>
+
+      <Route
+        exact
+        path="/eventos/:id"
+      >
+        <DetailRouteProbe />
+      </Route>
+    </MemoryRouter>,
+  );
+}
+
 describe(
   'ExploreEventsPage',
   () => {
@@ -214,16 +254,15 @@ describe(
       'muestra el estado de carga mientras espera el repositorio',
       () => {
         vi.mocked(
-          eventRepository.listEvents,
+          eventRepository
+            .listEvents,
         ).mockReturnValueOnce(
           new Promise(
             () => undefined,
           ),
         );
 
-        render(
-          <ExploreEventsPage />,
-        );
+        renderExplore();
 
         expect(
           screen.getByRole(
@@ -250,14 +289,13 @@ describe(
         );
 
         vi.mocked(
-          eventRepository.listEvents,
+          eventRepository
+            .listEvents,
         ).mockResolvedValueOnce(
           eventos,
         );
 
-        render(
-          <ExploreEventsPage />,
-        );
+        renderExplore();
 
         const nextEventHeading =
           await screen.findByRole(
@@ -307,14 +345,13 @@ describe(
       'muestra eventos y permite filtrarlos por categoría',
       async () => {
         vi.mocked(
-          eventRepository.listEvents,
+          eventRepository
+            .listEvents,
         ).mockResolvedValueOnce(
           eventos,
         );
 
-        render(
-          <ExploreEventsPage />,
-        );
+        renderExplore();
 
         expect(
           await screen.findByRole(
@@ -372,7 +409,8 @@ describe(
       'traduce un error del servidor a un mensaje para el usuario',
       async () => {
         vi.mocked(
-          eventRepository.listEvents,
+          eventRepository
+            .listEvents,
         ).mockRejectedValueOnce(
           new EventRepositoryError(
             'server',
@@ -381,9 +419,7 @@ describe(
           ),
         );
 
-        render(
-          <ExploreEventsPage />,
-        );
+        renderExplore();
 
         expect(
           await screen.findByRole(
@@ -400,6 +436,70 @@ describe(
             'El servicio de eventos no está disponible temporalmente. Intente nuevamente en unos momentos.',
           ),
         ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'navega al detalle usando únicamente el identificador del evento',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-09-18T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          eventos,
+        );
+
+        renderExplore();
+
+        const nextEventHeading =
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Próximo evento',
+            },
+          );
+
+        const nextEventSection =
+          nextEventHeading.closest(
+            'section',
+          );
+
+        expect(
+          nextEventSection,
+        ).not.toBeNull();
+
+        const detailButton =
+          within(
+            nextEventSection!,
+          ).getByText(
+            'Ver detalles',
+            {
+              selector:
+                'ion-button',
+            },
+          );
+
+        fireEvent.click(
+          detailButton,
+        );
+
+        expect(
+          await screen.findByTestId(
+            'detail-route',
+          ),
+        ).toHaveTextContent(
+          '/eventos/1',
+        );
       },
     );
   },

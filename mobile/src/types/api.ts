@@ -68,7 +68,7 @@ export interface Categoria {
 export interface Evento {
   readonly id: number;
   readonly titulo: string;
-  readonly descripcion: string;
+  readonly descripcion: string | null;
   readonly fechaInicio: string;
   readonly fechaFin: string | null;
   readonly costoReferencial: number;
@@ -76,7 +76,7 @@ export interface Evento {
   readonly estadoRevision: string;
   readonly fuenteInformacion: string | null;
   readonly fechaCreacion: string;
-  readonly fechaActualizacion: string;
+  readonly fechaActualizacion: string | null;
   readonly fechaRevision: string | null;
   readonly lugar: Lugar;
   readonly usuarioCreador: UsuarioResumen;

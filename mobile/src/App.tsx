@@ -12,10 +12,13 @@ import {
 } from 'react-router-dom';
 
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
+import EventDetailPage from './pages/EventDetailPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginRoute from './routing/LoginRoute';
-import { ApplicationStateProvider } from './state/ApplicationStateContext';
+import {
+  ApplicationStateProvider,
+} from './state/ApplicationStateContext';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -42,13 +45,17 @@ function App() {
             <Route
               exact
               path="/login"
-              component={LoginRoute}
+              component={
+                LoginRoute
+              }
             />
 
             <Route
               exact
               path="/register"
-              component={RegisterPage}
+              component={
+                RegisterPage
+              }
             />
 
             <Route
@@ -69,9 +76,19 @@ function App() {
 
             <Route
               exact
+              path="/eventos/:id"
+              component={
+                EventDetailPage
+              }
+            />
+
+            <Route
+              exact
               path="/"
               render={() => (
-                <Redirect to="/login" />
+                <Redirect
+                  to="/login"
+                />
               )}
             />
           </IonRouterOutlet>

@@ -26,4 +26,8 @@ export class EventRepositoryError extends Error {
 
 export interface EventRepository {
   listEvents(): Promise<readonly Evento[]>;
+
+  getEventById(
+    id: number,
+  ): Promise<Evento | null>;
 }
