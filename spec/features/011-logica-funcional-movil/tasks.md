@@ -59,14 +59,14 @@
 
 ## 4. Contrato HTTP y validación backend
 
-- [ ] T040 Añadir prueba que confirme `422` para errores de validación procesables.
-- [ ] T041 Ajustar el manejador central de errores Zod de `400` a `422`.
-- [ ] T042 Mantener estructura `error.code`, `error.message` y `error.details`.
-- [ ] T043 Confirmar que cada detalle de validación conserva `path` y `message`.
-- [ ] T044 Mantener `400` para solicitudes realmente malformadas.
-- [ ] T045 Actualizar OpenAPI con la respuesta `422` cuando corresponda.
-- [ ] T046 Ejecutar pruebas backend específicas de validación.
-- [ ] T047 Ejecutar suite backend completa sin regresiones.
+- [x] T040 Añadir prueba que confirme `422` para errores de validación procesables del cuerpo JSON.
+- [x] T041 Diferenciar la validación del `request.body` para devolver `422`, conservando `400` para `params`, `query` y solicitudes malformadas.
+- [x] T042 Mantener estructura `error.code`, `error.message` y `error.details`.
+- [x] T043 Confirmar que cada detalle de validación conserva `path` y `message`.
+- [x] T044 Mantener `400` para solicitudes realmente malformadas.
+- [x] T045 Actualizar OpenAPI con la respuesta `422` cuando corresponda.
+- [x] T046 Ejecutar pruebas backend específicas de validación.
+- [x] T047 Ejecutar suite backend completa sin regresiones.
 
 ## 5. Consulta pública de lugares
 

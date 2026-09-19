@@ -4,6 +4,21 @@ import { ZodError } from 'zod';
 import { AppError } from '../common/errors/app-error.js';
 import { env } from '../config/env.js';
 
+interface JsonParseError extends SyntaxError {
+  status?: unknown;
+  type?: unknown;
+}
+
+function isMalformedJsonError(error: unknown): error is JsonParseError {
+  if (!(error instanceof SyntaxError)) {
+    return false;
+  }
+
+  const candidate = error as JsonParseError;
+
+  return candidate.status === 400 && candidate.type === 'entity.parse.failed';
+}
+
 export const notFoundHandler: RequestHandler = (request, _response, next) => {
   next(
     new AppError(
@@ -15,6 +30,16 @@ export const notFoundHandler: RequestHandler = (request, _response, next) => {
 };
 
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+  if (isMalformedJsonError(error)) {
+    response.status(400).json({
+      error: {
+        code: 'MALFORMED_JSON',
+        message: 'El cuerpo JSON de la solicitud está malformado.',
+      },
+    });
+    return;
+  }
+
   if (error instanceof ZodError) {
     response.status(400).json({
       error: {

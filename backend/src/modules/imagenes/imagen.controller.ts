@@ -1,6 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
+import { parseRequestBody } from '../../common/validation/request-body.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
 import { createImagenSchema, imagenEventoParamsSchema } from './imagen.schemas.js';
 import { imagenService } from './imagen.service.js';
@@ -48,7 +49,7 @@ export const createImagenController: RequestHandler = async (request, response) 
 
   const { eventoId } = imagenEventoParamsSchema.parse(request.params);
 
-  const input = createImagenSchema.parse(request.body as unknown);
+  const input = parseRequestBody(createImagenSchema, request.body);
 
   const imagen = await imagenService.create(eventoId, identidad, input);
 

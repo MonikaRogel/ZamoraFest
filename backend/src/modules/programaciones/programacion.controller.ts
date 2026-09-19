@@ -1,6 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
+import { parseRequestBody } from '../../common/validation/request-body.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
 import {
   createProgramacionSchema,
@@ -56,7 +57,7 @@ export const createProgramacionController: RequestHandler = async (request, resp
 
   const { eventoId } = programacionEventoParamsSchema.parse(request.params);
 
-  const input = createProgramacionSchema.parse(request.body as unknown);
+  const input = parseRequestBody(createProgramacionSchema, request.body);
 
   const programacion = await programacionService.create(eventoId, identidad, input);
 
@@ -78,7 +79,7 @@ export const updateProgramacionController: RequestHandler = async (request, resp
     );
   }
 
-  const input = updateProgramacionSchema.parse(request.body as unknown);
+  const input = parseRequestBody(updateProgramacionSchema, request.body);
 
   const programacion = await programacionService.update(eventoId, programacionId, identidad, input);
 

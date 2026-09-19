@@ -1,6 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
+import { parseRequestBody } from '../../common/validation/request-body.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
 import { recordatorioApplication } from './recordatorio.application.js';
 import { createRecordatorioSchema, recordatorioIdParamsSchema } from './recordatorio.schemas.js';
@@ -23,7 +24,7 @@ function requireIdentity(request: Request): IdentidadAcceso {
 export const createRecordatorioController: RequestHandler = async (request, response) => {
   const identidad = requireIdentity(request);
 
-  const input = createRecordatorioSchema.parse(request.body as unknown);
+  const input = parseRequestBody(createRecordatorioSchema, request.body);
 
   const recordatorio = await recordatorioApplication.create(identidad, input);
 

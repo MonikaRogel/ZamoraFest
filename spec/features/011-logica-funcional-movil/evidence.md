@@ -181,15 +181,59 @@ El formulario móvil todavía no ha sido implementado en Feature 011.
 
 ## 11. Auditoría de validación HTTP
 
-Antes de Feature 011 se identificó que los errores de validación Zod son transformados actualmente en una respuesta HTTP `400`.
+El baseline previo a Feature 011 transformaba cualquier `ZodError` en una respuesta HTTP `400`, sin distinguir si el error provenía del cuerpo JSON, los parámetros de ruta o los parámetros de consulta.
 
-Semana 11 requiere que los errores procesables del formulario puedan asociarse a campos utilizando una respuesta `422`.
+Durante Feature 011 se implementó una separación explícita del contrato HTTP:
 
-Por tanto, se deberá corregir y comprobar el contrato antes de considerar esta evidencia completada.
+- un cuerpo JSON sintácticamente válido que no cumple el esquema devuelve `422 Unprocessable Entity`;
+- parámetros de ruta o consulta inválidos continúan devolviendo `400 Bad Request`;
+- un cuerpo JSON sintácticamente malformado devuelve `400 Bad Request` con código `MALFORMED_JSON`;
+- los errores de validación conservan `error.code`, `error.message` y `error.details`;
+- cada elemento de `error.details` conserva `path` y `message`, permitiendo posteriormente asociar errores del backend con campos concretos del formulario móvil.
+
+La validación de cuerpos se centralizó mediante `parseRequestBody`, sin modificar la semántica existente de `params` y `query`.
+
+Se añadió la prueba:
+
+`backend/tests/http-validation-contract.test.ts`
+
+La prueba específica comprobó tres casos:
+
+1. body JSON procesable pero inválido → `422`;
+2. query param inválido → `400`;
+3. JSON sintácticamente malformado → `400` y no `500`.
+
+Resultado de la prueba específica:
+
+`3 passed (3)`
+
+Después de aplicar el contrato a todos los controladores que reciben `request.body`, se ejecutó la suite backend completa.
+
+Resultado:
+
+- 34 archivos de pruebas aprobados;
+- 231 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`;
+- `git diff --check`.
+
+OpenAPI fue actualizado para documentar la nueva separación entre `400` y `422`.
+
+Comprobaciones del contrato OpenAPI:
+
+- 11 operaciones con `requestBody`;
+- 11 respuestas `422`;
+- componente reutilizable `UnprocessableEntity`;
+- esquema de detalle de validación con `path` y `message`.
 
 Estado:
 
-`PENDIENTE DE IMPLEMENTACIÓN Y PRUEBA`
+`COMPLETADO Y VERIFICADO`
 
 ## 12. Auditoría de lugares
 

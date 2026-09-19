@@ -121,6 +121,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
@@ -169,6 +172,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -216,6 +222,9 @@ export const openApiDocument: JsonObject = {
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -401,6 +410,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -507,6 +519,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -608,6 +623,9 @@ export const openApiDocument: JsonObject = {
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -783,6 +801,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -896,6 +917,9 @@ export const openApiDocument: JsonObject = {
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -1035,6 +1059,9 @@ export const openApiDocument: JsonObject = {
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -1226,6 +1253,9 @@ export const openApiDocument: JsonObject = {
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -1365,6 +1395,9 @@ export const openApiDocument: JsonObject = {
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2642,6 +2675,58 @@ export const openApiDocument: JsonObject = {
           }
         }
       },
+      "ValidationErrorDetail": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta del campo que no cumple el contrato.",
+            "example": "email"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje de validación asociado al campo.",
+            "example": "Invalid email address"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "const": "VALIDATION_ERROR"
+              },
+              "message": {
+                "type": "string",
+                "example": "La solicitud contiene datos inválidos."
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ValidationErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      },
       "ErrorResponse": {
         "type": "object",
         "required": [
@@ -2664,7 +2749,7 @@ export const openApiDocument: JsonObject = {
                 "example": "La solicitud contiene datos inválidos."
               },
               "details": {
-                "description": "Detalle opcional. Los errores de validación usan una lista de objetos con path y message."
+                "description": "Detalle opcional asociado al error."
               }
             }
           }
@@ -2673,11 +2758,21 @@ export const openApiDocument: JsonObject = {
     },
     "responses": {
       "BadRequest": {
-        "description": "Solicitud inválida o fallo de validación.",
+        "description": "Solicitud malformada o parámetros de ruta o consulta inválidos.",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "El cuerpo JSON es sintácticamente válido, pero no cumple el contrato de validación.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
             }
           }
         }

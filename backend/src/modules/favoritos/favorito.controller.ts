@@ -1,6 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
+import { parseRequestBody } from '../../common/validation/request-body.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
 import { createFavoritoSchema, favoritoEventoParamsSchema } from './favorito.schemas.js';
 import { favoritoService } from './favorito.service.js';
@@ -22,7 +23,7 @@ function requireIdentity(request: Request): IdentidadAcceso {
 export const createFavoritoController: RequestHandler = async (request, response) => {
   const identidad = requireIdentity(request);
 
-  const input = createFavoritoSchema.parse(request.body as unknown);
+  const input = parseRequestBody(createFavoritoSchema, request.body);
 
   const favorito = await favoritoService.create(identidad, input);
 

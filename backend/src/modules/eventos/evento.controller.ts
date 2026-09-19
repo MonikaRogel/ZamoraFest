@@ -1,6 +1,7 @@
 import type { Request, RequestHandler } from 'express';
 
 import { AppError } from '../../common/errors/app-error.js';
+import { parseRequestBody } from '../../common/validation/request-body.js';
 import type { IdentidadAcceso } from '../auth/auth.service.js';
 import {
   createEventoSchema,
@@ -28,7 +29,7 @@ function requireIdentity(request: Request): IdentidadAcceso {
 export const createEventoController: RequestHandler = async (request, response) => {
   const identity = requireIdentity(request);
 
-  const input = createEventoSchema.parse(request.body as unknown);
+  const input = parseRequestBody(createEventoSchema, request.body);
 
   const evento = await eventoService.create(identity, input);
 
@@ -64,7 +65,7 @@ export const updateEventoController: RequestHandler = async (request, response) 
 
   const { id } = eventoIdParamsSchema.parse(request.params);
 
-  const input = updateEventoSchema.parse(request.body as unknown);
+  const input = parseRequestBody(updateEventoSchema, request.body);
 
   const evento = await eventoService.update(id, identity, input);
 
@@ -78,7 +79,7 @@ export const reviewEventoController: RequestHandler = async (request, response) 
 
   const { id } = eventoIdParamsSchema.parse(request.params);
 
-  const input = reviewEventoSchema.parse(request.body as unknown);
+  const input = parseRequestBody(reviewEventoSchema, request.body);
 
   const evento = await eventoService.review(id, identity, input);
 
