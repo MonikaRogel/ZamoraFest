@@ -237,19 +237,78 @@ Estado:
 
 ## 12. Auditoría de lugares
 
-El modelo canónico de ZamoraFest requiere un `lugarId` válido al crear un evento.
+El modelo canónico de ZamoraFest requiere un `lugarId` válido para crear un evento.
 
-Se confirmó que el backend dispone del modelo y datos territoriales correspondientes.
+El baseline previo a esta fase disponía de las entidades territoriales necesarias en PostgreSQL y Prisma, pero no exponía un endpoint público específico para consultar lugares desde el cliente móvil.
 
-Sin embargo, el baseline actual no expone un endpoint público específico:
+Durante Feature 011 se implementó:
 
 `GET /api/v1/lugares`
 
-Por tanto, el formulario no deberá resolver esta necesidad mediante un identificador fijo.
+El endpoint es público y devuelve únicamente lugares activos cuya jerarquía territorial también se encuentra activa.
+
+La respuesta incluye información suficiente para que el cliente móvil identifique y presente correctamente cada lugar:
+
+- identificador del lugar;
+- nombre;
+- tipo de lugar;
+- dirección referencial;
+- sector;
+- tipo de sector;
+- parroquia;
+- cantón;
+- provincia.
+
+La implementación se organizó mediante:
+
+- `lugar.repository.ts`;
+- `lugar.service.ts`;
+- `lugar.controller.ts`;
+- `lugar.routes.ts`.
+
+La ruta fue registrada en:
+
+`backend/src/app.ts`
+
+El repositorio filtra lugares activos y conserva la jerarquía canónica:
+
+`Lugar -> Sector -> Parroquia -> Canton -> Provincia`
+
+No se utilizó ningún identificador de lugar fijo en el cliente.
+
+OpenAPI fue actualizado con:
+
+- tag `Lugares`;
+- operación `GET /lugares`;
+- esquema `LugarConsulta`;
+- respuesta pública `200`;
+- respuesta `500` reutilizando `InternalError`.
+
+Se implementaron las pruebas:
+
+- `backend/tests/lugar-repository.test.ts`;
+- `backend/tests/lugares-api.test.ts`.
+
+Las pruebas específicas del bloque obtuvieron:
+
+- 2 archivos de prueba aprobados;
+- 3 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite backend completa y se obtuvieron 36 archivos de prueba aprobados sin regresiones reportadas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`;
+- `git diff --check`.
+
+Finalmente, `git diff -- backend/prisma/schema.prisma` no produjo cambios, confirmando que esta implementación no modificó el modelo canónico de base de datos definido previamente.
 
 Estado:
 
-`PENDIENTE DE IMPLEMENTACIÓN`
+`COMPLETADO Y VERIFICADO`
 
 ## 13. Documentación SDD de Feature 011
 

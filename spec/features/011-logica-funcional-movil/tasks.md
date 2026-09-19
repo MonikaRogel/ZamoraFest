@@ -70,17 +70,17 @@
 
 ## 5. Consulta pública de lugares
 
-- [ ] T048 Diseñar contrato mínimo para `GET /api/v1/lugares`.
-- [ ] T049 Implementar repositorio de lectura de lugares activos.
-- [ ] T050 Implementar servicio de consulta de lugares activos.
-- [ ] T051 Implementar controlador de consulta de lugares.
-- [ ] T052 Registrar la ruta `/api/v1/lugares`.
-- [ ] T053 Devolver identificador y datos suficientes para identificar el lugar.
-- [ ] T054 Mantener únicamente lugares activos en la respuesta.
-- [ ] T055 Mantener consistencia con la jerarquía territorial de Semana 4.
-- [ ] T056 Documentar el endpoint en OpenAPI.
-- [ ] T057 Implementar pruebas del endpoint de lugares.
-- [ ] T058 Confirmar que no se modificó el modelo canónico de base de datos.
+- [x] T048 Diseñar contrato mínimo para `GET /api/v1/lugares`.
+- [x] T049 Implementar repositorio de lectura de lugares activos.
+- [x] T050 Implementar servicio de consulta de lugares activos.
+- [x] T051 Implementar controlador de consulta de lugares.
+- [x] T052 Registrar la ruta `/api/v1/lugares`.
+- [x] T053 Devolver identificador y datos suficientes para identificar el lugar.
+- [x] T054 Mantener únicamente lugares activos y jerarquía territorial activa en la respuesta.
+- [x] T055 Mantener consistencia con la jerarquía territorial de Semana 4.
+- [x] T056 Documentar el endpoint en OpenAPI.
+- [x] T057 Implementar pruebas del endpoint de lugares.
+- [x] T058 Confirmar que no se modificó el modelo canónico de base de datos.
 
 ## 6. Modelo de sesión móvil
 

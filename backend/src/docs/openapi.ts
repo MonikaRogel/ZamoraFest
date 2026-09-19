@@ -27,6 +27,9 @@ export const openApiDocument: JsonObject = {
       "name": "Categorías"
     },
     {
+    "name": "Lugares"
+    },
+    {
       "name": "Eventos"
     },
     {
@@ -257,6 +260,42 @@ export const openApiDocument: JsonObject = {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Categoria"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/lugares": {
+      "get": {
+        "tags": [
+          "Lugares"
+        ],
+        "summary": "Listar lugares activos",
+        "description": "Devuelve lugares activos cuya jerarquía territorial también se encuentra activa. El endpoint es público y proporciona los datos necesarios para seleccionar un lugar al crear un evento.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Lugares activos disponibles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LugarConsulta"
                       }
                     }
                   }
@@ -1691,6 +1730,101 @@ export const openApiDocument: JsonObject = {
           "refreshToken": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      },
+      "LugarConsulta": {
+        "type": "object",
+        "description": "Lugar activo con jerarquía territorial suficiente para su identificación y selección desde el cliente móvil.",
+        "required": [
+          "id",
+          "nombre",
+          "tipoLugar",
+          "direccionReferencial",
+          "sector"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "tipoLugar": {
+            "type": "string"
+          },
+          "direccionReferencial": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sector": {
+            "type": "object",
+            "required": [
+              "id",
+              "nombre",
+              "tipoSector",
+              "parroquia"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/EntityId"
+              },
+              "nombre": {
+                "type": "string"
+              },
+              "tipoSector": {
+                "type": "string"
+              },
+              "parroquia": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "nombre",
+                  "canton"
+                ],
+                "properties": {
+                  "id": {
+                    "$ref": "#/components/schemas/EntityId"
+                  },
+                  "nombre": {
+                    "type": "string"
+                  },
+                  "canton": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "nombre",
+                      "provincia"
+                    ],
+                    "properties": {
+                      "id": {
+                        "$ref": "#/components/schemas/EntityId"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      },
+                      "provincia": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "nombre"
+                        ],
+                        "properties": {
+                          "id": {
+                            "$ref": "#/components/schemas/EntityId"
+                          },
+                          "nombre": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
