@@ -1,9 +1,19 @@
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route } from 'react-router-dom';
+import {
+  IonApp,
+  IonRouterOutlet,
+  setupIonicReact,
+} from '@ionic/react';
+import {
+  IonReactRouter,
+} from '@ionic/react-router';
+import {
+  Redirect,
+  Route,
+} from 'react-router-dom';
 
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
+import RegisterPage from './pages/RegisterPage';
 import LoginRoute from './routing/LoginRoute';
 import { ApplicationStateProvider } from './state/ApplicationStateContext';
 
@@ -37,20 +47,32 @@ function App() {
 
             <Route
               exact
+              path="/register"
+              component={RegisterPage}
+            />
+
+            <Route
+              exact
               path="/environment"
-              component={EnvironmentStatusPage}
+              component={
+                EnvironmentStatusPage
+              }
             />
 
             <Route
               exact
               path="/explore"
-              component={ExploreEventsPage}
+              component={
+                ExploreEventsPage
+              }
             />
 
             <Route
               exact
               path="/"
-              render={() => <Redirect to="/login" />}
+              render={() => (
+                <Redirect to="/login" />
+              )}
             />
           </IonRouterOutlet>
         </IonReactRouter>

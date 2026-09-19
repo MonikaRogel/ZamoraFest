@@ -99,6 +99,19 @@ export interface LoginRequest {
   readonly password: string;
 }
 
+export interface RegisterRequest {
+  readonly nombre: string;
+  readonly email: string;
+  readonly password: string;
+}
+
+export interface RegisteredVisitor {
+  readonly id: number;
+  readonly nombre: string;
+  readonly email: string;
+  readonly rol: 'VISITANTE';
+}
+
 export interface AuthenticatedUser {
   readonly id: number;
   readonly nombre: string;

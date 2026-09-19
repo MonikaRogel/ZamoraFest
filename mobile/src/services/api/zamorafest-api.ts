@@ -12,6 +12,8 @@ import type {
   PaginationMeta,
   Parroquia,
   Provincia,
+  RegisterRequest,
+  RegisteredVisitor,
   RolResumen,
   Sector,
   UsuarioResumen,
@@ -29,10 +31,17 @@ interface LoginEnvelope {
   readonly data: AuthSession;
 }
 
+interface RegisterEnvelope {
+  readonly data: RegisteredVisitor;
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
   getEventos(): Promise<EventosResponse>;
   login(input: LoginRequest): Promise<AuthSession>;
+  register(
+    input: RegisterRequest,
+  ): Promise<RegisteredVisitor>;
 }
 
 export class ApiRequestError extends Error {
@@ -49,31 +58,51 @@ export class ApiRequestError extends Error {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+function isRecord(
+  value: unknown,
+): value is Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+  );
 }
 
 function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 
-function isNullableString(value: unknown): value is string | null {
+function isNullableString(
+  value: unknown,
+): value is string | null {
   return value === null || isString(value);
 }
 
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
+function isFiniteNumber(
+  value: unknown,
+): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isFinite(value)
+  );
 }
 
 function isInteger(value: unknown): value is number {
-  return isFiniteNumber(value) && Number.isInteger(value);
+  return (
+    isFiniteNumber(value) &&
+    Number.isInteger(value)
+  );
 }
 
-function isNullableNumber(value: unknown): value is number | null {
+function isNullableNumber(
+  value: unknown,
+): value is number | null {
   return value === null || isFiniteNumber(value);
 }
 
-function isProvincia(value: unknown): value is Provincia {
+function isProvincia(
+  value: unknown,
+): value is Provincia {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -82,7 +111,9 @@ function isProvincia(value: unknown): value is Provincia {
   );
 }
 
-function isCanton(value: unknown): value is Canton {
+function isCanton(
+  value: unknown,
+): value is Canton {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -92,7 +123,9 @@ function isCanton(value: unknown): value is Canton {
   );
 }
 
-function isParroquia(value: unknown): value is Parroquia {
+function isParroquia(
+  value: unknown,
+): value is Parroquia {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -102,7 +135,9 @@ function isParroquia(value: unknown): value is Parroquia {
   );
 }
 
-function isSector(value: unknown): value is Sector {
+function isSector(
+  value: unknown,
+): value is Sector {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -112,7 +147,9 @@ function isSector(value: unknown): value is Sector {
   );
 }
 
-function isLugar(value: unknown): value is Lugar {
+function isLugar(
+  value: unknown,
+): value is Lugar {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -126,7 +163,9 @@ function isLugar(value: unknown): value is Lugar {
   );
 }
 
-function isRolResumen(value: unknown): value is RolResumen {
+function isRolResumen(
+  value: unknown,
+): value is RolResumen {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -134,7 +173,9 @@ function isRolResumen(value: unknown): value is RolResumen {
   );
 }
 
-function isUsuarioResumen(value: unknown): value is UsuarioResumen {
+function isUsuarioResumen(
+  value: unknown,
+): value is UsuarioResumen {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -146,10 +187,15 @@ function isUsuarioResumen(value: unknown): value is UsuarioResumen {
 function isNullableUsuario(
   value: unknown,
 ): value is UsuarioResumen | null {
-  return value === null || isUsuarioResumen(value);
+  return (
+    value === null ||
+    isUsuarioResumen(value)
+  );
 }
 
-function isCategoria(value: unknown): value is Categoria {
+function isCategoria(
+  value: unknown,
+): value is Categoria {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -158,7 +204,9 @@ function isCategoria(value: unknown): value is Categoria {
   );
 }
 
-function isEvento(value: unknown): value is Evento {
+function isEvento(
+  value: unknown,
+): value is Evento {
   return (
     isRecord(value) &&
     isInteger(value.id) &&
@@ -181,7 +229,9 @@ function isEvento(value: unknown): value is Evento {
   );
 }
 
-function isPaginationMeta(value: unknown): value is PaginationMeta {
+function isPaginationMeta(
+  value: unknown,
+): value is PaginationMeta {
   return (
     isRecord(value) &&
     isInteger(value.page) &&
@@ -191,7 +241,9 @@ function isPaginationMeta(value: unknown): value is PaginationMeta {
   );
 }
 
-function isHealthResponse(value: unknown): value is HealthResponse {
+function isHealthResponse(
+  value: unknown,
+): value is HealthResponse {
   return (
     isRecord(value) &&
     value.status === 'ok' &&
@@ -224,8 +276,22 @@ function isAuthenticatedUser(
   );
 }
 
-function isLoginEnvelope(value: unknown): value is LoginEnvelope {
-  if (!isRecord(value) || !isRecord(value.data)) {
+function isRegisteredVisitor(
+  value: unknown,
+): value is RegisteredVisitor {
+  return (
+    isAuthenticatedUser(value) &&
+    value.rol === 'VISITANTE'
+  );
+}
+
+function isLoginEnvelope(
+  value: unknown,
+): value is LoginEnvelope {
+  if (
+    !isRecord(value) ||
+    !isRecord(value.data)
+  ) {
     return false;
   }
 
@@ -243,7 +309,18 @@ function isLoginEnvelope(value: unknown): value is LoginEnvelope {
   );
 }
 
-function isEventosResponse(value: unknown): value is EventosResponse {
+function isRegisterEnvelope(
+  value: unknown,
+): value is RegisterEnvelope {
+  return (
+    isRecord(value) &&
+    isRegisteredVisitor(value.data)
+  );
+}
+
+function isEventosResponse(
+  value: unknown,
+): value is EventosResponse {
   return (
     isRecord(value) &&
     Array.isArray(value.data) &&
@@ -266,7 +343,10 @@ async function requestJson<T>(
   let response: Response;
 
   try {
-    response = await fetcher(url, init);
+    response = await fetcher(
+      url,
+      init,
+    );
   } catch (cause) {
     throw new ApiRequestError(
       'No se pudo establecer conexión con la API.',
@@ -307,46 +387,129 @@ async function requestJson<T>(
 export function createZamoraFestApi(
   options: CreateApiOptions = {},
 ): ZamoraFestApi {
-  const fetcher = options.fetcher ?? globalThis.fetch.bind(globalThis);
+  const fetcher =
+    options.fetcher ??
+    globalThis.fetch.bind(globalThis);
 
   function resolveBaseUrl(): string {
     return options.baseUrl === undefined
       ? getApiBaseUrl()
-      : parseApiBaseUrl(options.baseUrl);
+      : parseApiBaseUrl(
+          options.baseUrl,
+        );
   }
 
   return {
     getHealth() {
-      const url = new URL('/api/v1/health', resolveBaseUrl());
+      const url = new URL(
+        '/api/v1/health',
+        resolveBaseUrl(),
+      );
 
-      return requestJson(url, isHealthResponse, fetcher);
+      return requestJson(
+        url,
+        isHealthResponse,
+        fetcher,
+      );
     },
 
     getEventos() {
-      const url = new URL('/api/v1/eventos', resolveBaseUrl());
+      const url = new URL(
+        '/api/v1/eventos',
+        resolveBaseUrl(),
+      );
 
-      url.searchParams.set('page', '1');
-      url.searchParams.set('limit', '5');
+      url.searchParams.set(
+        'page',
+        '1',
+      );
 
-      return requestJson(url, isEventosResponse, fetcher);
+      url.searchParams.set(
+        'limit',
+        '5',
+      );
+
+      return requestJson(
+        url,
+        isEventosResponse,
+        fetcher,
+      );
     },
 
-    async login(input: LoginRequest) {
-      const url = new URL('/api/v1/auth/login', resolveBaseUrl());
-
-      const response = await requestJson(
-        url,
-        isLoginEnvelope,
-        fetcher,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(input),
-        },
+    async login(
+      input: LoginRequest,
+    ) {
+      const url = new URL(
+        '/api/v1/auth/login',
+        resolveBaseUrl(),
       );
+
+      const response =
+        await requestJson(
+          url,
+          isLoginEnvelope,
+          fetcher,
+          {
+            method: 'POST',
+            headers: {
+              Accept:
+                'application/json',
+              'Content-Type':
+                'application/json',
+            },
+            body: JSON.stringify(
+              input,
+            ),
+          },
+        );
+
+      return response.data;
+    },
+
+    async register(
+      input: RegisterRequest,
+    ) {
+      const url = new URL(
+        '/api/v1/auth/register',
+        resolveBaseUrl(),
+      );
+
+      /*
+       * Se reconstruye expresamente el
+       * cuerpo permitido por el backend.
+       *
+       * De esta manera no pueden enviarse
+       * accidentalmente propiedades como:
+       *
+       * rol
+       * idRol
+       * estado
+       * u otros atributos privilegiados.
+       */
+      const safeInput: RegisterRequest = {
+        nombre: input.nombre,
+        email: input.email,
+        password: input.password,
+      };
+
+      const response =
+        await requestJson(
+          url,
+          isRegisterEnvelope,
+          fetcher,
+          {
+            method: 'POST',
+            headers: {
+              Accept:
+                'application/json',
+              'Content-Type':
+                'application/json',
+            },
+            body: JSON.stringify(
+              safeInput,
+            ),
+          },
+        );
 
       return response.data;
     },
@@ -362,7 +525,19 @@ export const zamoraFestApi: ZamoraFestApi = {
     return createZamoraFestApi().getEventos();
   },
 
-  login(input: LoginRequest) {
-    return createZamoraFestApi().login(input);
+  login(
+    input: LoginRequest,
+  ) {
+    return createZamoraFestApi().login(
+      input,
+    );
+  },
+
+  register(
+    input: RegisterRequest,
+  ) {
+    return createZamoraFestApi().register(
+      input,
+    );
   },
 };

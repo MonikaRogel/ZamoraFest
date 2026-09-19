@@ -989,22 +989,144 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 26. Próxima evidencia a obtener
+## 26. Registro público de visitantes
 
-La siguiente fase corresponde al registro público de visitantes, tareas `T106` a `T113`.
+Se implementó el flujo público de registro de visitantes de ZamoraFest.
 
-Antes de implementar la interfaz se auditará el contrato real de:
+La implementación se derivó del contrato real del backend:
 
 `POST /api/v1/auth/register`
 
-para derivar exactamente:
+El cliente permite enviar exclusivamente:
 
-- campos permitidos;
-- campos obligatorios;
-- longitudes;
-- validaciones;
-- formato de errores;
-- respuesta exitosa;
-- garantía de creación exclusiva del rol `VISITANTE`.
+- `nombre`;
+- `email`;
+- `password`.
 
-No se permitirán desde el cliente campos de rol, identificadores de rol ni atributos administrativos.
+No se permite enviar desde la aplicación móvil:
+
+- rol;
+- identificador de rol;
+- estado;
+- atributos administrativos;
+- otros campos privilegiados.
+
+La capa HTTP reconstruye explícitamente el cuerpo permitido antes de serializarlo, por lo que incluso si un objeto en tiempo de ejecución contiene propiedades adicionales, estas no son enviadas al backend.
+
+Las reglas de validación fueron derivadas del contrato vigente:
+
+- nombre obligatorio;
+- nombre entre 2 y 100 caracteres después de aplicar `trim`;
+- correo válido;
+- correo máximo de 254 caracteres;
+- correo normalizado mediante `trim` y conversión a minúsculas;
+- contraseña con mínimo 8 caracteres;
+- contraseña con máximo de 72 bytes UTF-8 debido al límite de bcrypt;
+- contraseña preservada exactamente, sin aplicar `trim`.
+
+Se incorporó `RegisterPage` como pantalla pública.
+
+La ruta:
+
+`/register`
+
+se encuentra disponible sin autenticación.
+
+La pantalla permite:
+
+- ingresar nombre completo;
+- ingresar correo electrónico;
+- ingresar contraseña;
+- validar los datos antes de realizar la solicitud;
+- impedir solicitudes duplicadas mientras existe una operación activa;
+- mostrar confirmación después de un registro correcto;
+- regresar posteriormente al inicio de sesión.
+
+El registro público utiliza:
+
+`zamoraFestApi.register()`
+
+La respuesta HTTP esperada es:
+
+`201 Created`
+
+y el cliente valida que el usuario devuelto tenga obligatoriamente:
+
+`rol: VISITANTE`
+
+Una respuesta de registro que intente devolver un rol privilegiado, como `ASISTENTE` o `ADMINISTRADOR`, es rechazada por la validación del contrato móvil.
+
+También se implementó manejo comprensible de errores:
+
+- `409` informa que el correo electrónico ya está registrado;
+- `400` y `422` solicitan revisar los datos ingresados;
+- fallos de conexión muestran un mensaje orientado al usuario;
+- los detalles técnicos internos no se presentan en la interfaz.
+
+Se añadieron pruebas para:
+
+- normalización de nombre y correo;
+- límites de longitud;
+- validación de correo;
+- contraseña mínima;
+- límite de 72 bytes UTF-8;
+- preservación exacta de la contraseña;
+- llamada a `POST /api/v1/auth/register`;
+- envío exclusivo de `nombre`, `email` y `password`;
+- rechazo de campos privilegiados;
+- aceptación exclusiva del rol `VISITANTE`;
+- rechazo de respuestas con rol privilegiado;
+- conservación de estados HTTP `409` y `422`;
+- registro correcto desde `RegisterPage`;
+- prevención de envío de formularios inválidos;
+- tratamiento comprensible de correo duplicado;
+- tratamiento de errores de validación;
+- tratamiento de fallos de conexión;
+- bloqueo de doble envío;
+- disponibilidad pública de `/register`.
+
+La verificación específica del bloque obtuvo:
+
+- 4 archivos de prueba aprobados;
+- 24 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+Posteriormente se ejecutó la suite móvil completa:
+
+- 21 archivos de prueba aprobados;
+- 106 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm run build`.
+
+El build de producción finalizó correctamente.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- `:host-context` de Ionic procesado mediante LightningCSS;
+- tamaño de algunos chunks generados por Vite.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO`
+
+## 27. Próxima evidencia a obtener
+
+La siguiente fase corresponde a la separación de datos de eventos, tareas `T114` a `T120`.
+
+Antes de modificar `ExploreEventsPage`, se auditará la capa actual de acceso a datos para introducir `EventRepository` sin alterar el comportamiento ya validado de Feature 010.
+
+La migración deberá conservar:
+
+- estados remotos cerrados;
+- filtrado por categoría;
+- evento próximo destacado;
+- componentes reutilizables;
+- contrato HTTP existente;
+- pruebas actuales de exploración.
+
+`zamoraFestApi` permanecerá como capa HTTP de bajo nivel y la página dejará de depender directamente de dicha capa.

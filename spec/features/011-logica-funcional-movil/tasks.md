@@ -146,14 +146,14 @@
 
 ## 11. Registro de visitante
 
-- [ ] T106 Crear `RegisterPage`.
-- [ ] T107 Registrar ruta pública `/register`.
-- [ ] T108 Implementar llamada a `POST /api/v1/auth/register`.
-- [ ] T109 Derivar reglas de validación del contrato backend.
-- [ ] T110 Impedir envío de campos privilegiados.
-- [ ] T111 Mostrar errores de registro comprensibles.
-- [ ] T112 Confirmar creación exclusiva de rol `VISITANTE`.
-- [ ] T113 Implementar pruebas del flujo de registro.
+- [x] T106 Crear `RegisterPage`.
+- [x] T107 Registrar ruta pública `/register`.
+- [x] T108 Implementar llamada a `POST /api/v1/auth/register`.
+- [x] T109 Derivar reglas de validación del contrato backend.
+- [x] T110 Impedir envío de campos privilegiados.
+- [x] T111 Mostrar errores de registro comprensibles.
+- [x] T112 Confirmar creación exclusiva de rol `VISITANTE`.
+- [x] T113 Implementar pruebas del flujo de registro.
 
 ## 12. Separación de datos de eventos
 
