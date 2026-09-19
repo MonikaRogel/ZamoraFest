@@ -70,4 +70,3 @@ export function createRemoteEventRepository(
 
 export const eventRepository =
   createRemoteEventRepository();
-  
