@@ -6,19 +6,26 @@ import type {
   AuthenticatedUser,
   AuthSession,
   Canton,
+  CantonConsulta,
   Categoria,
+  CategoriasResponse,
   Evento,
   EventosResponse,
   HealthResponse,
   LoginRequest,
   Lugar,
+  LugarConsulta,
+  LugaresResponse,
   PaginationMeta,
   Parroquia,
+  ParroquiaConsulta,
   Provincia,
+  ProvinciaConsulta,
   RegisterRequest,
   RegisteredVisitor,
   RolResumen,
   Sector,
+  SectorConsulta,
   UsuarioResumen,
 } from '../../types/api';
 
@@ -52,6 +59,10 @@ export interface ZamoraFestApi {
   getEventoById(
     id: number,
   ): Promise<Evento>;
+
+  getCategorias(): Promise<CategoriasResponse>;
+
+  getLugares(): Promise<LugaresResponse>;
 
   login(
     input: LoginRequest,
@@ -140,6 +151,19 @@ function isInteger(
     Number.isInteger(
       value,
     )
+  );
+}
+
+function isEntityId(
+  value: unknown,
+): value is number {
+  return (
+    isInteger(
+      value,
+    ) &&
+    value > 0 &&
+    value <=
+      2_147_483_647
   );
 }
 
@@ -264,6 +288,98 @@ function isLugar(
   );
 }
 
+function isProvinciaConsulta(
+  value: unknown,
+): value is ProvinciaConsulta {
+  return (
+    isRecord(value) &&
+    isEntityId(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    )
+  );
+}
+
+function isCantonConsulta(
+  value: unknown,
+): value is CantonConsulta {
+  return (
+    isRecord(value) &&
+    isEntityId(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isProvinciaConsulta(
+      value.provincia,
+    )
+  );
+}
+
+function isParroquiaConsulta(
+  value: unknown,
+): value is ParroquiaConsulta {
+  return (
+    isRecord(value) &&
+    isEntityId(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isCantonConsulta(
+      value.canton,
+    )
+  );
+}
+
+function isSectorConsulta(
+  value: unknown,
+): value is SectorConsulta {
+  return (
+    isRecord(value) &&
+    isEntityId(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.tipoSector,
+    ) &&
+    isParroquiaConsulta(
+      value.parroquia,
+    )
+  );
+}
+
+function isLugarConsulta(
+  value: unknown,
+): value is LugarConsulta {
+  return (
+    isRecord(value) &&
+    isEntityId(
+      value.id,
+    ) &&
+    isString(
+      value.nombre,
+    ) &&
+    isString(
+      value.tipoLugar,
+    ) &&
+    isNullableString(
+      value
+        .direccionReferencial,
+    ) &&
+    isSectorConsulta(
+      value.sector,
+    )
+  );
+}
+
 function isRolResumen(
   value: unknown,
 ): value is RolResumen {
@@ -321,6 +437,40 @@ function isCategoria(
     ) &&
     isNullableString(
       value.descripcion,
+    )
+  );
+}
+
+function isCategoriasResponse(
+  value: unknown,
+): value is CategoriasResponse {
+  return (
+    isRecord(value) &&
+    Array.isArray(
+      value.data,
+    ) &&
+    value.data.every(
+      (category) =>
+        isCategoria(
+          category,
+        ) &&
+        isEntityId(
+          category.id,
+        ),
+    )
+  );
+}
+
+function isLugaresResponse(
+  value: unknown,
+): value is LugaresResponse {
+  return (
+    isRecord(value) &&
+    Array.isArray(
+      value.data,
+    ) &&
+    value.data.every(
+      isLugarConsulta,
     )
   );
 }
@@ -700,6 +850,34 @@ export function createZamoraFestApi(
       );
     },
 
+    getCategorias() {
+      const url =
+        new URL(
+          '/api/v1/categorias',
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isCategoriasResponse,
+        fetcher,
+      );
+    },
+
+    getLugares() {
+      const url =
+        new URL(
+          '/api/v1/lugares',
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isLugaresResponse,
+        fetcher,
+      );
+    },
+
     async login(
       input:
         LoginRequest,
@@ -817,6 +995,20 @@ export const zamoraFestApi:
         .getEventoById(
           id,
         )
+    );
+  },
+
+  getCategorias() {
+    return (
+      createZamoraFestApi()
+        .getCategorias()
+    );
+  },
+
+  getLugares() {
+    return (
+      createZamoraFestApi()
+        .getLugares()
     );
   },
 

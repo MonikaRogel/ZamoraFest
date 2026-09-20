@@ -1657,19 +1657,257 @@ Estado:
 
 `COMPLETADO Y VERIFICADO, EXCEPTO ACCESO REAL A CREACIÓN`
 
-## 30. Próxima evidencia a obtener
+## 30. Datos auxiliares del formulario de Evento
 
-La siguiente fase corresponde a los datos auxiliares del formulario, tareas `T142` a `T148`.
+Se implementó la infraestructura móvil necesaria para consultar los datos auxiliares que posteriormente consumirá el formulario de creación de eventos.
 
-Antes de implementar el formulario se deberán integrar en el cliente móvil:
+Este incremento corresponde a:
 
-- consulta real de categorías;
-- consulta real de lugares;
-- estados de carga;
-- estados de error;
-- selección basada en datos reales;
-- ausencia de identificadores incrustados.
+- `T142`: consulta móvil de categorías;
+- `T143`: consulta móvil de lugares;
+- `T148`: modelado de loading y error de datos auxiliares.
 
-La ruta `/gestion/eventos/nuevo`, `CreateEventPage`, `T090` y `T139` permanecerán pendientes hasta iniciar la fase de creación real del evento.
+Las tareas `T144` a `T147` permanecen pendientes porque `CreateEventPage` todavía no ha sido implementada.
 
-No se implementarán todavía persistencia local, funcionamiento offline ni sincronización correspondientes a semanas posteriores.
+### Contratos HTTP de datos auxiliares
+
+El cliente móvil incorporó las operaciones:
+
+`GET /api/v1/categorias`
+
+y:
+
+`GET /api/v1/lugares`
+
+mediante nuevos métodos de `ZamoraFestApi`:
+
+- `getCategorias()`;
+- `getLugares()`.
+
+Ambas operaciones utilizan la infraestructura HTTP existente y validan en tiempo de ejecución la estructura recibida antes de exponerla al resto de la aplicación.
+
+La consulta de categorías espera la estructura:
+
+`CategoriasResponse`
+
+con:
+
+- identificador entero positivo;
+- nombre;
+- descripción anulable.
+
+La consulta de lugares utiliza un contrato específico:
+
+`LugarConsulta`
+
+porque la representación entregada por `GET /api/v1/lugares` no es idéntica al objeto `Lugar` incluido en el detalle de un evento.
+
+`LugarConsulta` conserva únicamente los campos realmente expuestos por ese endpoint:
+
+- identificador;
+- nombre;
+- tipo de lugar;
+- dirección referencial anulable;
+- sector;
+- parroquia;
+- cantón;
+- provincia.
+
+Esta separación evita asumir propiedades que el endpoint auxiliar no devuelve.
+
+### Repositorio de datos auxiliares
+
+Se incorporó:
+
+`EventFormDataRepository`
+
+como abstracción para los datos requeridos por el futuro formulario.
+
+Su implementación remota:
+
+`RemoteEventFormDataRepository`
+
+consulta categorías y lugares mediante la capa HTTP y devuelve una estructura única:
+
+`EventFormData`
+
+compuesta por:
+
+- categorías;
+- lugares.
+
+Las dos consultas se ejecutan mediante:
+
+`Promise.all`
+
+sin introducir identificadores fijos en esta capa.
+
+El repositorio traduce los fallos HTTP hacia errores propios del dominio:
+
+- `connection`;
+- `server`;
+- `request`;
+- `unexpected`.
+
+De esta forma, la futura pantalla no necesitará depender directamente de `ApiRequestError`.
+
+### Estado remoto de datos auxiliares
+
+Se incorporó:
+
+`useEventFormData`
+
+para conectar posteriormente el formulario con el repositorio.
+
+El hook utiliza el tipo cerrado `RemoteData` ya construido en Feature 011 y representa de forma excluyente:
+
+- `loading`;
+- `success`;
+- `error`.
+
+También proporciona una acción:
+
+`reload()`
+
+para repetir la consulta cuando sea necesario.
+
+El mensaje presentado al usuario distingue al menos:
+
+- fallo de conexión;
+- indisponibilidad del servidor;
+- fallo general de carga.
+
+Esta implementación mantiene la dirección arquitectónica prevista:
+
+`Pantalla -> repositorio -> API`
+
+y evita que la futura `CreateEventPage` tenga que consultar directamente el cliente HTTP.
+
+### Pruebas específicas de datos auxiliares
+
+Se añadieron pruebas para:
+
+`event-form-data-contract.test.ts`
+
+que verifican:
+
+- solicitud GET de categorías;
+- solicitud GET de lugares;
+- aceptación de `direccionReferencial` nula;
+- rechazo de identificadores inválidos;
+- rechazo de jerarquías territoriales incompletas.
+
+También se verificó:
+
+`remote-event-form-data-repository.test.ts`
+
+para comprobar:
+
+- carga conjunta de categorías y lugares;
+- traducción de fallos de conexión;
+- traducción de errores `5xx`;
+- encapsulamiento de errores inesperados.
+
+Finalmente:
+
+`use-event-form-data.test.ts`
+
+comprueba:
+
+- estado inicial `loading`;
+- transición a `success`;
+- transición a `error` con mensaje comprensible.
+
+Resultado de la verificación específica:
+
+- 3 archivos de prueba aprobados;
+- 11 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También finalizaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `git diff --check`.
+
+### Verificación global tras datos auxiliares
+
+Después de integrar este incremento se ejecutó la suite móvil completa.
+
+Resultado:
+
+- 29 archivos de prueba aprobados;
+- 145 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+No se produjo ninguna regresión respecto de las funcionalidades móviles previamente verificadas.
+
+Posteriormente se ejecutó:
+
+`npm run build`
+
+El comando incluye:
+
+`tsc --noEmit && vite build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 252 módulos y completó el build de producción en aproximadamente 9 segundos.
+
+Se mantienen únicamente advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build y no fueron introducidas por la infraestructura de datos auxiliares.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T142, T143 Y T148`
+
+### Límites de este incremento
+
+Todavía no se declara completado:
+
+- `T144`: cargar categorías reales en el formulario;
+- `T145`: cargar lugares reales en el formulario;
+- `T146`: evitar IDs de categorías incrustados en el formulario;
+- `T147`: evitar `lugarId` incrustado en el formulario.
+
+Estas tareas requieren la existencia real de:
+
+`CreateEventPage`
+
+y se comprobarán cuando el formulario utilice los datos auxiliares implementados en este incremento.
+
+Tampoco se cierran todavía:
+
+- `T090`;
+- `T139`.
+
+Ambas dependen de la ruta real:
+
+`/gestion/eventos/nuevo`.
+
+## 31. Próxima evidencia a obtener
+
+La siguiente fase corresponde a la construcción real del formulario de creación de Evento.
+
+Se deberá implementar:
+
+- `CreateEventPage`;
+- ruta protegida `/gestion/eventos/nuevo`;
+- acceso únicamente para `ASISTENTE`;
+- consumo de las categorías obtenidas desde `GET /api/v1/categorias`;
+- consumo de los lugares obtenidos desde `GET /api/v1/lugares`;
+- selección de categorías sin identificadores incrustados;
+- selección del lugar sin `lugarId` incrustado;
+- reutilización de los estados loading y error ya implementados.
+
+Una vez que el formulario consuma efectivamente estos datos podrán cerrarse `T144` a `T147`.
+
+Después se continuará con las validaciones derivadas del contrato de `POST /api/v1/eventos`.
+
+No se implementarán todavía persistencia local, almacenamiento offline ni sincronización correspondientes a Semana 12.

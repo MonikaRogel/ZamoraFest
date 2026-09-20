@@ -48,6 +48,42 @@ export interface Lugar {
   readonly sector: Sector;
 }
 
+export interface ProvinciaConsulta {
+  readonly id: number;
+  readonly nombre: string;
+}
+
+export interface CantonConsulta {
+  readonly id: number;
+  readonly nombre: string;
+  readonly provincia: ProvinciaConsulta;
+}
+
+export interface ParroquiaConsulta {
+  readonly id: number;
+  readonly nombre: string;
+  readonly canton: CantonConsulta;
+}
+
+export interface SectorConsulta {
+  readonly id: number;
+  readonly nombre: string;
+  readonly tipoSector: string;
+  readonly parroquia: ParroquiaConsulta;
+}
+
+export interface LugarConsulta {
+  readonly id: number;
+  readonly nombre: string;
+  readonly tipoLugar: string;
+  readonly direccionReferencial: string | null;
+  readonly sector: SectorConsulta;
+}
+
+export interface LugaresResponse {
+  readonly data: readonly LugarConsulta[];
+}
+
 export interface RolResumen {
   readonly id: number;
   readonly nombre: string;
@@ -63,6 +99,10 @@ export interface Categoria {
   readonly id: number;
   readonly nombre: string;
   readonly descripcion: string | null;
+}
+
+export interface CategoriasResponse {
+  readonly data: readonly Categoria[];
 }
 
 export interface Evento {

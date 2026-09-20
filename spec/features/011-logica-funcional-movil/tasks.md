@@ -194,13 +194,13 @@
 
 ## 15. Datos auxiliares del formulario
 
-- [ ] T142 Implementar consulta móvil de categorías.
-- [ ] T143 Implementar consulta móvil de lugares.
+- [x] T142 Implementar consulta móvil de categorías.
+- [x] T143 Implementar consulta móvil de lugares.
 - [ ] T144 Cargar categorías reales en el formulario.
 - [ ] T145 Cargar lugares reales en el formulario.
 - [ ] T146 Evitar IDs de categorías incrustados.
 - [ ] T147 Evitar `lugarId` incrustado.
-- [ ] T148 Modelar loading y error de datos auxiliares.
+- [x] T148 Modelar loading y error de datos auxiliares.
 
 ## 16. Formulario de creación de Evento
 
