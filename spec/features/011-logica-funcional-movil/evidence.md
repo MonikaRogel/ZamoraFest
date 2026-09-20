@@ -1398,7 +1398,7 @@ Por tanto, `EventCard` no conoce:
 
 La decisión de navegación permanece en `ExploreEventsPage`.
 
-### Pruebas específicas
+### Pruebas específicas del área protegida
 
 Se implementaron y actualizaron pruebas para comprobar:
 
@@ -1432,7 +1432,7 @@ La prueba específica de navegación de `ExploreEventsPage` obtuvo adicionalment
 - 5 pruebas aprobadas;
 - 0 pruebas fallidas.
 
-### Verificación global móvil
+### Verificación global móvil del área protegida
 
 Después de completar el detalle público se ejecutó la suite móvil completa.
 
@@ -1471,21 +1471,205 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 29. Próxima evidencia a obtener
+## 29. Área protegida
 
-La siguiente fase de Feature 011 corresponde al área protegida, tareas `T134` a `T141`.
+Se implementó y verificó el área protegida correspondiente a las tareas `T134` a `T141`, con excepción de `T139`, que permanecerá pendiente hasta existir el formulario real de creación de eventos.
 
-La implementación siguiente deberá incorporar:
+También se completó `T089` al registrar y proteger efectivamente la ruta:
 
-- `ManagementPage`;
-- ruta protegida `/gestion`;
+`/gestion`
+
+La pantalla asociada es:
+
+`ManagementPage`
+
+### Protección de la ruta
+
+La ruta `/gestion` utiliza el componente reutilizable:
+
+`ProtectedRoute`
+
+Cuando no existe sesión autenticada, el acceso a `/gestion` redirige hacia:
+
+`/login?redirect=%2Fgestion`
+
+Esto conserva el destino solicitado y permite que el flujo de login pueda retornar posteriormente al área protegida.
+
+La infraestructura de protección no fue duplicada dentro de `ManagementPage`.
+
+La pantalla depende del estado global ya implementado y no realiza comprobaciones paralelas de autenticación.
+
+### Información de sesión
+
+`ManagementPage` consume el estado global mediante:
+
+`useApplicationState()`
+
+La pantalla muestra únicamente información segura de la cuenta autenticada:
+
+- nombre;
+- correo electrónico;
+- rol.
+
+No muestra:
+
+- access token;
+- refresh token;
+- credenciales;
+- información sensible de autenticación.
+
+Los roles se presentan de forma comprensible para el usuario:
+
+- `VISITANTE` → Visitante;
+- `ASISTENTE` → Asistente;
+- `ADMINISTRADOR` → Administrador.
+
+### Autorización de acciones
+
+La interfaz respeta la política vigente de roles de ZamoraFest.
+
+El rol:
+
+`ASISTENTE`
+
+es el único que visualiza la acción relacionada con creación de eventos.
+
+El rol:
+
+`ADMINISTRADOR`
+
+no se interpreta como equivalente implícito de `ASISTENTE`.
+
+Por tanto, tanto `VISITANTE` como `ADMINISTRADOR` permanecen sin la acción de creación específica de Asistente.
+
+La acción "Crear evento" se mantiene temporalmente deshabilitada porque la ruta real:
+
+`/gestion/eventos/nuevo`
+
+y `CreateEventPage` todavía no se han implementado.
+
+Esta decisión evita introducir navegación hacia una pantalla inexistente.
+
+Por esta razón:
+
+- `T139` permanece pendiente;
+- `T090` permanece pendiente.
+
+Ambas tareas se cerrarán cuando se implemente el formulario real de creación.
+
+### Navegación disponible
+
+La pantalla protegida permite navegar hacia:
+
+`/explore`
+
+mediante la acción:
+
+`Explorar eventos`
+
+Esta navegación no modifica la sesión autenticada.
+
+### Cierre de sesión
+
+`ManagementPage` incorpora la acción:
+
+`Cerrar sesión`
+
+El flujo utiliza la función global:
+
+`logout()`
+
+Después del cierre de sesión:
+
+- la sesión en memoria queda eliminada;
+- el usuario deja de estar autenticado;
+- los tokens dejan de estar disponibles en el estado global;
+- el destino pendiente y el borrador se limpian según el reducer vigente;
+- la navegación regresa a `/login`.
+
+La comprobación más amplia de acceso protegido posterior al logout se conservará también para las tareas específicas `T199` a `T205`.
+
+### Pruebas específicas
+
+Se añadieron pruebas de `ManagementPage` para comprobar:
+
 - identidad del usuario autenticado;
-- rol del usuario;
-- acciones compatibles con autorización;
-- acceso a creación para `ASISTENTE`;
+- rol autenticado;
+- acción de creación visible únicamente para `ASISTENTE`;
+- acción de creación todavía deshabilitada;
+- ausencia de la acción para `VISITANTE`;
+- ausencia de la acción para `ADMINISTRADOR`;
+- separación explícita entre `ADMINISTRADOR` y `ASISTENTE`;
+- navegación hacia exploración;
 - cierre de sesión;
-- pruebas de `ManagementPage`.
+- retorno al login.
 
-Las tareas `T089` y `T090` de protección de rutas continuarán pendientes hasta registrar las rutas reales `/gestion` y `/gestion/eventos/nuevo`.
+También se actualizó `App.test.tsx` para comprobar que la ruta real:
 
-No se iniciarán todavía las tareas de persistencia local, sincronización u operación offline correspondientes a semanas posteriores.
+`/gestion`
+
+no muestra el área protegida cuando no existe sesión.
+
+La infraestructura existente de `ProtectedRoute` continúa comprobando de forma específica la conservación exacta del destino:
+
+`/login?redirect=%2Fgestion`
+
+La verificación específica obtuvo:
+
+- 3 archivos de prueba aprobados;
+- 15 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+### Verificación global móvil
+
+Después de implementar el área protegida se ejecutó la suite móvil completa.
+
+Resultado:
+
+- 26 archivos de prueba aprobados;
+- 134 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También se verificaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `git diff --check`.
+
+El build de producción se ejecutó mediante:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 252 módulos y completó el build de producción en aproximadamente 9 segundos.
+
+Se mantienen únicamente advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build y no fueron introducidas por `ManagementPage`.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO, EXCEPTO ACCESO REAL A CREACIÓN`
+
+## 30. Próxima evidencia a obtener
+
+La siguiente fase corresponde a los datos auxiliares del formulario, tareas `T142` a `T148`.
+
+Antes de implementar el formulario se deberán integrar en el cliente móvil:
+
+- consulta real de categorías;
+- consulta real de lugares;
+- estados de carga;
+- estados de error;
+- selección basada en datos reales;
+- ausencia de identificadores incrustados.
+
+La ruta `/gestion/eventos/nuevo`, `CreateEventPage`, `T090` y `T139` permanecerán pendientes hasta iniciar la fase de creación real del evento.
+
+No se implementarán todavía persistencia local, funcionamiento offline ni sincronización correspondientes a semanas posteriores.

@@ -123,7 +123,7 @@
 ## 9. Protección de rutas
 
 - [x] T088 Implementar protección compatible con Ionic React Router y React Router 5.
-- [ ] T089 Proteger `/gestion`.
+- [x] T089 Proteger `/gestion`.
 - [ ] T090 Proteger `/gestion/eventos/nuevo`.
 - [x] T091 Conservar destino solicitado cuando no existe sesión.
 - [x] T092 Redirigir al login cuando corresponde.
@@ -183,14 +183,14 @@
 
 ## 14. Área protegida
 
-- [ ] T134 Crear `ManagementPage`.
-- [ ] T135 Registrar `/gestion`.
-- [ ] T136 Mostrar identidad del usuario autenticado.
-- [ ] T137 Mostrar rol del usuario.
-- [ ] T138 Mostrar únicamente acciones compatibles con autorización.
+- [x] T134 Crear `ManagementPage`.
+- [x] T135 Registrar `/gestion`.
+- [x] T136 Mostrar identidad del usuario autenticado.
+- [x] T137 Mostrar rol del usuario.
+- [x] T138 Mostrar únicamente acciones compatibles con autorización.
 - [ ] T139 Incorporar acceso a creación para `ASISTENTE`.
-- [ ] T140 Incorporar acción de cierre de sesión.
-- [ ] T141 Implementar pruebas de `ManagementPage`.
+- [x] T140 Incorporar acción de cierre de sesión.
+- [x] T141 Implementar pruebas de `ManagementPage`.
 
 ## 15. Datos auxiliares del formulario
 

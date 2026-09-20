@@ -1,0 +1,263 @@
+.zf-management__header {
+  border-bottom:
+    var(--zf-border-width)
+    solid
+    var(--zf-color-border);
+}
+
+.zf-management__toolbar {
+  --background:
+    var(--zf-color-surface);
+  --color:
+    var(--zf-color-text-primary);
+  --border-color:
+    var(--zf-color-border);
+}
+
+.zf-management__brand {
+  font-family:
+    var(--zf-font-family);
+  font-size:
+    var(--zf-font-size-heading);
+  font-weight:
+    var(--zf-font-weight-bold);
+  color:
+    var(--zf-color-text-primary);
+}
+
+.zf-management {
+  display: grid;
+  gap:
+    var(--zf-space-6);
+
+  width: 100%;
+  max-width: 72rem;
+  min-height: 100%;
+
+  margin:
+    0
+    auto;
+
+  padding:
+    var(--zf-space-6)
+    var(--zf-space-4)
+    var(--zf-space-8);
+}
+
+.zf-management__panel {
+  display: grid;
+  gap:
+    var(--zf-space-5);
+
+  padding:
+    var(--zf-space-5);
+
+  background:
+    var(--zf-color-surface);
+
+  border:
+    var(--zf-border-width)
+    solid
+    var(--zf-color-border);
+
+  border-radius:
+    var(--zf-radius-xl);
+
+  box-shadow:
+    var(--zf-shadow-sm);
+}
+
+.zf-management__section-heading {
+  display: grid;
+  gap:
+    var(--zf-space-1);
+}
+
+.zf-management__section-heading h2 {
+  margin:
+    0;
+
+  font-size:
+    var(--zf-font-size-heading);
+  font-weight:
+    var(--zf-font-weight-bold);
+  line-height:
+    var(--zf-line-height-tight);
+
+  color:
+    var(--zf-color-text-primary);
+}
+
+.zf-management__section-heading p {
+  margin:
+    0;
+
+  font-size:
+    var(--zf-font-size-label);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-text-secondary);
+}
+
+.zf-management__identity {
+  display: grid;
+  gap:
+    var(--zf-space-3);
+
+  margin:
+    0;
+}
+
+.zf-management__identity-item {
+  display: grid;
+  gap:
+    var(--zf-space-1);
+
+  padding:
+    var(--zf-space-3)
+    var(--zf-space-4);
+
+  background:
+    var(--zf-color-surface-muted);
+
+  border-radius:
+    var(--zf-radius-md);
+}
+
+.zf-management__identity-item dt {
+  font-size:
+    var(--zf-font-size-caption);
+  font-weight:
+    var(--zf-font-weight-bold);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-text-secondary);
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.05em;
+}
+
+.zf-management__identity-item dd {
+  margin:
+    0;
+
+  overflow-wrap:
+    anywhere;
+
+  font-size:
+    var(--zf-font-size-body);
+  font-weight:
+    var(--zf-font-weight-semibold);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-text-primary);
+}
+
+.zf-management__actions {
+  display: grid;
+  gap:
+    var(--zf-space-3);
+}
+
+.zf-management__action-group {
+  display: grid;
+  gap:
+    var(--zf-space-2);
+}
+
+.zf-management__action-note {
+  margin:
+    0;
+
+  font-size:
+    var(--zf-font-size-caption);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-text-secondary);
+}
+
+.zf-management__secondary-action {
+  --border-color:
+    var(--zf-color-primary);
+  --color:
+    var(--zf-color-primary);
+  --border-radius:
+    var(--zf-radius-md);
+  --box-shadow:
+    none;
+
+  min-height:
+    var(--zf-control-min-size);
+
+  font-size:
+    var(--zf-font-size-body);
+  font-weight:
+    var(--zf-font-weight-bold);
+
+  text-transform:
+    none;
+}
+
+.zf-management__logout {
+  --color:
+    var(--zf-color-error);
+  --border-radius:
+    var(--zf-radius-md);
+
+  min-height:
+    var(--zf-control-min-size);
+
+  font-size:
+    var(--zf-font-size-body);
+  font-weight:
+    var(--zf-font-weight-semibold);
+
+  text-transform:
+    none;
+}
+
+.zf-management__secondary-action::part(native):focus-visible,
+.zf-management__logout::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+
+  outline-offset:
+    var(--zf-focus-ring-offset);
+}
+
+@media (min-width: 48rem) {
+  .zf-management {
+    padding:
+      var(--zf-space-8)
+      var(--zf-space-6);
+  }
+
+  .zf-management__identity {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+
+  .zf-management__actions {
+    max-width:
+      28rem;
+  }
+}

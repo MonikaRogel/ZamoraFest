@@ -25,13 +25,13 @@ Las rutas deben poder abrirse directamente y no depender de objetos transportado
 
 | Ruta | Acceso | Rol | Pantalla | Endpoint principal | Estado |
 | --- | --- | --- | --- | --- | --- |
-| `/` | Público | Ninguno | Redirección inicial | Ninguno | Existente / ajustar |
-| `/login` | Público | Ninguno | `LoginPage` | `POST /api/v1/auth/login` | Existente / evolucionar |
-| `/register` | Público | Ninguno | `RegisterPage` | `POST /api/v1/auth/register` | Por implementar |
-| `/explore` | Público | Ninguno | `ExploreEventsPage` | `GET /api/v1/eventos` | Existente |
-| `/eventos/:id` | Público | Ninguno | `EventDetailPage` | `GET /api/v1/eventos/:id` | Por implementar |
-| `/gestion` | Protegido | Usuario autenticado | `ManagementPage` | Ninguno obligatorio | Por implementar |
-| `/gestion/eventos/nuevo` | Protegido | `ASISTENTE` | `CreateEventPage` | `POST /api/v1/eventos` | Por implementar |
+| `/` | Público | Ninguno | Redirección inicial | Ninguno | Existente |
+| `/login` | Público | Ninguno | `LoginPage` | `POST /api/v1/auth/login` | Implementado y evolucionado |
+| `/register` | Público | Ninguno | `RegisterPage` | `POST /api/v1/auth/register` | Implementado |
+| `/explore` | Público | Ninguno | `ExploreEventsPage` | `GET /api/v1/eventos` | Implementado |
+| `/eventos/:id` | Público | Ninguno | `EventDetailPage` | `GET /api/v1/eventos/:id` | Implementado |
+| `/gestion` | Protegido | Usuario autenticado | `ManagementPage` | Ninguno obligatorio | Implementado |
+| `/gestion/eventos/nuevo` | Protegido | `ASISTENTE` | `CreateEventPage` | `POST /api/v1/eventos` | Pendiente |
 
 ## 4. Ruta inicial
 
