@@ -221,21 +221,21 @@
 
 ## 17. Validaciones del Evento
 
-- [ ] T163 Validar título obligatorio.
-- [ ] T164 Validar longitud permitida del título.
-- [ ] T165 Validar fecha de inicio.
-- [ ] T166 Validar fecha final opcional.
-- [ ] T167 Validar que fecha final no sea anterior a fecha inicial.
-- [ ] T168 Validar costo no negativo.
-- [ ] T169 Validar máximo de dos decimales.
-- [ ] T170 Validar lugar entero positivo.
-- [ ] T171 Validar al menos una categoría.
-- [ ] T172 Rechazar categorías duplicadas.
-- [ ] T173 Validar longitud de fuente de información.
-- [ ] T174 Ejecutar validación al abandonar campos cuando corresponda.
-- [ ] T175 Ejecutar validación completa al enviar.
-- [ ] T176 Mostrar mensajes específicos por campo.
-- [ ] T177 Añadir pruebas de validación móvil.
+- [x] T163 Validar título obligatorio.
+- [x] T164 Validar longitud permitida del título.
+- [x] T165 Validar fecha de inicio.
+- [x] T166 Validar fecha final opcional.
+- [x] T167 Validar que fecha final no sea anterior a fecha inicial.
+- [x] T168 Validar costo no negativo.
+- [x] T169 Validar máximo de dos decimales.
+- [x] T170 Validar lugar entero positivo.
+- [x] T171 Validar al menos una categoría.
+- [x] T172 Rechazar categorías duplicadas.
+- [x] T173 Validar longitud de fuente de información.
+- [x] T174 Ejecutar validación al abandonar campos cuando corresponda.
+- [x] T175 Ejecutar validación completa al enviar.
+- [x] T176 Mostrar mensajes específicos por campo.
+- [x] T177 Añadir pruebas de validación móvil.
 
 ## 18. Mapeo de errores 422
 

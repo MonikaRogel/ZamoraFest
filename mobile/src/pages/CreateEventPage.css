@@ -188,6 +188,13 @@
     vertical;
 }
 
+.zf-create-event__field input[aria-invalid="true"],
+.zf-create-event__field textarea[aria-invalid="true"],
+.zf-create-event__field select[aria-invalid="true"] {
+  border-color:
+    var(--zf-color-error);
+}
+
 .zf-create-event__field input:focus-visible,
 .zf-create-event__field textarea:focus-visible,
 .zf-create-event__field select:focus-visible,
@@ -200,6 +207,21 @@
 
   outline-offset:
     var(--zf-focus-ring-offset);
+}
+
+.zf-create-event__field-error {
+  margin:
+    0;
+
+  font-size:
+    var(--zf-font-size-caption);
+  font-weight:
+    var(--zf-font-weight-medium);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-error);
 }
 
 .zf-create-event__categories {
@@ -254,6 +276,12 @@
 
   cursor:
     pointer;
+}
+
+.zf-create-event__categories[aria-invalid="true"]
+  .zf-create-event__category {
+  border-color:
+    var(--zf-color-error);
 }
 
 .zf-create-event__category input {
@@ -321,6 +349,13 @@
   }
 
   .zf-create-event__categories legend {
+    grid-column:
+      1 /
+      -1;
+  }
+
+  .zf-create-event__categories
+    + .zf-create-event__field-error {
     grid-column:
       1 /
       -1;

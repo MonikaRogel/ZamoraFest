@@ -2041,7 +2041,7 @@ Esta decisión es intencional porque todavía no se ha implementado:
 
 Estas responsabilidades corresponden a `T160`, `T161` y `T162`.
 
-### Pruebas específicas
+### Pruebas específicas del formulario protegido
 
 Se creó:
 
@@ -2138,7 +2138,7 @@ Estado:
 
 Se completó el flujo de creación remota correspondiente a `T160`, `T161` y `T162`.
 
-### Implementación realizada
+### Implementación de validaciones del Evento
 
 La capa API móvil incorpora la operación:
 
@@ -2265,28 +2265,200 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T160-T162`
 
-## 33. Próxima evidencia a obtener
+## 33. Validaciones móviles del formulario de Evento
 
-La siguiente fase corresponde a las validaciones móviles del formulario de Evento.
+Se completaron las validaciones móviles correspondientes a `T163` hasta `T177`.
+
+### Implementación realizada
+
+Se incorporó una capa de validación independiente para el borrador de creación de eventos mediante `validateEventCreateDraft`.
+
+Esta función constituye la única fuente de verdad para validar y normalizar los datos antes de construir `CreateEventoRequest`.
+
+Las reglas implementadas se mantienen alineadas con el contrato actual del backend:
+
+- título obligatorio;
+- título con máximo de 200 caracteres;
+- fecha y hora de inicio obligatoria y válida;
+- fecha final opcional;
+- fecha final no anterior a la fecha inicial;
+- costo referencial obligatorio;
+- costo no negativo;
+- costo máximo de `99_999_999.99`;
+- máximo de dos decimales en el costo;
+- lugar con identificador entero positivo;
+- al menos una categoría;
+- identificadores de categorías válidos;
+- rechazo de categorías duplicadas;
+- fuente de información opcional;
+- fuente de información con máximo de 500 caracteres;
+- descripción y fuente opcionales normalizadas a `null` cuando están vacías.
+
+Cuando descripción o fuente contienen únicamente espacios después de haber sido proporcionadas, la validación las rechaza para mantener coherencia con el contrato del backend.
+
+### Validación durante la interacción
+
+`CreateEventPage` ejecuta validaciones al abandonar los campos cuando corresponde.
+
+Los errores se representan junto al campo relacionado y se enlazan mediante atributos de accesibilidad:
+
+- `aria-invalid`;
+- `aria-describedby`;
+- mensajes con `role="alert"`.
+
+Cuando el usuario modifica nuevamente un campo se elimina el error local correspondiente para permitir una nueva validación.
+
+La relación entre fecha inicial y fecha final también se vuelve a comprobar cuando cambia o se abandona alguno de los campos relacionados.
+
+### Validación completa al enviar
+
+Antes de invocar el repositorio de creación se ejecuta una validación completa del borrador.
+
+Si existe al menos un error:
+
+- no se ejecuta `POST /api/v1/eventos`;
+- no se llama al repositorio de creación;
+- se muestran los mensajes específicos de los campos inválidos;
+- se conservan los valores introducidos por el usuario.
+
+Si el formulario es válido, la misma función de validación devuelve el objeto `CreateEventoRequest` normalizado que se entrega al flujo de creación remota.
+
+De esta manera se eliminó la construcción manual duplicada de la solicitud dentro de `CreateEventPage`.
+
+### Presentación visual
+
+Los controles inválidos utilizan el token semántico existente:
+
+`--zf-color-error`
+
+No se incorporaron colores independientes del sistema visual.
+
+La presentación conserva compatibilidad con los modos claro y oscuro definidos en los tokens de diseño de Semana 10.
+
+### Pruebas específicas de validación
+
+Se añadieron pruebas puras para `validateEventCreateDraft`.
+
+Resultado:
+
+`15 pruebas aprobadas`
+
+Estas pruebas cubren:
+
+- normalización de un borrador válido;
+- título obligatorio;
+- máximo de caracteres del título;
+- fecha inicial vacía o inválida;
+- fecha final opcional;
+- fecha final inválida;
+- rango incorrecto de fechas;
+- costo vacío;
+- costo negativo;
+- costo con más de dos decimales;
+- costo superior al máximo permitido;
+- lugar inválido;
+- ausencia de categorías;
+- categorías duplicadas;
+- identificadores de categoría inválidos;
+- campos opcionales;
+- longitud de fuente de información;
+- cadenas compuestas únicamente por espacios.
+
+También se añadieron pruebas de interacción de `CreateEventPage`.
+
+Resultado:
+
+`4 pruebas aprobadas`
+
+Estas pruebas verifican:
+
+- validación del título al abandonar el campo;
+- validación del costo al abandonar el campo;
+- validación de la relación entre fecha inicial y fecha final;
+- validación completa al enviar;
+- mensajes específicos por campo;
+- atributos de accesibilidad;
+- ausencia de llamadas al repositorio cuando el formulario es inválido.
+
+Se volvieron a ejecutar las pruebas de creación remota existentes para comprobar que las nuevas validaciones no rompieran el flujo previamente implementado.
+
+### Verificación focalizada
+
+Resultado conjunto:
+
+`3 archivos de prueba aprobados`
+
+`22 pruebas aprobadas`
+
+### Verificación global de T163-T177
+
+Se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó la suite completa:
+
+`npm test`
+
+Resultado:
+
+`35 archivos de prueba aprobados`
+
+`180 pruebas aprobadas`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 261 módulos y completó el build de producción en aproximadamente 10 segundos.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build.
+
+También se ejecutó:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T163-T177`
+
+## 34. Próxima evidencia a obtener
+
+La siguiente fase corresponde al mapeo estructurado de errores HTTP `422`.
 
 Se continuará con:
 
-- `T163`: título obligatorio;
-- `T164`: longitud permitida del título;
-- `T165`: fecha de inicio;
-- `T166`: fecha final opcional;
-- `T167`: fecha final no anterior a fecha inicial;
-- `T168`: costo no negativo;
-- `T169`: máximo de dos decimales;
-- `T170`: lugar entero positivo;
-- `T171`: al menos una categoría;
-- `T172`: rechazo de categorías duplicadas;
-- `T173`: longitud de fuente de información;
-- `T174`: validación al abandonar campos cuando corresponda;
-- `T175`: validación completa al enviar;
-- `T176`: mensajes específicos por campo;
-- `T177`: pruebas de validación móvil.
+- `T178`: extender el error HTTP móvil para conservar el cuerpo estructurado;
+- `T179`: interpretar `VALIDATION_ERROR`;
+- las tareas posteriores definidas en la sección de mapeo de errores `422`.
 
-El tratamiento estructurado de errores `422`, así como el manejo específico de `401` y `403`, se realizará posteriormente en las fases definidas para esas responsabilidades.
+Esta fase deberá reutilizar los mensajes del backend y asociarlos a los campos correspondientes sin borrar el formulario.
+
+El manejo específico de `401` y `403` continuará posteriormente en la fase prevista para autorización y sesión.
 
 No se incorporarán video, PDF, persistencia offline ni sincronización dentro del código de este incremento.

@@ -6,8 +6,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import type {
-  FormEvent,
+import {
+  useState,
+  type FormEvent,
 } from 'react';
 import {
   useHistory,
@@ -19,6 +20,10 @@ import ScreenHeader from '../components/ui/ScreenHeader';
 import type {
   EventCreateRepository,
 } from '../features/events/event-create-repository';
+import {
+  type EventCreateFieldErrors,
+  validateEventCreateDraft,
+} from '../features/events/event-create-validation';
 import type {
   EventFormDataRepository,
 } from '../features/events/event-form-data-repository';
@@ -31,9 +36,6 @@ import {
 import {
   useApplicationState,
 } from '../state/ApplicationStateContext';
-import type {
-  CreateEventoRequest,
-} from '../types/api';
 
 import './CreateEventPage.css';
 
@@ -44,6 +46,36 @@ interface CreateEventPageProps {
   readonly creationRepository?:
     EventCreateRepository;
 }
+
+interface FieldErrorProps {
+  readonly id: string;
+  readonly message?: string;
+}
+
+function FieldError({
+  id,
+  message,
+}: FieldErrorProps) {
+  if (
+    message ===
+    undefined
+  ) {
+    return null;
+  }
+
+  return (
+    <p
+      id={id}
+      className="zf-create-event__field-error"
+      role="alert"
+    >
+      {message}
+    </p>
+  );
+}
+
+type EventCreateFieldName =
+  keyof EventCreateFieldErrors;
 
 function CreateEventPage({
   repository,
@@ -58,6 +90,14 @@ function CreateEventPage({
     updateEventDraft,
   } =
     useApplicationState();
+
+  const [
+    fieldErrors,
+    setFieldErrors,
+  ] =
+    useState<EventCreateFieldErrors>(
+      {},
+    );
 
   const {
     state,
@@ -83,9 +123,86 @@ function CreateEventPage({
     );
   }
 
+  function clearFieldError(
+    field:
+      EventCreateFieldName,
+  ) {
+    setFieldErrors(
+      (current) => ({
+        ...current,
+        [field]:
+          undefined,
+      }),
+    );
+  }
+
+  function validateField(
+    field:
+      EventCreateFieldName,
+  ) {
+    const validation =
+      validateEventCreateDraft(
+        eventDraft,
+      );
+
+    const message =
+      validation.ok
+        ? undefined
+        : validation
+            .errors[
+              field
+            ];
+
+    setFieldErrors(
+      (current) => ({
+        ...current,
+        [field]:
+          message,
+      }),
+    );
+  }
+
+  function validateStartField() {
+    const validation =
+      validateEventCreateDraft(
+        eventDraft,
+      );
+
+    setFieldErrors(
+      (current) => ({
+        ...current,
+
+        fechaInicio:
+          validation.ok
+            ? undefined
+            : validation
+                .errors
+                .fechaInicio,
+
+        fechaFin:
+          eventDraft
+            .fechaFin
+            .trim()
+            .length ===
+          0
+            ? current
+                .fechaFin
+            : validation.ok
+              ? undefined
+              : validation
+                  .errors
+                  .fechaFin,
+      }),
+    );
+  }
+
   function handlePlaceChange(
     value: string,
   ) {
+    clearFieldError(
+      'lugarId',
+    );
+
     if (
       value ===
       ''
@@ -136,6 +253,10 @@ function CreateEventPage({
               categoryId,
           );
 
+    clearFieldError(
+      'categoriaIds',
+    );
+
     updateEventDraft({
       categoriaIds:
         nextIds,
@@ -156,68 +277,27 @@ function CreateEventPage({
       return;
     }
 
-    const description =
-      eventDraft
-        .descripcion
-        .trim();
+    const validation =
+      validateEventCreateDraft(
+        eventDraft,
+      );
 
-    const endDate =
-      eventDraft
-        .fechaFin
-        .trim();
+    if (
+      !validation.ok
+    ) {
+      setFieldErrors(
+        validation.errors,
+      );
 
-    const source =
-      eventDraft
-        .fuenteInformacion
-        .trim();
+      return;
+    }
 
-    const input:
-      CreateEventoRequest = {
-      titulo:
-        eventDraft
-          .titulo,
-
-      descripcion:
-        description ===
-        ''
-          ? null
-          : description,
-
-      fechaInicio:
-        eventDraft
-          .fechaInicio,
-
-      fechaFin:
-        endDate ===
-        ''
-          ? null
-          : endDate,
-
-      costoReferencial:
-        Number.parseFloat(
-          eventDraft
-            .costoReferencial,
-        ),
-
-      lugarId:
-        eventDraft
-          .lugarId ??
-        0,
-
-      categoriaIds: [
-        ...eventDraft
-          .categoriaIds,
-      ],
-
-      fuenteInformacion:
-        source ===
-        ''
-          ? null
-          : source,
-    };
+    setFieldErrors(
+      {},
+    );
 
     await createEvent(
-      input,
+      validation.input,
       accessToken,
     );
   }
@@ -346,13 +426,32 @@ function CreateEventPage({
                       id="event-title"
                       name="titulo"
                       type="text"
+                      maxLength={
+                        200
+                      }
                       value={
                         eventDraft
                           .titulo
                       }
+                      aria-invalid={
+                        fieldErrors
+                          .titulo !==
+                        undefined
+                      }
+                      aria-describedby={
+                        fieldErrors
+                          .titulo ===
+                        undefined
+                          ? undefined
+                          : 'event-title-error'
+                      }
                       onChange={(
                         event,
                       ) => {
+                        clearFieldError(
+                          'titulo',
+                        );
+
                         updateEventDraft({
                           titulo:
                             event
@@ -360,6 +459,19 @@ function CreateEventPage({
                               .value,
                         });
                       }}
+                      onBlur={() => {
+                        validateField(
+                          'titulo',
+                        );
+                      }}
+                    />
+
+                    <FieldError
+                      id="event-title-error"
+                      message={
+                        fieldErrors
+                          .titulo
+                      }
                     />
                   </div>
 
@@ -376,9 +488,25 @@ function CreateEventPage({
                         eventDraft
                           .descripcion
                       }
+                      aria-invalid={
+                        fieldErrors
+                          .descripcion !==
+                        undefined
+                      }
+                      aria-describedby={
+                        fieldErrors
+                          .descripcion ===
+                        undefined
+                          ? undefined
+                          : 'event-description-error'
+                      }
                       onChange={(
                         event,
                       ) => {
+                        clearFieldError(
+                          'descripcion',
+                        );
+
                         updateEventDraft({
                           descripcion:
                             event
@@ -386,6 +514,19 @@ function CreateEventPage({
                               .value,
                         });
                       }}
+                      onBlur={() => {
+                        validateField(
+                          'descripcion',
+                        );
+                      }}
+                    />
+
+                    <FieldError
+                      id="event-description-error"
+                      message={
+                        fieldErrors
+                          .descripcion
+                      }
                     />
                   </div>
 
@@ -403,9 +544,29 @@ function CreateEventPage({
                           eventDraft
                             .fechaInicio
                         }
+                        aria-invalid={
+                          fieldErrors
+                            .fechaInicio !==
+                          undefined
+                        }
+                        aria-describedby={
+                          fieldErrors
+                            .fechaInicio ===
+                          undefined
+                            ? undefined
+                            : 'event-start-error'
+                        }
                         onChange={(
                           event,
                         ) => {
+                          clearFieldError(
+                            'fechaInicio',
+                          );
+
+                          clearFieldError(
+                            'fechaFin',
+                          );
+
                           updateEventDraft({
                             fechaInicio:
                               event
@@ -413,6 +574,17 @@ function CreateEventPage({
                                 .value,
                           });
                         }}
+                        onBlur={
+                          validateStartField
+                        }
+                      />
+
+                      <FieldError
+                        id="event-start-error"
+                        message={
+                          fieldErrors
+                            .fechaInicio
+                        }
                       />
                     </div>
 
@@ -429,9 +601,25 @@ function CreateEventPage({
                           eventDraft
                             .fechaFin
                         }
+                        aria-invalid={
+                          fieldErrors
+                            .fechaFin !==
+                          undefined
+                        }
+                        aria-describedby={
+                          fieldErrors
+                            .fechaFin ===
+                          undefined
+                            ? undefined
+                            : 'event-end-error'
+                        }
                         onChange={(
                           event,
                         ) => {
+                          clearFieldError(
+                            'fechaFin',
+                          );
+
                           updateEventDraft({
                             fechaFin:
                               event
@@ -439,6 +627,19 @@ function CreateEventPage({
                                 .value,
                           });
                         }}
+                        onBlur={() => {
+                          validateField(
+                            'fechaFin',
+                          );
+                        }}
+                      />
+
+                      <FieldError
+                        id="event-end-error"
+                        message={
+                          fieldErrors
+                            .fechaFin
+                        }
                       />
                     </div>
                   </div>
@@ -453,13 +654,31 @@ function CreateEventPage({
                       name="costoReferencial"
                       type="number"
                       inputMode="decimal"
+                      min="0"
+                      step="0.01"
                       value={
                         eventDraft
                           .costoReferencial
                       }
+                      aria-invalid={
+                        fieldErrors
+                          .costoReferencial !==
+                        undefined
+                      }
+                      aria-describedby={
+                        fieldErrors
+                          .costoReferencial ===
+                        undefined
+                          ? undefined
+                          : 'event-cost-error'
+                      }
                       onChange={(
                         event,
                       ) => {
+                        clearFieldError(
+                          'costoReferencial',
+                        );
+
                         updateEventDraft({
                           costoReferencial:
                             event
@@ -467,6 +686,19 @@ function CreateEventPage({
                               .value,
                         });
                       }}
+                      onBlur={() => {
+                        validateField(
+                          'costoReferencial',
+                        );
+                      }}
+                    />
+
+                    <FieldError
+                      id="event-cost-error"
+                      message={
+                        fieldErrors
+                          .costoReferencial
+                      }
                     />
                   </div>
 
@@ -479,13 +711,32 @@ function CreateEventPage({
                       id="event-source"
                       name="fuenteInformacion"
                       rows={3}
+                      maxLength={
+                        500
+                      }
                       value={
                         eventDraft
                           .fuenteInformacion
                       }
+                      aria-invalid={
+                        fieldErrors
+                          .fuenteInformacion !==
+                        undefined
+                      }
+                      aria-describedby={
+                        fieldErrors
+                          .fuenteInformacion ===
+                        undefined
+                          ? undefined
+                          : 'event-source-error'
+                      }
                       onChange={(
                         event,
                       ) => {
+                        clearFieldError(
+                          'fuenteInformacion',
+                        );
+
                         updateEventDraft({
                           fuenteInformacion:
                             event
@@ -493,6 +744,19 @@ function CreateEventPage({
                               .value,
                         });
                       }}
+                      onBlur={() => {
+                        validateField(
+                          'fuenteInformacion',
+                        );
+                      }}
+                    />
+
+                    <FieldError
+                      id="event-source-error"
+                      message={
+                        fieldErrors
+                          .fuenteInformacion
+                      }
                     />
                   </div>
                 </section>
@@ -531,6 +795,18 @@ function CreateEventPage({
                                 .lugarId,
                             )
                       }
+                      aria-invalid={
+                        fieldErrors
+                          .lugarId !==
+                        undefined
+                      }
+                      aria-describedby={
+                        fieldErrors
+                          .lugarId ===
+                        undefined
+                          ? undefined
+                          : 'event-place-error'
+                      }
                       onChange={(
                         event,
                       ) => {
@@ -538,6 +814,11 @@ function CreateEventPage({
                           event
                             .currentTarget
                             .value,
+                        );
+                      }}
+                      onBlur={() => {
+                        validateField(
+                          'lugarId',
                         );
                       }}
                     >
@@ -579,6 +860,14 @@ function CreateEventPage({
                           ),
                         )}
                     </select>
+
+                    <FieldError
+                      id="event-place-error"
+                      message={
+                        fieldErrors
+                          .lugarId
+                      }
+                    />
                   </div>
                 </section>
 
@@ -598,7 +887,26 @@ function CreateEventPage({
                     </p>
                   </div>
 
-                  <fieldset className="zf-create-event__categories">
+                  <fieldset
+                    className="zf-create-event__categories"
+                    aria-invalid={
+                      fieldErrors
+                        .categoriaIds !==
+                      undefined
+                    }
+                    aria-describedby={
+                      fieldErrors
+                        .categoriaIds ===
+                      undefined
+                        ? undefined
+                        : 'event-categories-error'
+                    }
+                    onBlur={() => {
+                      validateField(
+                        'categoriaIds',
+                      );
+                    }}
+                  >
                     <legend>
                       Categorías del evento
                     </legend>
@@ -650,6 +958,14 @@ function CreateEventPage({
                         ),
                       )}
                   </fieldset>
+
+                  <FieldError
+                    id="event-categories-error"
+                    message={
+                      fieldErrors
+                        .categoriaIds
+                    }
+                  />
                 </section>
 
                 {creationState.status ===
