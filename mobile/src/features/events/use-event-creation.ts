@@ -68,6 +68,9 @@ export interface UseEventCreationResult {
       string
     >;
 
+  readonly failure:
+    EventCreateRepositoryError | null;
+
   readonly create:
     (
       input:
@@ -98,6 +101,16 @@ export function useEventCreation(
       remoteIdle(),
     );
 
+  const [
+    failure,
+    setFailure,
+  ] =
+    useState<
+      EventCreateRepositoryError | null
+    >(
+      null,
+    );
+
   const create =
     useCallback(
       async (
@@ -106,6 +119,10 @@ export function useEventCreation(
         accessToken:
           string,
       ) => {
+        setFailure(
+          null,
+        );
+
         setState(
           remoteLoading(),
         );
@@ -118,6 +135,10 @@ export function useEventCreation(
                 accessToken,
               );
 
+          setFailure(
+            null,
+          );
+
           setState(
             remoteSuccess(
               evento,
@@ -126,6 +147,13 @@ export function useEventCreation(
 
           return evento;
         } catch (error) {
+          setFailure(
+            error instanceof
+              EventCreateRepositoryError
+              ? error
+              : null,
+          );
+
           setState(
             remoteError(
               getCreationErrorMessage(
@@ -145,6 +173,10 @@ export function useEventCreation(
   const reset =
     useCallback(
       () => {
+        setFailure(
+          null,
+        );
+
         setState(
           remoteIdle(),
         );
@@ -154,6 +186,7 @@ export function useEventCreation(
 
   return {
     state,
+    failure,
     create,
     reset,
   };

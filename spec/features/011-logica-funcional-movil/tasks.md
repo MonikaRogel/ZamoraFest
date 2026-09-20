@@ -239,12 +239,12 @@
 
 ## 18. Mapeo de errores 422
 
-- [ ] T178 Extender el error HTTP móvil para conservar cuerpo estructurado.
-- [ ] T179 Interpretar `VALIDATION_ERROR`.
-- [ ] T180 Leer `details[].path`.
-- [ ] T181 Asociar errores backend con campos del formulario.
-- [ ] T182 Mostrar errores no asociados a campo como error general.
-- [ ] T183 Añadir pruebas de mapeo de `422`.
+- [x] T178 Extender el error HTTP móvil para conservar cuerpo estructurado.
+- [x] T179 Interpretar `VALIDATION_ERROR`.
+- [x] T180 Leer `details[].path`.
+- [x] T181 Asociar errores backend con campos del formulario.
+- [x] T182 Mostrar errores no asociados a campo como error general.
+- [x] T183 Añadir pruebas de mapeo de `422`.
 
 ## 19. Tratamiento de 401 y 403
 

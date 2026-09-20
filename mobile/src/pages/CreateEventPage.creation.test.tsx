@@ -41,18 +41,26 @@ const session:
   AuthSession = {
     accessToken:
       'access-asistente',
+
     refreshToken:
       'refresh-asistente',
+
     tokenType:
       'Bearer',
+
     expiresIn:
       900,
+
     usuario: {
-      id: 10,
+      id:
+        10,
+
       nombre:
         'Asistente Demo',
+
       email:
         'asistente@zamorafest.test',
+
       rol:
         'ASISTENTE',
     },
@@ -62,9 +70,12 @@ const formData:
   EventFormData = {
     categorias: [
       {
-        id: 41,
+        id:
+          41,
+
         nombre:
           'Cultura comunitaria',
+
         descripcion:
           null,
       },
@@ -72,29 +83,46 @@ const formData:
 
     lugares: [
       {
-        id: 73,
+        id:
+          73,
+
         nombre:
           'Casa Cultural Zamora',
+
         tipoLugar:
           'CENTRO_CULTURAL',
+
         direccionReferencial:
           'Centro de Zamora',
+
         sector: {
-          id: 31,
+          id:
+            31,
+
           nombre:
             'Centro',
+
           tipoSector:
             'BARRIO',
+
           parroquia: {
-            id: 22,
+            id:
+              22,
+
             nombre:
               'Zamora',
+
             canton: {
-              id: 12,
+              id:
+                12,
+
               nombre:
                 'Zamora',
+
               provincia: {
-                id: 1,
+                id:
+                  1,
+
                 nombre:
                   'Zamora Chinchipe',
               },
@@ -107,65 +135,101 @@ const formData:
 
 const createdEvent:
   Evento = {
-    id: 501,
+    id:
+      501,
+
     titulo:
       'Festival Amazónico',
+
     descripcion:
       'Encuentro cultural.',
+
     fechaInicio:
       '2026-09-25T18:00:00.000',
+
     fechaFin:
       null,
+
     costoReferencial:
       5.5,
+
     estadoEvento:
       'BORRADOR',
+
     estadoRevision:
       'PENDIENTE',
+
     fuenteInformacion:
       null,
+
     fechaCreacion:
       '2026-09-19T20:00:00.000',
+
     fechaActualizacion:
       null,
+
     fechaRevision:
       null,
+
     lugar: {
-      id: 73,
+      id:
+        73,
+
       nombre:
         'Casa Cultural Zamora',
+
       tipoLugar:
         'CENTRO_CULTURAL',
+
       direccionReferencial:
         'Centro de Zamora',
+
       referencia:
         null,
+
       latitud:
         null,
+
       longitud:
         null,
+
       sector: {
-        id: 31,
+        id:
+          31,
+
         nombre:
           'Centro',
+
         tipoSector:
           'BARRIO',
+
         parroquia: {
-          id: 22,
+          id:
+            22,
+
           nombre:
             'Zamora',
+
           codigoDpa:
             '190150',
+
           canton: {
-            id: 12,
+            id:
+              12,
+
             nombre:
               'Zamora',
+
             codigoDpa:
               '1901',
+
             provincia: {
-              id: 1,
+              id:
+                1,
+
               nombre:
                 'Zamora Chinchipe',
+
               codigoDpa:
                 '19',
             },
@@ -173,23 +237,34 @@ const createdEvent:
         },
       },
     },
+
     usuarioCreador: {
-      id: 10,
+      id:
+        10,
+
       nombreCompleto:
         'Asistente Demo',
+
       rol: {
-        id: 2,
+        id:
+          2,
+
         nombre:
           'ASISTENTE',
       },
     },
+
     usuarioRevisor:
       null,
+
     categorias: [
       {
-        id: 41,
+        id:
+          41,
+
         nombre:
           'Cultura comunitaria',
+
         descripcion:
           null,
       },
@@ -226,19 +301,26 @@ function StateBootstrap() {
       updateEventDraft({
         titulo:
           'Festival Amazónico',
+
         descripcion:
           'Encuentro cultural.',
+
         fechaInicio:
           '2026-09-25T18:00',
+
         fechaFin:
           '',
+
         costoReferencial:
           '5.50',
+
         lugarId:
           73,
+
         categoriaIds: [
           41,
         ],
+
         fuenteInformacion:
           '',
       });
@@ -344,22 +426,30 @@ describe(
               {
                 titulo:
                   'Festival Amazónico',
+
                 descripcion:
                   'Encuentro cultural.',
+
                 fechaInicio:
                   '2026-09-25T18:00',
+
                 fechaFin:
                   null,
+
                 costoReferencial:
                   5.5,
+
                 lugarId:
                   73,
+
                 categoriaIds: [
                   41,
                 ],
+
                 fuenteInformacion:
                   null,
               },
+
               'access-asistente',
             );
           },
@@ -504,6 +594,114 @@ describe(
           ),
         ).toHaveValue(
           'Festival Amazónico',
+        );
+      },
+    );
+
+    it(
+      'asocia errores 422 del backend con campos y conserva errores desconocidos como mensaje general',
+      async () => {
+        const create =
+          vi.fn<
+            EventCreateRepository['create']
+          >(
+            async () => {
+              throw new EventCreateRepositoryError(
+                'request',
+                'Solicitud rechazada.',
+                422,
+                {
+                  code:
+                    'VALIDATION_ERROR',
+
+                  details: [
+                    {
+                      path:
+                        'titulo',
+
+                      message:
+                        'El título fue rechazado por el servidor.',
+                    },
+
+                    {
+                      path:
+                        'categoriaIds.0',
+
+                      message:
+                        'La categoría fue rechazada por el servidor.',
+                    },
+
+                    {
+                      path:
+                        'estadoEvento',
+
+                      message:
+                        'El estado del evento no puede enviarse desde el formulario.',
+                    },
+                  ],
+                },
+              );
+            },
+          );
+
+        renderPage({
+          create,
+        });
+
+        await submitForm();
+
+        expect(
+          await screen.findByText(
+            'El título fue rechazado por el servidor.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          await screen.findByText(
+            'La categoría fue rechazada por el servidor.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          await screen.findByText(
+            'El estado del evento no puede enviarse desde el formulario.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByLabelText(
+            'Título',
+          ),
+        ).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+
+        expect(
+          screen.getByRole(
+            'group',
+            {
+              name:
+                'Categorías del evento',
+            },
+          ),
+        ).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+
+        expect(
+          screen.getByLabelText(
+            'Título',
+          ),
+        ).toHaveValue(
+          'Festival Amazónico',
+        );
+
+        expect(
+          create,
+        ).toHaveBeenCalledTimes(
+          1,
         );
       },
     );

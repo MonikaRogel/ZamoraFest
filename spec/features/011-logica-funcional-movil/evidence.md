@@ -2447,18 +2447,221 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T163-T177`
 
-## 34. Próxima evidencia a obtener
+## 34. Mapeo estructurado de errores HTTP 422
 
-La siguiente fase corresponde al mapeo estructurado de errores HTTP `422`.
+Se completó el flujo móvil para conservar, interpretar y presentar los errores estructurados de validación devueltos por el backend durante la creación de eventos.
+
+### Contrato HTTP conservado en el móvil
+
+`ApiRequestError` fue extendido para conservar, además del estado HTTP, un cuerpo estructurado compatible con el contrato de error de ZamoraFest.
+
+La estructura conservada contiene:
+
+- `error.code`;
+- `error.message`;
+- `error.details` cuando existe.
+
+Cuando una respuesta HTTP no es exitosa, `requestJson` intenta leer el cuerpo JSON antes de lanzar el error.
+
+El cuerpo únicamente se conserva como error estructurado cuando contiene los campos mínimos esperados:
+
+- `error.code` como cadena;
+- `error.message` como cadena.
+
+Las respuestas no JSON o con una estructura diferente siguen conservando el estado HTTP, pero su cuerpo estructurado se representa como `null`.
+
+Con esto se evita confiar en datos remotos no validados y se mantiene compatibilidad con los errores HTTP previamente soportados.
+
+### Interpretación de VALIDATION_ERROR
+
+El repositorio remoto de creación de eventos interpreta el código:
+
+`VALIDATION_ERROR`
+
+Cuando el backend devuelve este código, se conservan los elementos válidos de `details`.
+
+Cada detalle aceptado debe contener:
+
+- `path` como cadena;
+- `message` como cadena.
+
+La información se propaga mediante `EventCreateRepositoryError`, que ahora conserva:
+
+- tipo de error;
+- estado HTTP;
+- código remoto;
+- detalles estructurados de validación.
+
+Los fallos de conexión, servidor, autorización y errores inesperados mantienen su clasificación anterior.
+
+### Asociación de rutas del backend con el formulario
+
+Se añadió `mapEventCreateServerValidation` para transformar los errores estructurados del backend en errores visibles dentro del formulario de creación.
+
+Las rutas reconocidas son:
+
+- `titulo`;
+- `descripcion`;
+- `fechaInicio`;
+- `fechaFin`;
+- `costoReferencial`;
+- `lugarId`;
+- `categoriaIds`;
+- `fuenteInformacion`.
+
+Para rutas indexadas, por ejemplo:
+
+`categoriaIds.0`
+
+se utiliza el primer segmento de la ruta y el mensaje se asocia al campo `categoriaIds`.
+
+De esta forma los errores de elementos concretos del arreglo de categorías se muestran junto al grupo de categorías del formulario.
+
+Los mensajes recibidos desde el backend se reutilizan directamente como mensajes del campo correspondiente.
+
+### Errores no asociados a un campo
+
+Cuando `details[].path` no corresponde a ninguno de los campos editables del formulario, el mensaje se conserva como error general.
+
+Por ejemplo, una ruta como:
+
+`estadoEvento`
+
+no se fuerza artificialmente sobre ningún control del formulario.
+
+Cuando existen varios mensajes generales se eliminan duplicados y se presentan conjuntamente.
+
+Si el backend devuelve `422 VALIDATION_ERROR` sin detalles utilizables, se presenta el mensaje general:
+
+`La solicitud contiene datos inválidos.`
+
+### Integración con CreateEventPage
+
+`useEventCreation` conserva ahora el `EventCreateRepositoryError` asociado al último fallo remoto.
+
+`CreateEventPage` utiliza ese error para:
+
+- mantener los mensajes generales del estado remoto;
+- aplicar errores de servidor a los campos correspondientes;
+- conservar los valores introducidos por el usuario;
+- mantener los atributos `aria-invalid`;
+- conservar los vínculos `aria-describedby`;
+- evitar eliminar el borrador ante un `422`.
+
+La validación local continúa ejecutándose antes del envío.
+
+La validación del backend actúa como segunda barrera cuando la solicitud alcanza el servidor.
+
+### Pruebas específicas de T178-T183
+
+Se añadieron pruebas del cuerpo HTTP estructurado para comprobar:
+
+- conservación de `code`;
+- conservación de `message`;
+- conservación de `details`;
+- rechazo seguro de cuerpos JSON incompatibles;
+- compatibilidad con respuestas HTTP que no contienen JSON válido.
+
+También se ampliaron las pruebas del repositorio remoto para comprobar:
+
+- propagación de `VALIDATION_ERROR`;
+- conservación del estado `422`;
+- lectura de `details[].path`;
+- conservación de los mensajes específicos del backend.
+
+Se añadieron pruebas específicas para `mapEventCreateServerValidation` que verifican:
+
+- asociación directa de errores a campos;
+- asociación de rutas indexadas como `categoriaIds.0`;
+- conversión de rutas desconocidas en error general;
+- rechazo del mapeo cuando el error no corresponde a `422 VALIDATION_ERROR`.
+
+Las pruebas de `CreateEventPage` también verifican que los errores `422`:
+
+- aparezcan junto al campo correcto;
+- mantengan `aria-invalid`;
+- presenten mensajes generales cuando corresponda;
+- conserven el contenido del formulario.
+
+### Verificación focalizada de T178-T183
+
+Se ejecutó el conjunto específico de pruebas relacionadas con esta fase.
+
+Resultado:
+
+`5 archivos de prueba aprobados`
+
+`20 pruebas aprobadas`
+
+También se ejecutaron:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+### Verificación global de T178-T183
+
+Se ejecutó nuevamente la suite completa mediante:
+
+`npm test`
+
+Resultado:
+
+`37 archivos de prueba aprobados`
+
+`189 pruebas aprobadas`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 262 módulos y completó el build de producción en aproximadamente 12.31 segundos.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T178-T183`
+
+## 35. Próxima fase: tratamiento de 401 y 403
+
+La siguiente fase corresponde al tratamiento diferenciado de autenticación y autorización.
 
 Se continuará con:
 
-- `T178`: extender el error HTTP móvil para conservar el cuerpo estructurado;
-- `T179`: interpretar `VALIDATION_ERROR`;
-- las tareas posteriores definidas en la sección de mapeo de errores `422`.
+- `T184`: implementar flujo móvil de `401`;
+- `T185`: invalidar sesión en memoria ante `401` protegido;
+- `T186`: conservar destino cuando corresponda;
+- `T187`: redirigir a login ante `401`;
+- `T188`: implementar flujo móvil de `403`;
+- `T189`: mantener sesión ante `403`;
+- `T190`: mostrar mensaje de permiso insuficiente;
+- `T191`: confirmar que `403` no provoca logout;
+- `T192`: añadir pruebas que diferencien `401` y `403`.
 
-Esta fase deberá reutilizar los mensajes del backend y asociarlos a los campos correspondientes sin borrar el formulario.
-
-El manejo específico de `401` y `403` continuará posteriormente en la fase prevista para autorización y sesión.
+El tratamiento de `401` deberá invalidar la autenticación cuando corresponda, mientras que un `403` deberá conservar la sesión y representar únicamente la falta de autorización para la operación solicitada.
 
 No se incorporarán video, PDF, persistencia offline ni sincronización dentro del código de este incremento.

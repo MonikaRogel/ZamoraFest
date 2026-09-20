@@ -42,65 +42,101 @@ const input:
 
 const evento:
   Evento = {
-    id: 501,
+    id:
+      501,
+
     titulo:
       'Festival Amazónico',
+
     descripcion:
       null,
+
     fechaInicio:
       '2026-09-25T18:00:00.000',
+
     fechaFin:
       null,
+
     costoReferencial:
       0,
+
     estadoEvento:
       'BORRADOR',
+
     estadoRevision:
       'PENDIENTE',
+
     fuenteInformacion:
       null,
+
     fechaCreacion:
       '2026-09-19T20:00:00.000',
+
     fechaActualizacion:
       null,
+
     fechaRevision:
       null,
+
     lugar: {
-      id: 73,
+      id:
+        73,
+
       nombre:
         'Casa Cultural Zamora',
+
       tipoLugar:
         'CENTRO_CULTURAL',
+
       direccionReferencial:
         'Centro',
+
       referencia:
         null,
+
       latitud:
         null,
+
       longitud:
         null,
+
       sector: {
-        id: 31,
+        id:
+          31,
+
         nombre:
           'Centro',
+
         tipoSector:
           'BARRIO',
+
         parroquia: {
-          id: 22,
+          id:
+            22,
+
           nombre:
             'Zamora',
+
           codigoDpa:
             '190150',
+
           canton: {
-            id: 12,
+            id:
+              12,
+
             nombre:
               'Zamora',
+
             codigoDpa:
               '1901',
+
             provincia: {
-              id: 1,
+              id:
+                1,
+
               nombre:
                 'Zamora Chinchipe',
+
               codigoDpa:
                 '19',
             },
@@ -108,23 +144,34 @@ const evento:
         },
       },
     },
+
     usuarioCreador: {
-      id: 10,
+      id:
+        10,
+
       nombreCompleto:
         'Asistente Demo',
+
       rol: {
-        id: 2,
+        id:
+          2,
+
         nombre:
           'ASISTENTE',
       },
     },
+
     usuarioRevisor:
       null,
+
     categorias: [
       {
-        id: 41,
+        id:
+          41,
+
         nombre:
           'Cultura comunitaria',
+
         descripcion:
           null,
       },
@@ -190,10 +237,18 @@ describe(
         ).rejects.toMatchObject({
           name:
             'EventCreateRepositoryError',
+
           kind:
             'connection',
+
           status:
             null,
+
+          code:
+            null,
+
+          details:
+            [],
         });
       },
     );
@@ -235,8 +290,113 @@ describe(
           ).toMatchObject({
             kind:
               'request',
+
             status:
               403,
+
+            code:
+              null,
+
+            details:
+              [],
+          });
+        }
+      },
+    );
+
+    it(
+      'conserva VALIDATION_ERROR y details con path de un 422',
+      async () => {
+        const validationBody = {
+          error: {
+            code:
+              'VALIDATION_ERROR',
+
+            message:
+              'La solicitud contiene datos inválidos.',
+
+            details: [
+              {
+                path:
+                  'titulo',
+
+                message:
+                  'El título es obligatorio.',
+              },
+
+              {
+                path:
+                  'categoriaIds.0',
+
+                message:
+                  'La categoría seleccionada no es válida.',
+              },
+            ],
+          },
+        };
+
+        const repository =
+          createRemoteEventCreateRepository({
+            createEvento:
+              vi.fn(
+                async () => {
+                  throw new ApiRequestError(
+                    'Unprocessable Entity',
+                    422,
+                    {
+                      body:
+                        validationBody,
+                    },
+                  );
+                },
+              ),
+          });
+
+        try {
+          await repository.create(
+            input,
+            'access-asistente',
+          );
+
+          throw new Error(
+            'La operación debía fallar.',
+          );
+        } catch (error) {
+          expect(
+            error,
+          ).toBeInstanceOf(
+            EventCreateRepositoryError,
+          );
+
+          expect(
+            error,
+          ).toMatchObject({
+            kind:
+              'request',
+
+            status:
+              422,
+
+            code:
+              'VALIDATION_ERROR',
+
+            details: [
+              {
+                path:
+                  'titulo',
+
+                message:
+                  'El título es obligatorio.',
+              },
+
+              {
+                path:
+                  'categoriaIds.0',
+
+                message:
+                  'La categoría seleccionada no es válida.',
+              },
+            ],
           });
         }
       },
@@ -265,10 +425,18 @@ describe(
         ).rejects.toMatchObject({
           name:
             'EventCreateRepositoryError',
+
           kind:
             'unexpected',
+
           status:
             null,
+
+          code:
+            null,
+
+          details:
+            [],
         });
       },
     );

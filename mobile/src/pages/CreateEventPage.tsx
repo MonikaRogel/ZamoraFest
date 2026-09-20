@@ -7,6 +7,8 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import {
+  useEffect,
+  useMemo,
   useState,
   type FormEvent,
 } from 'react';
@@ -20,6 +22,9 @@ import ScreenHeader from '../components/ui/ScreenHeader';
 import type {
   EventCreateRepository,
 } from '../features/events/event-create-repository';
+import {
+  mapEventCreateServerValidation,
+} from '../features/events/event-create-server-validation';
 import {
   type EventCreateFieldErrors,
   validateEventCreateDraft,
@@ -48,8 +53,11 @@ interface CreateEventPageProps {
 }
 
 interface FieldErrorProps {
-  readonly id: string;
-  readonly message?: string;
+  readonly id:
+    string;
+
+  readonly message?:
+    string;
 }
 
 function FieldError({
@@ -110,12 +118,57 @@ function CreateEventPage({
   const {
     state:
       creationState,
+    failure:
+      creationFailure,
     create:
       createEvent,
   } =
     useEventCreation(
       creationRepository,
     );
+
+  const serverValidation =
+    useMemo(
+      () => {
+        if (
+          creationFailure ===
+          null
+        ) {
+          return null;
+        }
+
+        return mapEventCreateServerValidation(
+          creationFailure,
+        );
+      },
+      [
+        creationFailure,
+      ],
+    );
+
+  useEffect(
+    () => {
+      if (
+        serverValidation ===
+          null ||
+        !serverValidation
+          .handled
+      ) {
+        return;
+      }
+
+      setFieldErrors(
+        (current) => ({
+          ...current,
+          ...serverValidation
+            .fieldErrors,
+        }),
+      );
+    },
+    [
+      serverValidation,
+    ],
+  );
 
   function handleBack() {
     history.push(
@@ -130,6 +183,7 @@ function CreateEventPage({
     setFieldErrors(
       (current) => ({
         ...current,
+
         [field]:
           undefined,
       }),
@@ -156,6 +210,7 @@ function CreateEventPage({
     setFieldErrors(
       (current) => ({
         ...current,
+
         [field]:
           message,
       }),
@@ -225,7 +280,8 @@ function CreateEventPage({
         Number.isInteger(
           parsed,
         ) &&
-        parsed > 0
+        parsed >
+          0
           ? parsed
           : null,
     });
@@ -301,6 +357,23 @@ function CreateEventPage({
       accessToken,
     );
   }
+
+  const creationErrorMessage =
+    creationState.status ===
+      'error'
+      ? (
+          serverValidation
+            ?.handled ===
+          true
+            ? (
+                serverValidation
+                  .generalError ??
+                'Revise los campos señalados e intente nuevamente.'
+              )
+            : creationState
+                .error
+        )
+      : undefined;
 
   return (
     <IonPage>
@@ -974,7 +1047,7 @@ function CreateEventPage({
                     state="error"
                     title="No pudimos crear el evento"
                     message={
-                      creationState.error
+                      creationErrorMessage
                     }
                   />
                 )}

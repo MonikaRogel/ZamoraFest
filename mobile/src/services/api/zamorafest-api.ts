@@ -79,14 +79,34 @@ export interface ZamoraFestApi {
   ): Promise<RegisteredVisitor>;
 }
 
+export interface ApiErrorResponse {
+  readonly error: {
+    readonly code: string;
+    readonly message: string;
+    readonly details?: unknown;
+  };
+}
+
+interface ApiRequestErrorOptions
+  extends ErrorOptions {
+  readonly body?:
+    ApiErrorResponse | null;
+}
+
 export class ApiRequestError
   extends Error {
-  readonly status: number | null;
+  readonly status:
+    number | null;
+
+  readonly body:
+    ApiErrorResponse | null;
 
   constructor(
     message: string,
-    status: number | null = null,
-    options?: ErrorOptions,
+    status:
+      number | null = null,
+    options?:
+      ApiRequestErrorOptions,
   ) {
     super(
       message,
@@ -98,6 +118,10 @@ export class ApiRequestError
 
     this.status =
       status;
+
+    this.body =
+      options?.body ??
+      null;
   }
 }
 
@@ -115,6 +139,51 @@ function isRecord(
       value,
     )
   );
+}
+
+function isApiErrorResponse(
+  value: unknown,
+): value is ApiErrorResponse {
+  if (
+    !isRecord(
+      value,
+    ) ||
+    !isRecord(
+      value.error,
+    )
+  ) {
+    return false;
+  }
+
+  return (
+    typeof value
+      .error
+      .code ===
+      'string' &&
+    typeof value
+      .error
+      .message ===
+      'string'
+  );
+}
+
+async function readApiErrorResponse(
+  response: Response,
+): Promise<ApiErrorResponse | null> {
+  try {
+    const payload:
+      unknown =
+      await response
+        .json();
+
+    return isApiErrorResponse(
+      payload,
+    )
+      ? payload
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function isString(
@@ -739,9 +808,17 @@ async function requestJson<T>(
   if (
     !response.ok
   ) {
+    const body =
+      await readApiErrorResponse(
+        response,
+      );
+
     throw new ApiRequestError(
       `La API respondió con el estado HTTP ${response.status}.`,
       response.status,
+      {
+        body,
+      },
     );
   }
 

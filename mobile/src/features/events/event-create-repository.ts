@@ -9,6 +9,23 @@ export type EventCreateRepositoryErrorKind =
   | 'request'
   | 'unexpected';
 
+export interface EventCreateValidationDetail {
+  readonly path:
+    string;
+
+  readonly message:
+    string;
+}
+
+interface EventCreateRepositoryErrorOptions
+  extends ErrorOptions {
+  readonly code?:
+    string | null;
+
+  readonly details?:
+    readonly EventCreateValidationDetail[];
+}
+
 export class EventCreateRepositoryError
   extends Error {
   readonly kind:
@@ -17,14 +34,21 @@ export class EventCreateRepositoryError
   readonly status:
     number | null;
 
+  readonly code:
+    string | null;
+
+  readonly details:
+    readonly EventCreateValidationDetail[];
+
   constructor(
     kind:
       EventCreateRepositoryErrorKind,
-    message: string,
+    message:
+      string,
     status:
       number | null = null,
     options?:
-      ErrorOptions,
+      EventCreateRepositoryErrorOptions,
   ) {
     super(
       message,
@@ -39,6 +63,14 @@ export class EventCreateRepositoryError
 
     this.status =
       status;
+
+    this.code =
+      options?.code ??
+      null;
+
+    this.details =
+      options?.details ??
+      [];
   }
 }
 
