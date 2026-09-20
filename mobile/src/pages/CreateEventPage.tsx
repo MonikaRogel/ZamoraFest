@@ -6,6 +6,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import type {
+  FormEvent,
+} from 'react';
 import {
   useHistory,
 } from 'react-router-dom';
@@ -14,29 +17,43 @@ import AsyncStateView from '../components/ui/AsyncStateView';
 import PrimaryButton from '../components/ui/PrimaryButton';
 import ScreenHeader from '../components/ui/ScreenHeader';
 import type {
+  EventCreateRepository,
+} from '../features/events/event-create-repository';
+import type {
   EventFormDataRepository,
 } from '../features/events/event-form-data-repository';
+import {
+  useEventCreation,
+} from '../features/events/use-event-creation';
 import {
   useEventFormData,
 } from '../features/events/use-event-form-data';
 import {
   useApplicationState,
 } from '../state/ApplicationStateContext';
+import type {
+  CreateEventoRequest,
+} from '../types/api';
 
 import './CreateEventPage.css';
 
 interface CreateEventPageProps {
   readonly repository?:
     EventFormDataRepository;
+
+  readonly creationRepository?:
+    EventCreateRepository;
 }
 
 function CreateEventPage({
   repository,
+  creationRepository,
 }: CreateEventPageProps) {
   const history =
     useHistory();
 
   const {
+    accessToken,
     eventDraft,
     updateEventDraft,
   } =
@@ -48,6 +65,16 @@ function CreateEventPage({
   } =
     useEventFormData(
       repository,
+    );
+
+  const {
+    state:
+      creationState,
+    create:
+      createEvent,
+  } =
+    useEventCreation(
+      creationRepository,
     );
 
   function handleBack() {
@@ -113,6 +140,86 @@ function CreateEventPage({
       categoriaIds:
         nextIds,
     });
+  }
+
+  async function handleSubmit(
+    event:
+      FormEvent<HTMLFormElement>,
+  ) {
+    event
+      .preventDefault();
+
+    if (
+      accessToken ===
+      null
+    ) {
+      return;
+    }
+
+    const description =
+      eventDraft
+        .descripcion
+        .trim();
+
+    const endDate =
+      eventDraft
+        .fechaFin
+        .trim();
+
+    const source =
+      eventDraft
+        .fuenteInformacion
+        .trim();
+
+    const input:
+      CreateEventoRequest = {
+      titulo:
+        eventDraft
+          .titulo,
+
+      descripcion:
+        description ===
+        ''
+          ? null
+          : description,
+
+      fechaInicio:
+        eventDraft
+          .fechaInicio,
+
+      fechaFin:
+        endDate ===
+        ''
+          ? null
+          : endDate,
+
+      costoReferencial:
+        Number.parseFloat(
+          eventDraft
+            .costoReferencial,
+        ),
+
+      lugarId:
+        eventDraft
+          .lugarId ??
+        0,
+
+      categoriaIds: [
+        ...eventDraft
+          .categoriaIds,
+      ],
+
+      fuenteInformacion:
+        source ===
+        ''
+          ? null
+          : source,
+    };
+
+    await createEvent(
+      input,
+      accessToken,
+    );
   }
 
   return (
@@ -210,12 +317,9 @@ function CreateEventPage({
               <form
                 className="zf-create-event__form"
                 noValidate
-                onSubmit={(
-                  event,
-                ) => {
-                  event
-                    .preventDefault();
-                }}
+                onSubmit={
+                  handleSubmit
+                }
               >
                 <section
                   className="zf-create-event__panel"
@@ -548,22 +652,68 @@ function CreateEventPage({
                   </fieldset>
                 </section>
 
+                {creationState.status ===
+                  'error' && (
+                  <AsyncStateView
+                    state="error"
+                    title="No pudimos crear el evento"
+                    message={
+                      creationState.error
+                    }
+                  />
+                )}
+
+                {creationState.status ===
+                  'success' && (
+                  <section
+                    className="zf-create-event__panel"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    <div className="zf-create-event__section-heading">
+                      <h2>
+                        Evento creado correctamente
+                      </h2>
+
+                      <p>
+                        {
+                          creationState
+                            .data
+                            .titulo
+                        }{' '}
+                        fue registrado con
+                        el identificador{' '}
+                        {
+                          creationState
+                            .data
+                            .id
+                        }.
+                      </p>
+                    </div>
+                  </section>
+                )}
+
                 <section className="zf-create-event__actions">
                   <PrimaryButton
                     type="submit"
-                    disabled
-                    ariaLabel="Crear evento, envío en preparación"
+                    disabled={
+                      accessToken ===
+                        null ||
+                      creationState
+                        .status ===
+                        'success'
+                    }
+                    loading={
+                      creationState
+                        .status ===
+                      'loading'
+                    }
+                    loadingLabel="Creando evento..."
+                    ariaLabel="Crear evento"
                   >
                     Crear evento
                   </PrimaryButton>
-
-                  <p className="zf-create-event__pending-note">
-                    La estructura del
-                    formulario ya está
-                    disponible. El envío al
-                    backend se habilitará en
-                    el siguiente incremento.
-                  </p>
                 </section>
               </form>
             )}

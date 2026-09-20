@@ -9,6 +9,7 @@ import type {
   CantonConsulta,
   Categoria,
   CategoriasResponse,
+  CreateEventoRequest,
   Evento,
   EventosResponse,
   HealthResponse,
@@ -63,6 +64,11 @@ export interface ZamoraFestApi {
   getCategorias(): Promise<CategoriasResponse>;
 
   getLugares(): Promise<LugaresResponse>;
+
+  createEvento(
+    input: CreateEventoRequest,
+    accessToken: string,
+  ): Promise<Evento>;
 
   login(
     input: LoginRequest,
@@ -878,6 +884,68 @@ export function createZamoraFestApi(
       );
     },
 
+    async createEvento(
+      input:
+        CreateEventoRequest,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          '/api/v1/eventos',
+          resolveBaseUrl(),
+        );
+
+      const safeInput:
+        CreateEventoRequest = {
+        titulo:
+          input.titulo,
+        descripcion:
+          input.descripcion,
+        fechaInicio:
+          input.fechaInicio,
+        fechaFin:
+          input.fechaFin,
+        costoReferencial:
+          input
+            .costoReferencial,
+        lugarId:
+          input.lugarId,
+        categoriaIds:
+          input.categoriaIds,
+        fuenteInformacion:
+          input
+            .fuenteInformacion,
+      };
+
+      const response =
+        await requestJson(
+          url,
+          isEventoEnvelope,
+          fetcher,
+          {
+            method:
+              'POST',
+            headers: {
+              Accept:
+                'application/json',
+              'Content-Type':
+                'application/json',
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+            body:
+              JSON.stringify(
+                safeInput,
+              ),
+          },
+        );
+
+      return (
+        response.data
+      );
+    },
+
     async login(
       input:
         LoginRequest,
@@ -924,15 +992,6 @@ export function createZamoraFestApi(
           resolveBaseUrl(),
         );
 
-      /*
-       * Se reconstruye
-       * expresamente el cuerpo
-       * permitido por el backend.
-       *
-       * De esta manera no pueden
-       * enviarse accidentalmente
-       * propiedades privilegiadas.
-       */
       const safeInput:
         RegisterRequest = {
         nombre:
@@ -1009,6 +1068,21 @@ export const zamoraFestApi:
     return (
       createZamoraFestApi()
         .getLugares()
+    );
+  },
+
+  createEvento(
+    input:
+      CreateEventoRequest,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .createEvento(
+          input,
+          accessToken,
+        )
     );
   },
 

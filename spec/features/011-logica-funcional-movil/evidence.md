@@ -2134,17 +2134,23 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T090, T139, T144-T147 Y T149-T159`
 
-## 32. Próxima evidencia a obtener
+## 32. Creación protegida de eventos
 
-La siguiente fase corresponde al envío real del formulario al backend.
+Se completó el flujo de creación remota correspondiente a `T160`, `T161` y `T162`.
 
-Se deberá implementar:
+### Implementación realizada
 
-- `T160`: `POST /api/v1/eventos`;
-- `T161`: envío del access token mediante autenticación Bearer;
-- `T162`: representación del estado remoto de creación.
+La capa API móvil incorpora la operación:
 
-El cuerpo enviado deberá contener únicamente los campos permitidos por el contrato del backend:
+`POST /api/v1/eventos`
+
+La solicitud utiliza autenticación mediante:
+
+`Authorization: Bearer <accessToken>`
+
+El access token se obtiene de la sesión mantenida en el estado global de la aplicación y no se encuentra incrustado en el código.
+
+El cuerpo enviado al backend se reconstruye explícitamente antes de realizar la solicitud y contiene únicamente los campos permitidos por el contrato:
 
 - `titulo`;
 - `descripcion`;
@@ -2155,6 +2161,132 @@ El cuerpo enviado deberá contener únicamente los campos permitidos por el cont
 - `categoriaIds`;
 - `fuenteInformacion`.
 
-Después de completar el envío protegido se continuará con las validaciones móviles `T163` a `T177`.
+No se envían campos controlados por el servidor como:
 
-No se implementarán todavía persistencia local, almacenamiento offline ni sincronización correspondientes a Semana 12.
+- `estadoEvento`;
+- `estadoRevision`;
+- `usuarioCreador`;
+- fechas de creación o revisión.
+
+Se incorporó una capa de repositorio específica para la creación de eventos. Esta capa desacopla la pantalla del cliente HTTP y traduce los errores remotos a errores propios del dominio móvil.
+
+El flujo de creación utiliza `RemoteData` para representar los estados cerrados:
+
+- `idle`;
+- `loading`;
+- `success`;
+- `error`.
+
+`CreateEventPage` utiliza el borrador mantenido en el estado de aplicación, construye la solicitud y delega la creación al repositorio mediante `useEventCreation`.
+
+Durante la operación se muestra el estado de carga con el texto `Creando evento...`. Cuando la creación finaliza correctamente se presenta el evento creado y su identificador. Ante un error remoto se conserva el formulario y se informa el fallo sin eliminar los datos introducidos.
+
+La limpieza definitiva del borrador después de una creación exitosa no se implementa todavía, ya que corresponde a una tarea posterior del plan.
+
+### Verificación específica
+
+Se ejecutaron las pruebas correspondientes a:
+
+- contrato HTTP de creación;
+- repositorio remoto de creación;
+- formulario de creación existente;
+- integración del formulario con la creación remota.
+
+Resultado:
+
+`4 archivos de prueba aprobados`
+
+`15 pruebas aprobadas`
+
+Las pruebas verifican, entre otros aspectos:
+
+- uso de `POST /api/v1/eventos`;
+- envío del encabezado Bearer;
+- reconstrucción segura del cuerpo;
+- exclusión de propiedades controladas por el servidor;
+- propagación del access token desde la sesión;
+- transición al estado `loading`;
+- representación de `success`;
+- representación de `error`;
+- conservación del formulario después de un rechazo remoto.
+
+### Verificación global
+
+Se ejecutó la suite completa del cliente móvil.
+
+Resultado:
+
+`33 archivos de prueba aprobados`
+
+`161 pruebas aprobadas`
+
+También se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 260 módulos y completó el build de producción en aproximadamente 11 segundos.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build.
+
+También se ejecutó:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T160-T162`
+
+## 33. Próxima evidencia a obtener
+
+La siguiente fase corresponde a las validaciones móviles del formulario de Evento.
+
+Se continuará con:
+
+- `T163`: título obligatorio;
+- `T164`: longitud permitida del título;
+- `T165`: fecha de inicio;
+- `T166`: fecha final opcional;
+- `T167`: fecha final no anterior a fecha inicial;
+- `T168`: costo no negativo;
+- `T169`: máximo de dos decimales;
+- `T170`: lugar entero positivo;
+- `T171`: al menos una categoría;
+- `T172`: rechazo de categorías duplicadas;
+- `T173`: longitud de fuente de información;
+- `T174`: validación al abandonar campos cuando corresponda;
+- `T175`: validación completa al enviar;
+- `T176`: mensajes específicos por campo;
+- `T177`: pruebas de validación móvil.
+
+El tratamiento estructurado de errores `422`, así como el manejo específico de `401` y `403`, se realizará posteriormente en las fases definidas para esas responsabilidades.
+
+No se incorporarán video, PDF, persistencia offline ni sincronización dentro del código de este incremento.

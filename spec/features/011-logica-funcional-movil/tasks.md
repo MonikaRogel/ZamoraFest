@@ -215,9 +215,9 @@
 - [x] T157 Implementar selección múltiple de categorías.
 - [x] T158 Implementar fuente de información.
 - [x] T159 No exponer campos controlados por servidor.
-- [ ] T160 Implementar `POST /api/v1/eventos`.
-- [ ] T161 Adjuntar access token en la operación protegida.
-- [ ] T162 Representar estado remoto de creación.
+- [x] T160 Implementar `POST /api/v1/eventos`.
+- [x] T161 Adjuntar access token en la operación protegida.
+- [x] T162 Representar estado remoto de creación.
 
 ## 17. Validaciones del Evento
 
