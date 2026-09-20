@@ -39,7 +39,8 @@ function ManagementPage() {
     user,
     role,
     logout,
-  } = useApplicationState();
+  } =
+    useApplicationState();
 
   const roleLabel =
     role === null
@@ -50,6 +51,12 @@ function ManagementPage() {
     role === 'ASISTENTE'
       ? 'Tu sesión está autorizada para las funciones de gestión compatibles con el rol Asistente.'
       : 'Tu sesión autenticada mantiene acceso únicamente a las funciones compatibles con tu rol.';
+
+  function handleCreateEvent() {
+    history.push(
+      '/gestion/eventos/nuevo',
+    );
+  }
 
   function handleExplore() {
     history.push(
@@ -156,18 +163,19 @@ function ManagementPage() {
                 'ASISTENTE' && (
                 <div className="zf-management__action-group">
                   <PrimaryButton
-                    disabled
-                    ariaLabel="Crear evento, función en preparación"
+                    ariaLabel="Crear evento"
+                    onClick={
+                      handleCreateEvent
+                    }
                   >
                     Crear evento
                   </PrimaryButton>
 
                   <p className="zf-management__action-note">
-                    La creación de
-                    eventos se habilitará
-                    cuando el formulario
-                    protegido esté
-                    implementado.
+                    Registra un nuevo
+                    borrador de evento
+                    utilizando los lugares y
+                    categorías disponibles.
                   </p>
                 </div>
               )}

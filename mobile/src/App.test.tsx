@@ -65,6 +65,20 @@ vi.mock(
             },
           }),
         ),
+
+      getCategorias:
+        vi.fn(
+          async () => ({
+            data: [],
+          }),
+        ),
+
+      getLugares:
+        vi.fn(
+          async () => ({
+            data: [],
+          }),
+        ),
     },
   }),
 );
@@ -202,6 +216,41 @@ describe(
             {
               name:
                 'Gestión de ZamoraFest',
+            },
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      'protege la ruta real de creación cuando no existe sesión',
+      async () => {
+        window.history.pushState(
+          {},
+          '',
+          '/gestion/eventos/nuevo',
+        );
+
+        render(
+          <App />,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Iniciar sesión',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.queryByRole(
+            'heading',
+            {
+              name:
+                'Crear nuevo evento',
             },
           ),
         ).not.toBeInTheDocument();

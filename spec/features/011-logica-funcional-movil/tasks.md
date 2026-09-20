@@ -124,7 +124,7 @@
 
 - [x] T088 Implementar protección compatible con Ionic React Router y React Router 5.
 - [x] T089 Proteger `/gestion`.
-- [ ] T090 Proteger `/gestion/eventos/nuevo`.
+- [x] T090 Proteger `/gestion/eventos/nuevo`.
 - [x] T091 Conservar destino solicitado cuando no existe sesión.
 - [x] T092 Redirigir al login cuando corresponde.
 - [x] T093 Validar que el destino de retorno sea una ruta interna.
@@ -188,7 +188,7 @@
 - [x] T136 Mostrar identidad del usuario autenticado.
 - [x] T137 Mostrar rol del usuario.
 - [x] T138 Mostrar únicamente acciones compatibles con autorización.
-- [ ] T139 Incorporar acceso a creación para `ASISTENTE`.
+- [x] T139 Incorporar acceso a creación para `ASISTENTE`.
 - [x] T140 Incorporar acción de cierre de sesión.
 - [x] T141 Implementar pruebas de `ManagementPage`.
 
@@ -196,25 +196,25 @@
 
 - [x] T142 Implementar consulta móvil de categorías.
 - [x] T143 Implementar consulta móvil de lugares.
-- [ ] T144 Cargar categorías reales en el formulario.
-- [ ] T145 Cargar lugares reales en el formulario.
-- [ ] T146 Evitar IDs de categorías incrustados.
-- [ ] T147 Evitar `lugarId` incrustado.
+- [x] T144 Cargar categorías reales en el formulario.
+- [x] T145 Cargar lugares reales en el formulario.
+- [x] T146 Evitar IDs de categorías incrustados.
+- [x] T147 Evitar `lugarId` incrustado.
 - [x] T148 Modelar loading y error de datos auxiliares.
 
 ## 16. Formulario de creación de Evento
 
-- [ ] T149 Crear `CreateEventPage`.
-- [ ] T150 Registrar `/gestion/eventos/nuevo`.
-- [ ] T151 Implementar campo título.
-- [ ] T152 Implementar campo descripción.
-- [ ] T153 Implementar fecha de inicio.
-- [ ] T154 Implementar fecha de fin.
-- [ ] T155 Implementar costo referencial.
-- [ ] T156 Implementar selección de lugar.
-- [ ] T157 Implementar selección múltiple de categorías.
-- [ ] T158 Implementar fuente de información.
-- [ ] T159 No exponer campos controlados por servidor.
+- [x] T149 Crear `CreateEventPage`.
+- [x] T150 Registrar `/gestion/eventos/nuevo`.
+- [x] T151 Implementar campo título.
+- [x] T152 Implementar campo descripción.
+- [x] T153 Implementar fecha de inicio.
+- [x] T154 Implementar fecha de fin.
+- [x] T155 Implementar costo referencial.
+- [x] T156 Implementar selección de lugar.
+- [x] T157 Implementar selección múltiple de categorías.
+- [x] T158 Implementar fuente de información.
+- [x] T159 No exponer campos controlados por servidor.
 - [ ] T160 Implementar `POST /api/v1/eventos`.
 - [ ] T161 Adjuntar access token en la operación protegida.
 - [ ] T162 Representar estado remoto de creación.

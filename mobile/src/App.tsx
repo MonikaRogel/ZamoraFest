@@ -11,12 +11,13 @@ import {
   Route,
 } from 'react-router-dom';
 
+import CreateEventPage from './pages/CreateEventPage';
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import EventDetailPage from './pages/EventDetailPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
+import LoginRoute from './routing/LoginRoute';
 import ManagementPage from './pages/ManagementPage';
 import RegisterPage from './pages/RegisterPage';
-import LoginRoute from './routing/LoginRoute';
 import ProtectedRoute from './routing/ProtectedRoute';
 import {
   ApplicationStateProvider,
@@ -82,6 +83,17 @@ function App() {
               component={
                 EventDetailPage
               }
+            />
+
+            <ProtectedRoute
+              exact
+              path="/gestion/eventos/nuevo"
+              allowedRoles={[
+                'ASISTENTE',
+              ]}
+              render={() => (
+                <CreateEventPage />
+              )}
             />
 
             <ProtectedRoute

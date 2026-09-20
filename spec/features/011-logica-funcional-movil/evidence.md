@@ -1891,23 +1891,270 @@ Ambas dependen de la ruta real:
 
 `/gestion/eventos/nuevo`.
 
-## 31. Próxima evidencia a obtener
+## 31. Formulario protegido de creación de Evento
 
-La siguiente fase corresponde a la construcción real del formulario de creación de Evento.
+Se implementó la primera versión funcional de la pantalla de creación de eventos.
+
+Este incremento cierra:
+
+- `T090`;
+- `T139`;
+- `T144` a `T147`;
+- `T149` a `T159`.
+
+La operación HTTP de creación todavía no forma parte de este incremento, por lo que `T160`, `T161` y `T162` permanecen pendientes.
+
+### Ruta protegida de creación
+
+Se registró la ruta:
+
+`/gestion/eventos/nuevo`
+
+mediante `ProtectedRoute`.
+
+La ruta requiere explícitamente:
+
+`ASISTENTE`
+
+como rol autorizado.
+
+Cuando no existe sesión, la infraestructura vigente conserva el destino solicitado y redirige al login.
+
+Cuando existe una sesión cuyo rol no es `ASISTENTE`, la ruta no presenta el formulario protegido.
+
+Esta implementación mantiene separados los roles:
+
+- `ASISTENTE`;
+- `VISITANTE`;
+- `ADMINISTRADOR`.
+
+El rol `ADMINISTRADOR` no se interpreta como equivalente implícito de `ASISTENTE`.
+
+### Acceso desde el área de gestión
+
+`ManagementPage` habilita ahora la acción:
+
+`Crear evento`
+
+únicamente cuando el usuario autenticado posee el rol:
+
+`ASISTENTE`.
+
+La acción navega hacia:
+
+`/gestion/eventos/nuevo`.
+
+Para `VISITANTE` y `ADMINISTRADOR` la acción de creación no se muestra.
+
+Con ello se completa el acceso real que anteriormente permanecía deshabilitado.
+
+### CreateEventPage
+
+Se creó:
+
+`CreateEventPage`
+
+como pantalla protegida dedicada a la captura de los datos principales de un evento.
+
+La pantalla reutiliza:
+
+- `ScreenHeader`;
+- `PrimaryButton`;
+- `AsyncStateView`;
+- estado global de aplicación;
+- `useEventFormData`.
+
+No se introdujo acceso HTTP directo desde la página.
+
+La dirección arquitectónica se mantiene como:
+
+`Pantalla -> hook/repositorio -> API`.
+
+### Datos auxiliares reales
+
+El formulario consume las categorías y los lugares cargados mediante la infraestructura implementada previamente.
+
+Las categorías proceden de:
+
+`GET /api/v1/categorias`.
+
+Los lugares proceden de:
+
+`GET /api/v1/lugares`.
+
+El formulario no contiene identificadores fijos de categorías ni un `lugarId` incrustado.
+
+Los identificadores utilizados en el borrador proceden exclusivamente de los objetos recuperados desde el backend.
+
+Si no existe al menos una categoría o un lugar activo, el formulario no se presenta como utilizable y muestra un estado vacío específico.
+
+Si la consulta de datos auxiliares falla, se presenta un estado de error con acción de reintento.
+
+### Campos implementados
+
+La pantalla incorpora los campos exigidos por el contrato de creación:
+
+- título;
+- descripción;
+- fecha y hora de inicio;
+- fecha y hora de fin;
+- costo referencial;
+- lugar;
+- selección múltiple de categorías;
+- fuente de información.
+
+Los valores se almacenan en el borrador compartido:
+
+`eventDraft`.
+
+Todavía no se aplican en esta fase las reglas completas de validación previstas para `T163` a `T177`.
+
+### Campos controlados por servidor
+
+La pantalla no expone controles para propiedades administradas por el backend.
+
+Entre ellas:
+
+- `estadoEvento`;
+- `estadoRevision`;
+- usuario creador;
+- usuario revisor;
+- fecha de creación;
+- fecha de actualización;
+- fecha de revisión.
+
+Estas propiedades continuarán siendo responsabilidad exclusiva del servidor.
+
+### Estado de envío
+
+El botón principal:
+
+`Crear evento`
+
+permanece temporalmente deshabilitado.
+
+Esta decisión es intencional porque todavía no se ha implementado:
+
+- `POST /api/v1/eventos`;
+- adjunto del access token;
+- estado remoto de creación.
+
+Estas responsabilidades corresponden a `T160`, `T161` y `T162`.
+
+### Pruebas específicas
+
+Se creó:
+
+`CreateEventPage.test.tsx`
+
+con comprobaciones para:
+
+- estado loading;
+- carga de campos;
+- uso de lugares reales;
+- uso de categorías reales;
+- actualización del borrador con IDs obtenidos del repositorio;
+- ausencia de campos controlados por servidor;
+- estado vacío;
+- reintento después de error.
+
+También se actualizó:
+
+`ManagementPage.test.tsx`
+
+para comprobar:
+
+- acceso a creación para `ASISTENTE`;
+- ausencia de la acción para `VISITANTE`;
+- ausencia de la acción para `ADMINISTRADOR`;
+- navegación hacia la ruta del formulario.
+
+`App.test.tsx` comprueba además que la ruta real:
+
+`/gestion/eventos/nuevo`
+
+permanece protegida cuando no existe sesión.
+
+Las pruebas existentes de:
+
+`ProtectedRoute`
+
+continúan verificando:
+
+- conservación del destino anidado;
+- acceso del rol `ASISTENTE`;
+- rechazo de roles no autorizados sin destruir la sesión.
+
+Resultado de la verificación específica:
+
+- 4 archivos de prueba aprobados;
+- 22 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+También finalizaron correctamente:
+
+- `npm run typecheck`;
+- `npm run lint`;
+- `git diff --check`.
+
+### Verificación global después del formulario
+
+Después de integrar la pantalla y la ruta se ejecutó la suite móvil completa.
+
+Resultado:
+
+- 30 archivos de prueba aprobados;
+- 152 pruebas aprobadas;
+- 0 pruebas fallidas.
+
+No se detectaron regresiones respecto de las funcionalidades previamente verificadas.
+
+Posteriormente se ejecutó:
+
+`npm run build`
+
+El comando incluye:
+
+`tsc --noEmit && vite build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente 257 módulos y completó el build de producción en aproximadamente 10 segundos.
+
+Se mantienen únicamente las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- tamaño superior a 500 kB de algunos chunks generados por Vite.
+
+Estas advertencias no impidieron la generación del build.
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T090, T139, T144-T147 Y T149-T159`
+
+## 32. Próxima evidencia a obtener
+
+La siguiente fase corresponde al envío real del formulario al backend.
 
 Se deberá implementar:
 
-- `CreateEventPage`;
-- ruta protegida `/gestion/eventos/nuevo`;
-- acceso únicamente para `ASISTENTE`;
-- consumo de las categorías obtenidas desde `GET /api/v1/categorias`;
-- consumo de los lugares obtenidos desde `GET /api/v1/lugares`;
-- selección de categorías sin identificadores incrustados;
-- selección del lugar sin `lugarId` incrustado;
-- reutilización de los estados loading y error ya implementados.
+- `T160`: `POST /api/v1/eventos`;
+- `T161`: envío del access token mediante autenticación Bearer;
+- `T162`: representación del estado remoto de creación.
 
-Una vez que el formulario consuma efectivamente estos datos podrán cerrarse `T144` a `T147`.
+El cuerpo enviado deberá contener únicamente los campos permitidos por el contrato del backend:
 
-Después se continuará con las validaciones derivadas del contrato de `POST /api/v1/eventos`.
+- `titulo`;
+- `descripcion`;
+- `fechaInicio`;
+- `fechaFin`;
+- `costoReferencial`;
+- `lugarId`;
+- `categoriaIds`;
+- `fuenteInformacion`.
+
+Después de completar el envío protegido se continuará con las validaciones móviles `T163` a `T177`.
 
 No se implementarán todavía persistencia local, almacenamiento offline ni sincronización correspondientes a Semana 12.

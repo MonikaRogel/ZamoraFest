@@ -96,7 +96,8 @@ function SeedSession({
 }: SeedSessionProps) {
   const {
     login,
-  } = useApplicationState();
+  } =
+    useApplicationState();
 
   const history =
     useHistory();
@@ -122,7 +123,8 @@ function SeedSession({
 function LoginProbe() {
   const {
     session,
-  } = useApplicationState();
+  } =
+    useApplicationState();
 
   return (
     <>
@@ -131,7 +133,8 @@ function LoginProbe() {
       </h1>
 
       <p data-testid="session-state">
-        {session === null
+        {session ===
+        null
           ? 'sin sesión'
           : 'con sesión'}
       </p>
@@ -143,6 +146,14 @@ function ExploreProbe() {
   return (
     <h1>
       Agenda pública de prueba
+    </h1>
+  );
+}
+
+function CreateEventProbe() {
+  return (
+    <h1>
+      Formulario de creación de prueba
     </h1>
   );
 }
@@ -183,6 +194,14 @@ function TestApp({
 
         <Route
           exact
+          path="/gestion/eventos/nuevo"
+          component={
+            CreateEventProbe
+          }
+        />
+
+        <Route
+          exact
           path="/explore"
           component={
             ExploreProbe
@@ -202,7 +221,8 @@ function TestApp({
 }
 
 function enterManagement(
-  session: AuthSession,
+  session:
+    AuthSession,
 ) {
   render(
     <TestApp
@@ -264,7 +284,7 @@ describe(
     );
 
     it(
-      'muestra la acción de creación únicamente al rol ASISTENTE y la mantiene inactiva hasta existir el formulario',
+      'habilita el acceso al formulario únicamente para ASISTENTE',
       async () => {
         enterManagement(
           assistantSession,
@@ -278,25 +298,30 @@ describe(
           },
         );
 
-        const createButton =
+        fireEvent.click(
           screen.getByText(
             'Crear evento',
             {
               selector:
                 'ion-button',
             },
-          );
+          ),
+        );
 
         expect(
-          createButton,
-        ).toHaveAttribute(
-          'disabled',
-        );
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Formulario de creación de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
       },
     );
 
     it(
-      'no muestra creación de eventos a VISITANTE ni ADMINISTRADOR',
+      'no muestra creación de eventos a VISITANTE',
       async () => {
         enterManagement(
           visitorSession,
