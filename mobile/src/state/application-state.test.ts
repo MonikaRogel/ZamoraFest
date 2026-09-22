@@ -83,6 +83,36 @@ describe('applicationReducer', () => {
     });
   });
 
+  it('invalida únicamente la sesión y conserva destino y borrador', () => {
+    const authenticatedState = {
+      session,
+      pendingDestination: '/gestion/eventos/nuevo',
+      eventDraft: {
+        ...initialEventDraft,
+        titulo: 'Evento pendiente',
+        lugarId: 4,
+        categoriaIds: [1, 3],
+      },
+    };
+
+    const state = applicationReducer(
+      authenticatedState,
+      {
+        type: 'INVALIDATE_SESSION',
+      },
+    );
+
+    expect(state.session).toBeNull();
+
+    expect(state.pendingDestination).toBe(
+      '/gestion/eventos/nuevo',
+    );
+
+    expect(state.eventDraft).toEqual(
+      authenticatedState.eventDraft,
+    );
+  });
+
   it('el logout elimina sesión, destino pendiente y borrador', () => {
     const authenticatedState = {
       session,

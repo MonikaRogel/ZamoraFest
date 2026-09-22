@@ -27,6 +27,7 @@ interface ApplicationStateContextValue {
   readonly pendingDestination: string | null;
   readonly eventDraft: EventDraft;
   readonly login: (session: AuthSession) => void;
+  readonly invalidateSession: () => void;
   readonly logout: () => void;
   readonly setPendingDestination: (
     destination: string | null,
@@ -66,6 +67,12 @@ export function ApplicationStateProvider({
         dispatch({
           type: 'LOGIN',
           session,
+        });
+      },
+
+      invalidateSession() {
+        dispatch({
+          type: 'INVALIDATE_SESSION',
         });
       },
 

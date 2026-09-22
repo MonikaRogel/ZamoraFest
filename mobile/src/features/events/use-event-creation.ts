@@ -10,6 +10,9 @@ import {
   remoteSuccess,
   type RemoteData,
 } from '../../state/remote-data';
+import {
+  useApplicationState,
+} from '../../state/ApplicationStateContext';
 import type {
   CreateEventoRequest,
   Evento,
@@ -88,6 +91,11 @@ export function useEventCreation(
     EventCreateRepository =
       eventCreateRepository,
 ): UseEventCreationResult {
+  const {
+    invalidateSession,
+  } =
+    useApplicationState();
+
   const [
     state,
     setState,
@@ -147,11 +155,14 @@ export function useEventCreation(
 
           return evento;
         } catch (error) {
-          setFailure(
+          const repositoryFailure =
             error instanceof
               EventCreateRepositoryError
               ? error
-              : null,
+              : null;
+
+          setFailure(
+            repositoryFailure,
           );
 
           setState(
@@ -162,10 +173,19 @@ export function useEventCreation(
             ),
           );
 
+          if (
+            repositoryFailure
+              ?.status ===
+            401
+          ) {
+            invalidateSession();
+          }
+
           return null;
         }
       },
       [
+        invalidateSession,
         repository,
       ],
     );

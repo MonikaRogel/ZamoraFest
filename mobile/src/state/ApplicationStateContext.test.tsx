@@ -65,6 +65,59 @@ describe('ApplicationStateContext', () => {
     expect(result.current.refreshToken).toBe('refresh-prueba');
   });
 
+  it('invalida la autenticación sin eliminar destino ni borrador', () => {
+    const { result } = renderHook(
+      () => useApplicationState(),
+      {
+        wrapper: Wrapper,
+      },
+    );
+
+    act(() => {
+      result.current.login({
+        accessToken: 'access-prueba',
+        refreshToken: 'refresh-prueba',
+        tokenType: 'Bearer',
+        expiresIn: 900,
+        usuario: {
+          id: 7,
+          nombre: 'Asistente Demo',
+          email: 'asistente@zamorafest.ec',
+          rol: 'ASISTENTE',
+        },
+      });
+
+      result.current.setPendingDestination(
+        '/gestion/eventos/nuevo',
+      );
+
+      result.current.updateEventDraft({
+        titulo: 'Festival pendiente',
+        lugarId: 3,
+      });
+    });
+
+    act(() => {
+      result.current.invalidateSession();
+    });
+
+    expect(result.current.session).toBeNull();
+    expect(result.current.user).toBeNull();
+    expect(result.current.role).toBeNull();
+    expect(result.current.accessToken).toBeNull();
+    expect(result.current.refreshToken).toBeNull();
+
+    expect(result.current.pendingDestination).toBe(
+      '/gestion/eventos/nuevo',
+    );
+
+    expect(result.current.eventDraft.titulo).toBe(
+      'Festival pendiente',
+    );
+
+    expect(result.current.eventDraft.lugarId).toBe(3);
+  });
+
   it('el logout elimina completamente la autenticación en memoria', () => {
     const { result } = renderHook(
       () => useApplicationState(),

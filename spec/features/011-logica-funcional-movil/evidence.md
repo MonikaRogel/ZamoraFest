@@ -2646,22 +2646,272 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T178-T183`
 
-## 35. Próxima fase: tratamiento de 401 y 403
+## 35. Tratamiento diferenciado de HTTP 401 y 403
 
-La siguiente fase corresponde al tratamiento diferenciado de autenticación y autorización.
+Se completó el tratamiento móvil diferenciado de fallos de autenticación y autorización durante operaciones protegidas.
 
-Se continuará con:
+La implementación reutiliza el estado global, el repositorio de creación, el guard de rutas y el mecanismo de retorno post-login ya incorporados anteriormente en Feature 011.
 
-- `T184`: implementar flujo móvil de `401`;
-- `T185`: invalidar sesión en memoria ante `401` protegido;
-- `T186`: conservar destino cuando corresponda;
-- `T187`: redirigir a login ante `401`;
-- `T188`: implementar flujo móvil de `403`;
-- `T189`: mantener sesión ante `403`;
-- `T190`: mostrar mensaje de permiso insuficiente;
-- `T191`: confirmar que `403` no provoca logout;
-- `T192`: añadir pruebas que diferencien `401` y `403`.
+No se creó un segundo sistema de autenticación ni una navegación paralela.
 
-El tratamiento de `401` deberá invalidar la autenticación cuando corresponda, mientras que un `403` deberá conservar la sesión y representar únicamente la falta de autorización para la operación solicitada.
+### Invalidación de sesión distinta de logout
 
-No se incorporarán video, PDF, persistencia offline ni sincronización dentro del código de este incremento.
+El estado global incorpora la transición:
+
+`INVALIDATE_SESSION`
+
+Esta operación elimina únicamente la sesión autenticada.
+
+Como consecuencia dejan de estar disponibles en memoria:
+
+- usuario autenticado;
+- rol;
+- access token;
+- refresh token.
+
+La invalidación no elimina:
+
+- destino protegido pendiente;
+- borrador de creación del evento.
+
+Esta separación evita utilizar `LOGOUT` para representar un token de acceso inválido.
+
+El logout continúa representando el cierre explícito de sesión y conserva su responsabilidad independiente.
+
+### Flujo HTTP 401
+
+`useEventCreation` conserva el `EventCreateRepositoryError` recibido desde el repositorio.
+
+Cuando el error posee:
+
+`status === 401`
+
+se ejecuta:
+
+`invalidateSession()`
+
+La lógica de navegación no se duplicó dentro de la página de creación.
+
+Al quedar la sesión en `null`, el `ProtectedRoute` existente vuelve a evaluar la ruta protegida y utiliza el mecanismo previamente implementado para dirigir al usuario hacia login.
+
+Para:
+
+`/gestion/eventos/nuevo`
+
+el retorno seguro se expresa mediante:
+
+`/login?redirect=%2Fgestion%2Feventos%2Fnuevo`
+
+`LoginRoute` utiliza el destino interno validado para permitir regresar después de una nueva autenticación correcta.
+
+La invalidación conserva el borrador para evitar eliminar el trabajo introducido por el usuario únicamente porque el access token dejó de ser válido.
+
+No se incorporó renovación automática mediante refresh token en esta fase, ya que esa responsabilidad corresponde al endurecimiento del cliente HTTP previsto posteriormente.
+
+### Flujo HTTP 403
+
+Cuando la operación protegida devuelve:
+
+`status === 403`
+
+no se ejecuta invalidación de sesión.
+
+Se conservan:
+
+- sesión;
+- usuario;
+- rol;
+- access token;
+- refresh token;
+- destino pendiente;
+- borrador del evento.
+
+El estado remoto presenta el mensaje:
+
+`La sesión no tiene permisos para crear eventos.`
+
+El usuario no es enviado al login y no se ejecuta logout.
+
+De esta forma `401` y `403` representan comportamientos diferentes tanto en estado como en navegación.
+
+### Reutilización de infraestructura existente
+
+Para completar T184-T192 se reutilizaron:
+
+- `ApplicationStateContext`;
+- `applicationReducer`;
+- `useEventCreation`;
+- `EventCreateRepositoryError`;
+- `ProtectedRoute`;
+- `buildLoginRedirect`;
+- `LoginRoute`;
+- `pendingDestination`;
+- estado compartido del borrador.
+
+No fue necesario modificar:
+
+- backend;
+- contrato HTTP de `zamoraFestApi`;
+- repositorio remoto de creación;
+- `CreateEventPage`;
+- `ProtectedRoute`;
+- `LoginRoute`;
+- `route-security`.
+
+La única nueva responsabilidad añadida al flujo de creación es invalidar la sesión cuando el repositorio comunica realmente un `401`.
+
+### Pruebas de estado
+
+Las pruebas de `applicationReducer` verifican que `INVALIDATE_SESSION`:
+
+- elimina la sesión;
+- conserva el destino protegido pendiente;
+- conserva el borrador.
+
+Las pruebas de `ApplicationStateContext` verifican que después de invalidar la autenticación:
+
+- `session` es `null`;
+- `user` es `null`;
+- `role` es `null`;
+- `accessToken` es `null`;
+- `refreshToken` es `null`;
+- el destino protegido continúa disponible;
+- el borrador continúa disponible.
+
+### Pruebas específicas de autorización
+
+Se añadió:
+
+`use-event-creation.authorization.test.tsx`
+
+Resultado:
+
+`2 pruebas aprobadas`
+
+Los casos comprueban de manera diferenciada:
+
+#### Respuesta 401
+
+- propagación de `status = 401`;
+- conservación de `INVALID_ACCESS_TOKEN`;
+- invalidación de autenticación;
+- eliminación de los tokens en memoria;
+- conservación del destino;
+- conservación del borrador.
+
+#### Respuesta 403
+
+- propagación de `status = 403`;
+- conservación de `FORBIDDEN`;
+- mantenimiento de la sesión;
+- mantenimiento de usuario y rol;
+- mantenimiento de access token y refresh token;
+- mantenimiento del borrador;
+- mensaje comprensible de permiso insuficiente;
+- ausencia de invalidación automática.
+
+### Verificación integrada de navegación y autorización
+
+También se ejecutaron conjuntamente las pruebas existentes de:
+
+- `application-state`;
+- `ApplicationStateContext`;
+- `useEventCreation`;
+- `ProtectedRoute`;
+- `LoginRoute`.
+
+Resultado:
+
+`23 pruebas aprobadas`
+
+Estas pruebas verifican conjuntamente las responsabilidades utilizadas por el flujo:
+
+- invalidación de sesión;
+- protección de rutas;
+- construcción del redirect seguro;
+- conservación del destino;
+- retorno después de login;
+- mantenimiento de sesión cuando no corresponde invalidarla.
+
+### Verificación focalizada final
+
+Se ejecutó nuevamente:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+También se ejecutaron conjuntamente:
+
+- `ApplicationStateContext.test.tsx`;
+- `use-event-creation.authorization.test.tsx`.
+
+Resultado:
+
+`2 archivos de prueba aprobados`
+
+`7 pruebas aprobadas`
+
+### Verificación global de T184-T192
+
+Se ejecutó:
+
+`npm test`
+
+Resultado:
+
+`38 archivos de prueba aprobados`
+
+`193 pruebas aprobadas`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite:
+
+- versión `8.2.2`;
+- transformó correctamente `262` módulos;
+- completó el build de producción en aproximadamente `24.84 s`.
+
+Se mantienen las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` procedente del CSS de Ionic mediante LightningCSS;
+- chunks superiores a 500 kB después de minificación.
+
+Las advertencias no impidieron la generación del build.
+
+También se ejecutó:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T184-T192`
+
+## 36. Próxima fase: preservación del borrador
+
+La siguiente fase corresponde a:
+
+- `T193`: guardar borrador de creación en estado de aplicación;
+- `T194`: navegar fuera de la pantalla con datos ingresados;
+- `T195`: regresar y recuperar el borrador;
+- `T196`: limpiar borrador después de creación exitosa cuando corresponda;
+- `T197`: definir comportamiento del borrador al cerrar sesión;
+- `T198`: añadir pruebas de preservación durante navegación.
+
+Parte de la infraestructura necesaria ya existe porque el borrador forma parte del estado de aplicación.
+
+La siguiente fase deberá auditar primero el comportamiento real ya implementado para evitar duplicar almacenamiento o introducir una segunda fuente de verdad.
+
+No se incorporarán todavía persistencia offline, base de datos local, almacenamiento seguro ni sincronización, responsabilidades correspondientes a etapas posteriores.

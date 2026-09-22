@@ -31,7 +31,7 @@ Las rutas deben poder abrirse directamente y no depender de objetos transportado
 | `/explore` | Público | Ninguno | `ExploreEventsPage` | `GET /api/v1/eventos` | Implementado |
 | `/eventos/:id` | Público | Ninguno | `EventDetailPage` | `GET /api/v1/eventos/:id` | Implementado |
 | `/gestion` | Protegido | Usuario autenticado | `ManagementPage` | Ninguno obligatorio | Implementado |
-| `/gestion/eventos/nuevo` | Protegido | `ASISTENTE` | `CreateEventPage` | `POST /api/v1/eventos` | Pendiente |
+| `/gestion/eventos/nuevo` | Protegido | `ASISTENTE` | `CreateEventPage` | `POST /api/v1/eventos` | Implementado |
 
 ## 4. Ruta inicial
 
@@ -232,8 +232,7 @@ Datos auxiliares:
 
 `GET /api/v1/categorias`
 
-y el endpoint mínimo de lugares activos que se incorpore durante Feature 011.
-
+`GET /api/v1/lugares`
 ### 10.6 Ruta anidada
 
 Esta ruta pertenece funcionalmente a:
@@ -275,7 +274,9 @@ Si una operación requiere específicamente `ASISTENTE`, un usuario `ADMINISTRAD
 
 ## 12. Protección de rutas
 
-Se implementará un guard de autenticación.
+La aplicación utiliza `ProtectedRoute` como guard de autenticación y autorización de navegación.
+
+La protección del cliente controla la experiencia de usuario, pero no sustituye la autorización del backend, que continúa siendo la autoridad final para cada operación protegida.
 
 ### 12.1 Sin sesión
 
@@ -287,42 +288,81 @@ Resultado:
 
 `/login?redirect=%2Fgestion%2Feventos%2Fnuevo`
 
+La dirección solicitada se construye a partir de la ruta protegida actual y se valida como destino interno reconocido antes de utilizarse.
+
 ### 12.2 Login correcto como ASISTENTE
 
-Resultado:
+Después de una autenticación válida con el rol requerido, `LoginRoute` recupera el destino protegido pendiente y permite regresar a:
 
 `/gestion/eventos/nuevo`
 
-### 12.3 Login correcto sin rol requerido
+El destino pendiente se elimina después de aplicarse correctamente.
 
-La sesión se mantiene.
+### 12.3 Rol no permitido por el guard del cliente
 
-El usuario será dirigido a una pantalla segura y recibirá un mensaje de falta de permisos.
+Cuando existe una sesión válida pero el rol conocido por el cliente no está incluido entre los roles permitidos para la ruta:
 
-No se eliminará su sesión.
+- la sesión se conserva;
+- no se ejecuta logout;
+- `ProtectedRoute` redirige hacia la ruta segura configurada mediante `forbiddenRedirect`;
+- para `/gestion/eventos/nuevo`, la ruta segura actual es `/explore`.
+
+Este control preventivo de navegación no debe confundirse con una respuesta HTTP `403` producida por el backend durante una operación remota.
+
+### 12.4 Autoridad del backend
+
+La protección de rutas del cliente no constituye un mecanismo suficiente de seguridad.
+
+El backend valida nuevamente:
+
+- autenticación;
+- token de acceso;
+- rol autorizado;
+- permisos correspondientes a la operación.
+
+Las respuestas `401` y `403` del backend se procesan de manera diferenciada incluso cuando la navegación preventiva del cliente ya se haya aplicado.
 
 ## 13. Tratamiento de 401
 
 Una respuesta `401 Unauthorized` en una operación protegida representa ausencia o invalidez de autenticación.
 
-Comportamiento:
+Para evitar confundir un token inválido con un cierre voluntario de sesión se diferencian dos transiciones de estado:
 
-1. limpiar la sesión en memoria;
-2. conservar el destino cuando corresponda;
-3. navegar hacia `/login`;
-4. solicitar una nueva autenticación.
+- `INVALIDATE_SESSION`: invalida exclusivamente la autenticación;
+- `LOGOUT`: corresponde al cierre explícito de sesión y puede limpiar el resto del estado asociado.
+
+Ante un `401` durante la creación protegida de un evento:
+
+1. `useEventCreation` reconoce el estado HTTP recibido desde el repositorio;
+2. se ejecuta `invalidateSession()`;
+3. la sesión, usuario, rol, access token y refresh token dejan de estar disponibles en memoria;
+4. el borrador del evento no se elimina;
+5. el destino protegido puede conservarse;
+6. `ProtectedRoute` detecta la ausencia de sesión;
+7. se genera el retorno seguro hacia `/login`;
+8. `LoginRoute` conserva el destino interno validado para utilizarlo después de una nueva autenticación.
+
+No se implementa renovación automática del access token durante Feature 011. Esa capacidad pertenece al endurecimiento posterior del cliente HTTP previsto para Semana 13.
 
 ## 14. Tratamiento de 403
 
-Una respuesta `403 Forbidden` representa una sesión válida sin permiso suficiente.
+Una respuesta `403 Forbidden` representa una identidad autenticada que no posee autorización suficiente para la operación solicitada.
 
-Comportamiento:
+Ante un `403` durante una operación protegida:
 
-1. mantener la sesión;
-2. no enviar al usuario al login;
-3. mostrar un mensaje comprensible;
-4. permitir continuar utilizando las funciones autorizadas.
+1. se conserva la sesión;
+2. se conservan usuario, rol y tokens;
+3. no se ejecuta `invalidateSession()`;
+4. no se ejecuta logout;
+5. no se redirige automáticamente al login;
+6. se mantiene el estado del formulario;
+7. se presenta un mensaje comprensible de permiso insuficiente.
 
+El mensaje utilizado actualmente durante la creación de eventos es:
+
+`La sesión no tiene permisos para crear eventos.`
+
+Este comportamiento es deliberadamente diferente del tratamiento de `401`.
 ## 15. Formulario de creación
 
 `CreateEventPage` consumirá:
@@ -359,23 +399,31 @@ Uso:
 
 El modelo canónico exige que cada Evento tenga un lugar válido y activo.
 
-Actualmente no existe una ruta pública específica para consultar lugares desde el cliente móvil.
-
-Feature 011 incorporará una consulta de solo lectura mínima, sin modificar el modelo de datos.
-
-Ruta prevista:
+Feature 011 incorporó la consulta pública de solo lectura:
 
 `GET /api/v1/lugares`
+
+Acceso:
+
+Público.
 
 Propósito:
 
 - listar lugares activos;
-- proporcionar identificador y datos suficientes para seleccionar un lugar;
-- evitar IDs fijos;
-- mantener integridad con la jerarquía territorial existente.
+- proporcionar identificadores reales;
+- proporcionar datos suficientes para identificar el lugar;
+- evitar `lugarId` incrustados en el cliente;
+- conservar la jerarquía territorial definida en el modelo canónico.
 
-La respuesta mínima deberá permitir identificar de forma comprensible el lugar seleccionado.
+La respuesta permite identificar de forma comprensible:
 
+- lugar;
+- sector;
+- parroquia;
+- cantón;
+- provincia.
+
+El formulario de creación consume este endpoint para construir dinámicamente las opciones disponibles.
 ## 18. Rutas no implementadas durante Feature 011
 
 El proyecto contempla otras funcionalidades derivadas de la API, pero no forman parte del recorrido obligatorio de Semana 11:

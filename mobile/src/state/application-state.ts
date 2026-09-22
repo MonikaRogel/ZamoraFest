@@ -23,6 +23,9 @@ export type ApplicationAction =
       readonly session: AuthSession;
     }
   | {
+      readonly type: 'INVALIDATE_SESSION';
+    }
+  | {
       readonly type: 'LOGOUT';
     }
   | {
@@ -63,6 +66,12 @@ export function applicationReducer(
       return {
         ...state,
         session: action.session,
+      };
+
+    case 'INVALIDATE_SESSION':
+      return {
+        ...state,
+        session: null,
       };
 
     case 'LOGOUT':

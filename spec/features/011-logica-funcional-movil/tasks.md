@@ -248,15 +248,15 @@
 
 ## 19. Tratamiento de 401 y 403
 
-- [ ] T184 Implementar flujo móvil de `401`.
-- [ ] T185 Invalidar sesión en memoria ante `401` protegido.
-- [ ] T186 Conservar destino cuando corresponda.
-- [ ] T187 Redirigir a login ante `401`.
-- [ ] T188 Implementar flujo móvil de `403`.
-- [ ] T189 Mantener sesión ante `403`.
-- [ ] T190 Mostrar mensaje de permiso insuficiente.
-- [ ] T191 Confirmar que `403` no provoca logout.
-- [ ] T192 Añadir pruebas que diferencien `401` y `403`.
+- [x] T184 Implementar flujo móvil de `401`.
+- [x] T185 Invalidar sesión en memoria ante `401` protegido.
+- [x] T186 Conservar destino cuando corresponda.
+- [x] T187 Redirigir a login ante `401`.
+- [x] T188 Implementar flujo móvil de `403`.
+- [x] T189 Mantener sesión ante `403`.
+- [x] T190 Mostrar mensaje de permiso insuficiente.
+- [x] T191 Confirmar que `403` no provoca logout.
+- [x] T192 Añadir pruebas que diferencien `401` y `403`.
 
 ## 20. Preservación del borrador
 
