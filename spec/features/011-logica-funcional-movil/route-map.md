@@ -233,6 +233,7 @@ Datos auxiliares:
 `GET /api/v1/categorias`
 
 `GET /api/v1/lugares`
+
 ### 10.6 Ruta anidada
 
 Esta ruta pertenece funcionalmente a:
@@ -363,6 +364,7 @@ El mensaje utilizado actualmente durante la creación de eventos es:
 `La sesión no tiene permisos para crear eventos.`
 
 Este comportamiento es deliberadamente diferente del tratamiento de `401`.
+
 ## 15. Formulario de creación
 
 `CreateEventPage` consumirá:
@@ -424,6 +426,7 @@ La respuesta permite identificar de forma comprensible:
 - provincia.
 
 El formulario de creación consume este endpoint para construir dinámicamente las opciones disponibles.
+
 ## 18. Rutas no implementadas durante Feature 011
 
 El proyecto contempla otras funcionalidades derivadas de la API, pero no forman parte del recorrido obligatorio de Semana 11:
