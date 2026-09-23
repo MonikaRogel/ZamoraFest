@@ -260,12 +260,12 @@
 
 ## 20. Preservación del borrador
 
-- [ ] T193 Guardar borrador de creación en estado de aplicación.
-- [ ] T194 Navegar fuera de la pantalla con datos ingresados.
-- [ ] T195 Regresar y recuperar el borrador.
-- [ ] T196 Limpiar borrador después de creación exitosa cuando corresponda.
-- [ ] T197 Definir comportamiento del borrador al cerrar sesión.
-- [ ] T198 Añadir pruebas de preservación durante navegación.
+- [x] T193 Guardar borrador de creación en estado de aplicación.
+- [x] T194 Navegar fuera de la pantalla con datos ingresados.
+- [x] T195 Regresar y recuperar el borrador.
+- [x] T196 Limpiar borrador después de creación exitosa cuando corresponda.
+- [x] T197 Definir comportamiento del borrador al cerrar sesión.
+- [x] T198 Añadir pruebas de preservación durante navegación.
 
 ## 21. Logout
 

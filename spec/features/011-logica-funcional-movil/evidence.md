@@ -2899,19 +2899,166 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T184-T192`
 
-## 36. Próxima fase: preservación del borrador
+## 36. Preservación del borrador T193-T198
+
+Se completó y verificó la preservación del borrador de creación de eventos durante la misma ejecución de la aplicación.
+
+La implementación reutiliza el estado global existente y no introduce una segunda fuente de verdad.
+
+### Estado de aplicación
+
+`eventDraft` ya forma parte de `ApplicationState`.
+
+`CreateEventPage` utiliza directamente:
+
+- `eventDraft`;
+- `updateEventDraft()`.
+
+Los campos del formulario escriben sobre ese estado compartido.
+
+No se incorporó `localStorage`, base de datos local ni otro mecanismo de persistencia durante Feature 011.
+
+### Navegación y recuperación
+
+Se añadió una prueba específica de navegación:
+
+`CreateEventPage.draft-navigation.test.tsx`
+
+El caso comprobado:
+
+1. abre `/gestion/eventos/nuevo`;
+2. ingresa un título;
+3. selecciona un lugar real del repositorio de prueba;
+4. selecciona una categoría;
+5. navega hacia `/gestion`;
+6. regresa a `/gestion/eventos/nuevo`;
+7. verifica que título, lugar y categoría continúan presentes.
+
+De esta forma se comprueba que desmontar y volver a montar la pantalla no elimina el borrador mientras `ApplicationStateProvider` continúa activo.
+
+### Limpieza después de creación exitosa
+
+`useEventCreation` reutiliza `clearEventDraft()`.
+
+La limpieza se ejecuta únicamente después de que el repositorio devuelve un Evento creado correctamente y el estado remoto pasa a `success`.
+
+Una creación fallida no limpia el borrador.
+
+Esto permite corregir datos o reintentar sin perder el contenido introducido.
+
+### Comportamiento ante logout
+
+El reducer ya define que `LOGOUT` restablece:
+
+- sesión;
+- destino pendiente;
+- `eventDraft`.
+
+La prueba existente de `applicationReducer` confirma que el cierre explícito de sesión devuelve el estado al `initialApplicationState`.
+
+Este comportamiento se mantiene separado de `INVALIDATE_SESSION`, que conserva el borrador cuando la autenticación deja de ser válida por un `401`.
+
+### Pruebas específicas
+
+Se añadieron:
+
+- `use-event-creation.draft.test.tsx`;
+- `CreateEventPage.draft-navigation.test.tsx`.
+
+Las pruebas verifican:
+
+- limpieza del borrador después de creación exitosa;
+- conservación del borrador ante fallo remoto;
+- conservación durante navegación;
+- recuperación al regresar al formulario.
+
+También se mantuvieron las pruebas existentes de:
+
+- `application-state`;
+- `ApplicationStateContext`;
+- autorización `401` y `403`.
+
+### Verificación focalizada
+
+Se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+Se ejecutaron conjuntamente cinco archivos de prueba relacionados con estado, autorización, creación y navegación del borrador.
+
+Resultado:
+
+`5 archivos de prueba aprobados`
+
+### Verificación global
+
+La suite móvil completa se ejecutó dos veces después del cambio.
+
+Resultado en ambas ejecuciones:
+
+`40 archivos de prueba aprobados`
+
+`196 pruebas aprobadas`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite:
+
+- versión `8.2.2`;
+- `262` módulos transformados;
+- build final completado en aproximadamente `8.64 s`.
+
+Persisten las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- `:host-context` durante la minificación del CSS de Ionic;
+- chunks superiores a `500 kB` después de minificación.
+
+Estas advertencias no impidieron la generación del build.
+
+También se ejecutó:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T193-T198`
+
+## 37. Próxima fase: logout
 
 La siguiente fase corresponde a:
 
-- `T193`: guardar borrador de creación en estado de aplicación;
-- `T194`: navegar fuera de la pantalla con datos ingresados;
-- `T195`: regresar y recuperar el borrador;
-- `T196`: limpiar borrador después de creación exitosa cuando corresponda;
-- `T197`: definir comportamiento del borrador al cerrar sesión;
-- `T198`: añadir pruebas de preservación durante navegación.
+- `T199`: eliminar usuario de memoria;
+- `T200`: eliminar access token de memoria;
+- `T201`: eliminar refresh token de memoria;
+- `T202`: eliminar estado de autenticación;
+- `T203`: limpiar destino pendiente no aplicable;
+- `T204`: verificar que una ruta protegida vuelve a requerir login;
+- `T205`: añadir pruebas de logout.
 
-Parte de la infraestructura necesaria ya existe porque el borrador forma parte del estado de aplicación.
+Parte de este comportamiento ya existe en `LOGOUT`.
 
-La siguiente fase deberá auditar primero el comportamiento real ya implementado para evitar duplicar almacenamiento o introducir una segunda fuente de verdad.
+La siguiente fase deberá auditar primero el reducer, `ApplicationStateContext`, `ManagementPage`, `ProtectedRoute` y sus pruebas antes de añadir código, para reutilizar el comportamiento existente y evitar duplicaciones.
 
-No se incorporarán todavía persistencia offline, base de datos local, almacenamiento seguro ni sincronización, responsabilidades correspondientes a etapas posteriores.
+No se incorporará almacenamiento seguro persistente ni limpieza de base local durante este bloque, porque esas responsabilidades pertenecen a Semana 12.

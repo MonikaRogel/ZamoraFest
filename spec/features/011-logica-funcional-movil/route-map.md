@@ -378,7 +378,15 @@ y utilizará información auxiliar procedente de:
 
 No se utilizarán IDs incrustados como solución definitiva.
 
-La navegación fuera de la pantalla no deberá eliminar el borrador durante la misma ejecución.
+El borrador de creación forma parte del estado global de aplicación y se conserva al navegar fuera de la pantalla y regresar durante la misma ejecución.
+
+Una creación confirmada como exitosa limpia el borrador mediante `clearEventDraft()`.
+
+Los errores de creación no eliminan el borrador, lo que permite corregir o reintentar sin perder los datos ingresados.
+
+El cierre explícito de sesión limpia el borrador junto con la sesión y el destino pendiente.
+
+No existe persistencia del borrador después de cerrar la aplicación durante Feature 011; esa responsabilidad corresponde a Semana 12.
 
 ## 16. Consulta de categorías
 

@@ -92,6 +92,7 @@ export function useEventCreation(
       eventCreateRepository,
 ): UseEventCreationResult {
   const {
+    clearEventDraft,
     invalidateSession,
   } =
     useApplicationState();
@@ -153,6 +154,8 @@ export function useEventCreation(
             ),
           );
 
+          clearEventDraft();
+
           return evento;
         } catch (error) {
           const repositoryFailure =
@@ -185,6 +188,7 @@ export function useEventCreation(
         }
       },
       [
+        clearEventDraft,
         invalidateSession,
         repository,
       ],
