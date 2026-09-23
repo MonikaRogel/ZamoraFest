@@ -269,13 +269,13 @@
 
 ## 21. Logout
 
-- [ ] T199 Eliminar usuario de memoria.
-- [ ] T200 Eliminar access token de memoria.
-- [ ] T201 Eliminar refresh token de memoria.
-- [ ] T202 Eliminar estado de autenticación.
-- [ ] T203 Limpiar destino pendiente no aplicable.
-- [ ] T204 Verificar que una ruta protegida vuelve a requerir login.
-- [ ] T205 Añadir pruebas de logout.
+- [x] T199 Eliminar usuario de memoria.
+- [x] T200 Eliminar access token de memoria.
+- [x] T201 Eliminar refresh token de memoria.
+- [x] T202 Eliminar estado de autenticación.
+- [x] T203 Limpiar destino pendiente no aplicable.
+- [x] T204 Verificar que una ruta protegida vuelve a requerir login.
+- [x] T205 Añadir pruebas de logout.
 
 ## 22. Accesibilidad y reutilización visual
 

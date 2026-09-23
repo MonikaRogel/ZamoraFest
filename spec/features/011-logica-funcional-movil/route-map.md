@@ -323,6 +323,28 @@ El backend valida nuevamente:
 
 Las respuestas `401` y `403` del backend se procesan de manera diferenciada incluso cuando la navegación preventiva del cliente ya se haya aplicado.
 
+### 12.5 Cierre explícito de sesión
+
+El cierre explícito de sesión se realiza desde `ManagementPage` mediante `logout()`.
+
+La acción `LOGOUT` restablece el estado de aplicación asociado a la sesión:
+
+- `session` pasa a `null`;
+- usuario y rol dejan de estar disponibles porque derivan de la sesión;
+- access token y refresh token dejan de estar disponibles;
+- `pendingDestination` pasa a `null`;
+- `eventDraft` vuelve a `initialEventDraft`.
+
+Después del logout, `ManagementPage` navega a `/login`.
+
+Si el usuario intenta acceder nuevamente a `/gestion`, `ProtectedRoute` detecta que `session` es `null` y vuelve a exigir autenticación mediante el redirect seguro hacia:
+
+`/login?redirect=%2Fgestion`
+
+Este cierre voluntario de sesión se mantiene separado de `INVALIDATE_SESSION`, utilizado para respuestas `401`.
+
+Durante Feature 011 la limpieza se limita al estado mantenido en memoria. La limpieza de almacenamiento seguro o base local corresponde a Semana 12.
+
 ## 13. Tratamiento de 401
 
 Una respuesta `401 Unauthorized` en una operación protegida representa ausencia o invalidez de autenticación.

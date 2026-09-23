@@ -3045,20 +3045,181 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T193-T198`
 
-## 37. Próxima fase: logout
+## 37. Logout T199-T205
+
+Se completó y verificó el flujo de cierre explícito de sesión de Feature 011.
+
+La auditoría previa confirmó que el comportamiento de producción ya existía y no requería duplicar lógica.
+
+### Estado de aplicación
+
+`applicationReducer` define `LOGOUT` restableciendo:
+
+- `session` a `null`;
+- `pendingDestination` a `null`;
+- `eventDraft` a `initialEventDraft`.
+
+Como `ApplicationStateContext` deriva de `session` los valores:
+
+- `user`;
+- `role`;
+- `accessToken`;
+- `refreshToken`;
+
+todos dejan de estar disponibles después del logout.
+
+### Flujo de interfaz
+
+`ManagementPage` ejecuta:
+
+`logout()`
+
+y posteriormente navega mediante:
+
+`history.replace('/login')`
+
+De esta forma el cierre voluntario de sesión elimina el estado autenticado y lleva al usuario a la pantalla de login.
+
+### Protección posterior al logout
+
+Se añadió:
+
+`src/routing/logout-flow.test.tsx`
+
+La prueba integrada prepara una sesión `ASISTENTE`, un destino pendiente y un borrador antes de ejecutar el logout.
+
+Después del cierre de sesión se comprueba que:
+
+- `session` es `null`;
+- `user` es `null`;
+- `role` es `null`;
+- `accessToken` es `null`;
+- `refreshToken` es `null`;
+- `pendingDestination` es `null`;
+- el borrador queda vacío.
+
+También se comprueba el recorrido:
+
+1. usuario autenticado entra a `/gestion`;
+2. ejecuta `Cerrar sesión`;
+3. regresa a `/login`;
+4. intenta abrir nuevamente `/gestion`;
+5. `ProtectedRoute` detecta ausencia de sesión;
+6. la aplicación vuelve a login con el destino protegido codificado.
+
+Destino comprobado:
+
+`/login?redirect=%2Fgestion`
+
+Esto confirma que una ruta protegida vuelve a requerir autenticación después del logout.
+
+### Separación respecto de 401
+
+El cierre explícito utiliza `LOGOUT`.
+
+Una respuesta `401` utiliza `INVALIDATE_SESSION`.
+
+La diferencia se conserva porque:
+
+- `LOGOUT` limpia sesión, destino pendiente y borrador;
+- `INVALIDATE_SESSION` invalida la sesión pero conserva destino y borrador cuando corresponde al flujo de recuperación de autenticación.
+
+### Verificación focalizada
+
+Se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+Se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+Se ejecutaron seis archivos de prueba relacionados con:
+
+- logout integrado;
+- reducer;
+- contexto de aplicación;
+- gestión;
+- rutas protegidas;
+- aplicación principal.
+
+Resultado:
+
+`6 archivos de prueba aprobados`
+
+La prueba nueva:
+
+`logout-flow.test.tsx`
+
+Resultado:
+
+`2 pruebas aprobadas`
+
+### Verificación global
+
+Se ejecutó la suite móvil completa.
+
+Resultado:
+
+`41 archivos de prueba aprobados`
+
+`198 pruebas aprobadas`
+
+Se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Vite:
+
+- versión `8.2.2`;
+- `262` módulos transformados;
+- build final completado en aproximadamente `12.66 s`.
+
+Persisten las advertencias no bloqueantes ya conocidas relacionadas con:
+
+- `:host-context` durante la minificación de CSS de Ionic;
+- chunks superiores a `500 kB` después de minificación.
+
+Estas advertencias no impidieron la generación del build.
+
+También se ejecutó:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Estado:
+
+`COMPLETADO Y VERIFICADO PARA T199-T205`
+
+## 38. Próxima fase: accesibilidad y reutilización visual
 
 La siguiente fase corresponde a:
 
-- `T199`: eliminar usuario de memoria;
-- `T200`: eliminar access token de memoria;
-- `T201`: eliminar refresh token de memoria;
-- `T202`: eliminar estado de autenticación;
-- `T203`: limpiar destino pendiente no aplicable;
-- `T204`: verificar que una ruta protegida vuelve a requerir login;
-- `T205`: añadir pruebas de logout.
+- `T206`: reutilizar `ScreenHeader` donde corresponda;
+- `T207`: reutilizar `PrimaryButton` donde corresponda;
+- `T208`: reutilizar `AsyncStateView` para operaciones remotas;
+- `T209`: mantener tokens de Feature 010;
+- `T210`: verificar labels y nombres accesibles de formularios;
+- `T211`: asociar errores de validación con sus controles;
+- `T212`: conservar tamaño mínimo táctil;
+- `T213`: verificar foco visible;
+- `T214`: verificar flujo principal con TalkBack.
 
-Parte de este comportamiento ya existe en `LOGOUT`.
+Antes de modificar código se deberá auditar lo ya implementado en Feature 010 y Feature 011 para distinguir requisitos ya satisfechos de aquellos que todavía necesitan comprobación o ajustes.
 
-La siguiente fase deberá auditar primero el reducer, `ApplicationStateContext`, `ManagementPage`, `ProtectedRoute` y sus pruebas antes de añadir código, para reutilizar el comportamiento existente y evitar duplicaciones.
-
-No se incorporará almacenamiento seguro persistente ni limpieza de base local durante este bloque, porque esas responsabilidades pertenecen a Semana 12.
+La verificación con TalkBack deberá documentarse únicamente después de ejecutarse realmente en dispositivo físico.
