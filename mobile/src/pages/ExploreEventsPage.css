@@ -57,6 +57,44 @@
   white-space: nowrap;
 }
 
+.zf-app-session-actions {
+  margin-inline-end:
+    var(--zf-space-2);
+}
+
+.zf-app-session-button {
+  --color:
+    var(--zf-color-primary);
+  --border-radius:
+    var(--zf-radius-md);
+
+  min-height:
+    var(--zf-control-min-size);
+
+  font-size:
+    var(--zf-font-size-label);
+  font-weight:
+    var(--zf-font-weight-bold);
+
+  text-transform:
+    none;
+}
+
+.zf-app-session-button::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+
+  outline-offset:
+    var(--zf-focus-ring-offset);
+}
+
+.zf-app-session-button ion-icon {
+  font-size:
+    1.25rem;
+}
+
 /* ====================================================== */
 /* Pantalla                                               */
 /* ====================================================== */
@@ -193,7 +231,10 @@
 
   .zf-explore__list {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 }
 
@@ -203,11 +244,41 @@
 
 @media (min-width: 70rem) {
   .zf-explore {
-    padding-top: var(--zf-space-8);
+    padding-top:
+      var(--zf-space-8);
   }
 
   .zf-explore__list {
     grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+/* ====================================================== */
+/* Teléfonos estrechos                                    */
+/* ====================================================== */
+
+@media (max-width: 30rem) {
+  .zf-app-brand__descriptor,
+  .zf-app-brand__separator {
+    display: none;
+  }
+
+  .zf-app-session-actions {
+    margin-inline-end: 0;
+  }
+
+  .zf-app-session-button {
+    font-size:
+      var(--zf-font-size-caption);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zf-app-session-button {
+    transition: none;
   }
 }

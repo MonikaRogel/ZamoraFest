@@ -12,6 +12,8 @@ import {
 } from 'vitest';
 import {
   MemoryRouter,
+  Route,
+  useLocation,
 } from 'react-router-dom';
 
 import {
@@ -62,10 +64,43 @@ const registeredVisitor:
     rol: 'VISITANTE',
   };
 
+function LoginDestinationProbe() {
+  const location =
+    useLocation();
+
+  return (
+    <main>
+      <h1>
+        Login de prueba
+      </h1>
+
+      <output data-testid="register-destination">
+        {`${location.pathname}${location.search}`}
+      </output>
+    </main>
+  );
+}
+
 function renderPage() {
   return render(
-    <MemoryRouter>
-      <RegisterPage />
+    <MemoryRouter
+      initialEntries={[
+        '/register',
+      ]}
+    >
+      <Route
+        exact
+        path="/register"
+      >
+        <RegisterPage />
+      </Route>
+
+      <Route
+        exact
+        path="/login"
+      >
+        <LoginDestinationProbe />
+      </Route>
     </MemoryRouter>,
   );
 }
@@ -139,7 +174,7 @@ describe(
     });
 
     it(
-      'registra un visitante con los datos normalizados',
+      'registra un visitante y vuelve al login con confirmación',
       async () => {
         vi.mocked(
           zamoraFestApi.register,
@@ -182,22 +217,46 @@ describe(
             'heading',
             {
               name:
-                'Registro completado',
+                'Login de prueba',
             },
           ),
         ).toBeInTheDocument();
 
         expect(
-          screen.getByText(
-            'maria@ejemplo.com',
+          screen.getByTestId(
+            'register-destination',
           ),
-        ).toBeInTheDocument();
+        ).toHaveTextContent(
+          '/login?registered=1',
+        );
+      },
+    );
+
+    it(
+      'mantiene visible que el autorregistro crea únicamente visitantes',
+      () => {
+        renderPage();
 
         expect(
           screen.getByText(
-            'VISITANTE',
+            /únicamente una cuenta de visitante/i,
           ),
         ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'incluye control para mostrar u ocultar la contraseña',
+      () => {
+        const {
+          container,
+        } = renderPage();
+
+        expect(
+          container.querySelector(
+            'ion-input-password-toggle',
+          ),
+        ).not.toBeNull();
       },
     );
 
@@ -461,7 +520,7 @@ describe(
             'heading',
             {
               name:
-                'Registro completado',
+                'Login de prueba',
             },
           ),
         ).toBeInTheDocument();

@@ -236,7 +236,7 @@ async function loginAndLogout() {
       'heading',
       {
         name:
-          'Gestión de ZamoraFest',
+          'Mi cuenta',
       },
     ),
   ).toBeInTheDocument();
@@ -358,7 +358,7 @@ describe(
             'heading',
             {
               name:
-                'Gestión de ZamoraFest',
+                'Mi cuenta',
             },
           ),
         ).not.toBeInTheDocument();

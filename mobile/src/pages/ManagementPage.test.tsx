@@ -258,7 +258,7 @@ describe(
             'heading',
             {
               name:
-                'Gestión de ZamoraFest',
+                'Mi cuenta',
             },
           ),
         ).toBeInTheDocument();
@@ -294,7 +294,7 @@ describe(
           'heading',
           {
             name:
-              'Gestión de ZamoraFest',
+              'Mi cuenta',
           },
         );
 
@@ -331,7 +331,7 @@ describe(
           'heading',
           {
             name:
-              'Gestión de ZamoraFest',
+              'Mi cuenta',
           },
         );
 
@@ -364,7 +364,7 @@ describe(
           'heading',
           {
             name:
-              'Gestión de ZamoraFest',
+              'Mi cuenta',
           },
         );
 
@@ -397,7 +397,7 @@ describe(
           'heading',
           {
             name:
-              'Gestión de ZamoraFest',
+              'Mi cuenta',
           },
         );
 
@@ -434,7 +434,7 @@ describe(
           'heading',
           {
             name:
-              'Gestión de ZamoraFest',
+              'Mi cuenta',
           },
         );
 

@@ -15,6 +15,7 @@ import {
 import {
   MemoryRouter,
   Route,
+  useHistory,
   useLocation,
 } from 'react-router-dom';
 
@@ -24,7 +25,12 @@ import {
 import {
   eventRepository,
 } from '../features/events/remote-event-repository';
+import {
+  ApplicationStateProvider,
+  useApplicationState,
+} from '../state/ApplicationStateContext';
 import type {
+  AuthSession,
   Evento,
 } from '../types/api';
 import ExploreEventsPage from './ExploreEventsPage';
@@ -33,176 +39,215 @@ vi.mock(
   '../features/events/remote-event-repository',
   () => ({
     eventRepository: {
-      listEvents: vi.fn(),
-      getEventById: vi.fn(),
+      listEvents:
+        vi.fn(),
+      getEventById:
+        vi.fn(),
     },
   }),
 );
 
+const visitorSession:
+  AuthSession = {
+    accessToken:
+      'access-visitante',
+    refreshToken:
+      'refresh-visitante',
+    tokenType:
+      'Bearer',
+    expiresIn:
+      900,
+    usuario: {
+      id: 20,
+      nombre:
+        'Visitante Demo',
+      email:
+        'visitante@zamorafest.ec',
+      rol:
+        'VISITANTE',
+    },
+  };
+
 const eventos:
   readonly Evento[] = [
-  {
-    id: 1,
-    titulo:
-      'Festival Cultural de Zamora',
-    descripcion:
-      'Música, danza y tradiciones locales.',
-    fechaInicio:
-      '2026-09-20T18:00:00.000Z',
-    fechaFin: null,
-    costoReferencial: 0,
-    estadoEvento:
-      'PROGRAMADO',
-    estadoRevision:
-      'APROBADO',
-    fuenteInformacion: null,
-    fechaCreacion:
-      '2026-09-01T12:00:00.000Z',
-    fechaActualizacion:
-      '2026-09-01T12:00:00.000Z',
-    fechaRevision: null,
-    lugar: {
+    {
       id: 1,
-      nombre:
-        'Parque Central de Zamora',
-      tipoLugar:
-        'PARQUE',
-      direccionReferencial:
-        'Centro de Zamora',
-      referencia: null,
-      latitud: -4.069,
-      longitud: -78.956,
-      sector: {
+      titulo:
+        'Festival Cultural de Zamora',
+      descripcion:
+        'Música, danza y tradiciones locales.',
+      fechaInicio:
+        '2026-09-20T18:00:00.000Z',
+      fechaFin: null,
+      costoReferencial: 0,
+      estadoEvento:
+        'PROGRAMADO',
+      estadoRevision:
+        'APROBADO',
+      fuenteInformacion:
+        null,
+      fechaCreacion:
+        '2026-09-01T12:00:00.000Z',
+      fechaActualizacion:
+        '2026-09-01T12:00:00.000Z',
+      fechaRevision:
+        null,
+      lugar: {
         id: 1,
         nombre:
-          'Centro',
-        tipoSector:
-          'URBANO',
-        parroquia: {
+          'Parque Central de Zamora',
+        tipoLugar:
+          'PARQUE',
+        direccionReferencial:
+          'Centro de Zamora',
+        referencia:
+          null,
+        latitud:
+          -4.069,
+        longitud:
+          -78.956,
+        sector: {
           id: 1,
           nombre:
-            'Zamora',
-          codigoDpa:
-            '190101',
-          canton: {
+            'Centro',
+          tipoSector:
+            'URBANO',
+          parroquia: {
             id: 1,
             nombre:
               'Zamora',
             codigoDpa:
-              '1901',
-            provincia: {
+              '190101',
+            canton: {
               id: 1,
               nombre:
-                'Zamora Chinchipe',
+                'Zamora',
               codigoDpa:
-                '19',
+                '1901',
+              provincia: {
+                id: 1,
+                nombre:
+                  'Zamora Chinchipe',
+                codigoDpa:
+                  '19',
+              },
             },
           },
         },
       },
-    },
-    usuarioCreador: {
-      id: 1,
-      nombreCompleto:
-        'Gestor Cultural',
-      rol: {
-        id: 2,
-        nombre:
-          'ASISTENTE',
-      },
-    },
-    usuarioRevisor: null,
-    categorias: [
-      {
+      usuarioCreador: {
         id: 1,
-        nombre:
-          'Cultura',
-        descripcion: null,
+        nombreCompleto:
+          'Gestor Cultural',
+        rol: {
+          id: 2,
+          nombre:
+            'ASISTENTE',
+        },
       },
-    ],
-  },
+      usuarioRevisor:
+        null,
+      categorias: [
+        {
+          id: 1,
+          nombre:
+            'Cultura',
+          descripcion:
+            null,
+        },
+      ],
+    },
 
-  {
-    id: 2,
-    titulo:
-      'Feria Gastronómica Provincial',
-    descripcion:
-      'Productos y gastronomía de la provincia.',
-    fechaInicio:
-      '2026-09-25T15:00:00.000Z',
-    fechaFin: null,
-    costoReferencial: 2,
-    estadoEvento:
-      'PROGRAMADO',
-    estadoRevision:
-      'APROBADO',
-    fuenteInformacion: null,
-    fechaCreacion:
-      '2026-09-02T12:00:00.000Z',
-    fechaActualizacion:
-      '2026-09-02T12:00:00.000Z',
-    fechaRevision: null,
-    lugar: {
+    {
       id: 2,
-      nombre:
-        'Recinto Ferial',
-      tipoLugar:
-        'RECINTO',
-      direccionReferencial:
-        'Zamora',
-      referencia: null,
-      latitud: null,
-      longitud: null,
-      sector: {
-        id: 1,
+      titulo:
+        'Feria Gastronómica Provincial',
+      descripcion:
+        'Productos y gastronomía de la provincia.',
+      fechaInicio:
+        '2026-09-25T15:00:00.000Z',
+      fechaFin:
+        null,
+      costoReferencial:
+        2,
+      estadoEvento:
+        'PROGRAMADO',
+      estadoRevision:
+        'APROBADO',
+      fuenteInformacion:
+        null,
+      fechaCreacion:
+        '2026-09-02T12:00:00.000Z',
+      fechaActualizacion:
+        '2026-09-02T12:00:00.000Z',
+      fechaRevision:
+        null,
+      lugar: {
+        id: 2,
         nombre:
-          'Centro',
-        tipoSector:
-          'URBANO',
-        parroquia: {
+          'Recinto Ferial',
+        tipoLugar:
+          'RECINTO',
+        direccionReferencial:
+          'Zamora',
+        referencia:
+          null,
+        latitud:
+          null,
+        longitud:
+          null,
+        sector: {
           id: 1,
           nombre:
-            'Zamora',
-          codigoDpa:
-            '190101',
-          canton: {
+            'Centro',
+          tipoSector:
+            'URBANO',
+          parroquia: {
             id: 1,
             nombre:
               'Zamora',
             codigoDpa:
-              '1901',
-            provincia: {
+              '190101',
+            canton: {
               id: 1,
               nombre:
-                'Zamora Chinchipe',
+                'Zamora',
               codigoDpa:
-                '19',
+                '1901',
+              provincia: {
+                id: 1,
+                nombre:
+                  'Zamora Chinchipe',
+                codigoDpa:
+                  '19',
+              },
             },
           },
         },
       },
-    },
-    usuarioCreador: {
-      id: 1,
-      nombreCompleto:
-        'Gestor Cultural',
-      rol: {
-        id: 2,
-        nombre:
-          'ASISTENTE',
+      usuarioCreador: {
+        id: 1,
+        nombreCompleto:
+          'Gestor Cultural',
+        rol: {
+          id: 2,
+          nombre:
+            'ASISTENTE',
+        },
       },
+      usuarioRevisor:
+        null,
+      categorias: [
+        {
+          id: 2,
+          nombre:
+            'Gastronomía',
+          descripcion:
+            null,
+        },
+      ],
     },
-    usuarioRevisor: null,
-    categorias: [
-      {
-        id: 2,
-        nombre:
-          'Gastronomía',
-        descripcion: null,
-      },
-    ],
-  },
-];
+  ];
 
 function DetailRouteProbe() {
   const location =
@@ -215,27 +260,108 @@ function DetailRouteProbe() {
   );
 }
 
+function LoginRouteProbe() {
+  return (
+    <h1>
+      Login de prueba
+    </h1>
+  );
+}
+
+function ManagementRouteProbe() {
+  return (
+    <h1>
+      Cuenta protegida de prueba
+    </h1>
+  );
+}
+
+function SeedVisitorSession() {
+  const {
+    login,
+  } =
+    useApplicationState();
+
+  const history =
+    useHistory();
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        login(
+          visitorSession,
+        );
+
+        history.push(
+          '/explore',
+        );
+      }}
+    >
+      Iniciar visitante de prueba
+    </button>
+  );
+}
+
+interface TestAppProps {
+  readonly initialEntry:
+    string;
+}
+
+function TestApp({
+  initialEntry,
+}: TestAppProps) {
+  return (
+    <ApplicationStateProvider>
+      <MemoryRouter
+        initialEntries={[
+          initialEntry,
+        ]}
+      >
+        <Route
+          exact
+          path="/seed"
+        >
+          <SeedVisitorSession />
+        </Route>
+
+        <Route
+          exact
+          path="/explore"
+        >
+          <ExploreEventsPage />
+        </Route>
+
+        <Route
+          exact
+          path="/eventos/:id"
+        >
+          <DetailRouteProbe />
+        </Route>
+
+        <Route
+          exact
+          path="/login"
+        >
+          <LoginRouteProbe />
+        </Route>
+
+        <Route
+          exact
+          path="/gestion"
+        >
+          <ManagementRouteProbe />
+        </Route>
+      </MemoryRouter>
+    </ApplicationStateProvider>
+  );
+}
+
 function renderExplore() {
   return render(
-    <MemoryRouter
-      initialEntries={[
-        '/explore',
-      ]}
-    >
-      <Route
-        exact
-        path="/explore"
-      >
-        <ExploreEventsPage />
-      </Route>
-
-      <Route
-        exact
-        path="/eventos/:id"
-      >
-        <DetailRouteProbe />
-      </Route>
-    </MemoryRouter>,
+    <TestApp
+      initialEntry="/explore"
+    />,
   );
 }
 
@@ -270,6 +396,108 @@ describe(
             {
               name:
                 'Cargando eventos',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'ofrece iniciar sesión cuando no existe una sesión activa',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        const loginButton =
+          await screen.findByText(
+            'Iniciar sesión',
+            {
+              selector:
+                'ion-button',
+            },
+          );
+
+        expect(
+          loginButton,
+        ).toHaveAttribute(
+          'aria-label',
+          'Iniciar sesión',
+        );
+
+        fireEvent.click(
+          loginButton,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Login de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'muestra Mi cuenta y navega a gestión cuando existe sesión',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          eventos,
+        );
+
+        render(
+          <TestApp
+            initialEntry="/seed"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            'button',
+            {
+              name:
+                'Iniciar visitante de prueba',
+            },
+          ),
+        );
+
+        const accountButton =
+          await screen.findByText(
+            'Mi cuenta',
+            {
+              selector:
+                'ion-button',
+            },
+          );
+
+        expect(
+          accountButton,
+        ).toHaveAttribute(
+          'aria-label',
+          'Abrir mi cuenta',
+        );
+
+        fireEvent.click(
+          accountButton,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Cuenta protegida de prueba',
             },
           ),
         ).toBeInTheDocument();

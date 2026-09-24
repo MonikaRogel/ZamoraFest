@@ -8,6 +8,7 @@ import {
   IonHeader,
   IonIcon,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonList,
   IonNote,
@@ -17,7 +18,10 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useRef, useState } from 'react';
+import {
+  useRef,
+  useState,
+} from 'react';
 import {
   leafOutline,
   lockClosedOutline,
@@ -35,10 +39,19 @@ import type { AuthenticatedUser } from '../types/api';
 import './LoginPage.css';
 
 interface LoginPageProps {
-  readonly onAuthenticated?: (user: AuthenticatedUser) => void;
+  readonly onAuthenticated?:
+    (
+      user:
+        AuthenticatedUser,
+    ) => void;
+
+  readonly registrationSucceeded?:
+    boolean;
 }
 
-function getLoginErrorMessage(error: unknown): string {
+function getLoginErrorMessage(
+  error: unknown,
+): string {
   if (!(error instanceof ApiRequestError)) {
     return 'No fue posible iniciar sesión. Intente nuevamente.';
   }
@@ -47,7 +60,10 @@ function getLoginErrorMessage(error: unknown): string {
     return 'El correo o la contraseña son incorrectos.';
   }
 
-  if (error.status === 400 || error.status === 422) {
+  if (
+    error.status === 400 ||
+    error.status === 422
+  ) {
     return 'Revise los datos ingresados e intente nuevamente.';
   }
 
@@ -62,80 +78,169 @@ function getLoginErrorMessage(error: unknown): string {
   return 'No fue posible iniciar sesión. Intente nuevamente.';
 }
 
-function LoginPage({ onAuthenticated }: LoginPageProps) {
+function LoginPage({
+  onAuthenticated,
+  registrationSucceeded =
+    false,
+}: LoginPageProps) {
   const {
     login,
-    user: authenticatedUser,
-  } = useApplicationState();
+    user:
+      authenticatedUser,
+  } =
+    useApplicationState();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState<string>();
-  const [passwordError, setPasswordError] = useState<string>();
-  const [requestError, setRequestError] = useState<string>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [
+    email,
+    setEmail,
+  ] =
+    useState('');
 
-  const inFlightRef = useRef(false);
+  const [
+    password,
+    setPassword,
+  ] =
+    useState('');
+
+  const [
+    emailError,
+    setEmailError,
+  ] =
+    useState<string>();
+
+  const [
+    passwordError,
+    setPasswordError,
+  ] =
+    useState<string>();
+
+  const [
+    requestError,
+    setRequestError,
+  ] =
+    useState<string>();
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] =
+    useState(false);
+
+  const inFlightRef =
+    useRef(false);
 
   async function handleSubmit() {
     if (inFlightRef.current) {
       return;
     }
 
-    const validation = validateLoginForm({
-      email,
-      password,
-    });
+    const validation =
+      validateLoginForm({
+        email,
+        password,
+      });
 
-    setRequestError(undefined);
+    setRequestError(
+      undefined,
+    );
 
     if (!validation.ok) {
-      setEmailError(validation.errors.email);
-      setPasswordError(validation.errors.password);
+      setEmailError(
+        validation
+          .errors
+          .email,
+      );
+
+      setPasswordError(
+        validation
+          .errors
+          .password,
+      );
+
       return;
     }
 
     setEmailError(undefined);
-    setPasswordError(undefined);
+    setPasswordError(
+      undefined,
+    );
 
     inFlightRef.current = true;
-    setIsSubmitting(true);
+
+    setIsSubmitting(
+      true,
+    );
 
     try {
-      const session = await zamoraFestApi.login(validation.input);
+      const session =
+        await zamoraFestApi
+          .login(
+            validation.input,
+          );
 
-      login(session);
-      onAuthenticated?.(session.usuario);
+      login(
+        session,
+      );
+
+      onAuthenticated?.(
+        session.usuario,
+      );
     } catch (error) {
-      setRequestError(getLoginErrorMessage(error));
+      setRequestError(
+        getLoginErrorMessage(
+          error,
+        ),
+      );
     } finally {
-      inFlightRef.current = false;
-      setIsSubmitting(false);
+      inFlightRef.current =
+        false;
+
+      setIsSubmitting(
+        false,
+      );
     }
   }
 
-  if (authenticatedUser !== null) {
+  if (
+    authenticatedUser !==
+    null
+  ) {
     return (
       <IonPage className="zf-auth-page">
         <IonHeader className="zf-auth-header">
           <IonToolbar className="zf-auth-toolbar">
-            <IonTitle>ZamoraFest</IonTitle>
+            <IonTitle>
+              ZamoraFest
+            </IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <IonContent fullscreen className="zf-auth-content">
+        <IonContent
+          fullscreen
+          className="zf-auth-content"
+        >
           <main className="zf-auth-shell">
             <section
               className="zf-brand-block"
               aria-label="ZamoraFest"
             >
-              <div className="zf-mark" aria-hidden="true">
-                <IonIcon icon={leafOutline} />
+              <div
+                className="zf-mark"
+                aria-hidden="true"
+              >
+                <IonIcon
+                  icon={
+                    leafOutline
+                  }
+                />
               </div>
 
               <div className="zf-brand-copy">
                 <p className="zf-brand-name">
-                  Zamora<strong>Fest</strong>
+                  Zamora
+                  <strong>
+                    Fest
+                  </strong>
                 </p>
 
                 <p className="zf-brand-tagline">
@@ -145,7 +250,9 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
             </section>
 
             <IonText className="zf-title">
-              <h1>Acceso confirmado</h1>
+              <h1>
+                Acceso confirmado
+              </h1>
             </IonText>
 
             <IonCard className="zf-auth-card">
@@ -158,23 +265,51 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
               <IonCardContent>
                 <dl className="zf-user-summary">
                   <div>
-                    <dt>Identificador</dt>
-                    <dd>{authenticatedUser.id}</dd>
+                    <dt>
+                      Identificador
+                    </dt>
+
+                    <dd>
+                      {
+                        authenticatedUser.id
+                      }
+                    </dd>
                   </div>
 
                   <div>
-                    <dt>Nombre</dt>
-                    <dd>{authenticatedUser.nombre}</dd>
+                    <dt>
+                      Nombre
+                    </dt>
+
+                    <dd>
+                      {
+                        authenticatedUser.nombre
+                      }
+                    </dd>
                   </div>
 
                   <div>
-                    <dt>Correo</dt>
-                    <dd>{authenticatedUser.email}</dd>
+                    <dt>
+                      Correo
+                    </dt>
+
+                    <dd>
+                      {
+                        authenticatedUser.email
+                      }
+                    </dd>
                   </div>
 
                   <div>
-                    <dt>Rol</dt>
-                    <dd>{authenticatedUser.rol}</dd>
+                    <dt>
+                      Rol
+                    </dt>
+
+                    <dd>
+                      {
+                        authenticatedUser.rol
+                      }
+                    </dd>
                   </div>
                 </dl>
               </IonCardContent>
@@ -189,23 +324,38 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
     <IonPage className="zf-auth-page">
       <IonHeader className="zf-auth-header">
         <IonToolbar className="zf-auth-toolbar">
-          <IonTitle>ZamoraFest</IonTitle>
+          <IonTitle>
+            ZamoraFest
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className="zf-auth-content">
+      <IonContent
+        fullscreen
+        className="zf-auth-content"
+      >
         <main className="zf-auth-shell">
           <section
             className="zf-brand-block"
             aria-label="ZamoraFest"
           >
-            <div className="zf-mark" aria-hidden="true">
-              <IonIcon icon={leafOutline} />
+            <div
+              className="zf-mark"
+              aria-hidden="true"
+            >
+              <IonIcon
+                icon={
+                  leafOutline
+                }
+              />
             </div>
 
             <div className="zf-brand-copy">
               <p className="zf-brand-name">
-                Zamora<strong>Fest</strong>
+                Zamora
+                <strong>
+                  Fest
+                </strong>
               </p>
 
               <p className="zf-brand-tagline">
@@ -215,23 +365,45 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
           </section>
 
           <IonText className="zf-title">
-            <h1>Iniciar sesión</h1>
+            <h1>
+              Iniciar sesión
+            </h1>
           </IonText>
 
           <IonCard className="zf-auth-card zf-login-card">
             <IonCardContent>
+              {registrationSucceeded && (
+                <IonText
+                  className="zf-registration-success"
+                  role="status"
+                >
+                  <p>
+                    Cuenta creada correctamente como visitante. Ahora puede iniciar sesión.
+                  </p>
+                </IonText>
+              )}
+
               <form
-                onSubmit={(event) => {
-                  event.preventDefault();
+                onSubmit={(
+                  event,
+                ) => {
+                  event
+                    .preventDefault();
+
                   void handleSubmit();
                 }}
                 noValidate
               >
-                <IonList className="zf-fields" lines="none">
+                <IonList
+                  className="zf-fields"
+                  lines="none"
+                >
                   <IonItem className="zf-field">
                     <IonIcon
                       className="zf-field-icon"
-                      icon={personOutline}
+                      icon={
+                        personOutline
+                      }
                       slot="start"
                       aria-hidden="true"
                     />
@@ -244,19 +416,29 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                       autocomplete="username"
                       maxlength={254}
                       value={email}
-                      aria-invalid={emailError !== undefined}
+                      aria-invalid={
+                        emailError !==
+                        undefined
+                      }
                       aria-describedby={
-                        emailError === undefined
+                        emailError ===
+                        undefined
                           ? undefined
                           : 'login-email-error'
                       }
-                      onIonInput={(event) => {
-                        setEmail(event.detail.value ?? '');
+                      onIonInput={(
+                        event,
+                      ) => {
+                        setEmail(
+                          event.detail
+                            .value ?? '',
+                        );
                       }}
                     />
                   </IonItem>
 
-                  {emailError !== undefined && (
+                  {emailError !==
+                    undefined && (
                     <IonNote
                       id="login-email-error"
                       role="alert"
@@ -269,7 +451,9 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                   <IonItem className="zf-field">
                     <IonIcon
                       className="zf-field-icon"
-                      icon={lockClosedOutline}
+                      icon={
+                        lockClosedOutline
+                      }
                       slot="start"
                       aria-hidden="true"
                     />
@@ -280,19 +464,34 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                       type="password"
                       autocomplete="current-password"
                       value={password}
-                      aria-invalid={passwordError !== undefined}
+                      aria-invalid={
+                        passwordError !==
+                        undefined
+                      }
                       aria-describedby={
-                        passwordError === undefined
+                        passwordError ===
+                        undefined
                           ? undefined
                           : 'login-password-error'
                       }
-                      onIonInput={(event) => {
-                        setPassword(event.detail.value ?? '');
+                      onIonInput={(
+                        event,
+                      ) => {
+                        setPassword(
+                          event.detail
+                            .value ?? '',
+                        );
                       }}
-                    />
+                    >
+                      <IonInputPasswordToggle
+                        slot="end"
+                        color="light"
+                      />
+                    </IonInput>
                   </IonItem>
 
-                  {passwordError !== undefined && (
+                  {passwordError !==
+                    undefined && (
                     <IonNote
                       id="login-password-error"
                       role="alert"
@@ -303,12 +502,17 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                   )}
                 </IonList>
 
-                {requestError !== undefined && (
+                {requestError !==
+                  undefined && (
                   <IonText
                     className="zf-request-error"
                     role="alert"
                   >
-                    <p>{requestError}</p>
+                    <p>
+                      {
+                        requestError
+                      }
+                    </p>
                   </IonText>
                 )}
 
@@ -316,12 +520,18 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                   className="zf-submit"
                   expand="block"
                   type="submit"
-                  disabled={isSubmitting}
-                  aria-busy={isSubmitting}
+                  disabled={
+                    isSubmitting
+                  }
+                  aria-busy={
+                    isSubmitting
+                  }
                 >
                   {isSubmitting ? (
                     <>
-                      <IonSpinner name="crescent" />
+                      <IonSpinner
+                        name="crescent"
+                      />
 
                       <span className="ion-padding-start">
                         Ingresando…
@@ -330,6 +540,15 @@ function LoginPage({ onAuthenticated }: LoginPageProps) {
                   ) : (
                     'Ingresar'
                   )}
+                </IonButton>
+
+                <IonButton
+                  className="zf-auth-secondary"
+                  fill="clear"
+                  expand="block"
+                  routerLink="/register"
+                >
+                  Crear cuenta
                 </IonButton>
               </form>
             </IonCardContent>

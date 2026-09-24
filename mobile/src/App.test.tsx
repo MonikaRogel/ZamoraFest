@@ -54,6 +54,90 @@ vi.mock(
                 id: 1,
                 titulo:
                   'Evento de prueba',
+                descripcion:
+                  'Evento público de demostración.',
+                fechaInicio:
+                  '2026-09-26T19:00:00.000Z',
+                fechaFin:
+                  null,
+                costoReferencial:
+                  0,
+                estadoEvento:
+                  'PROGRAMADO',
+                estadoRevision:
+                  'APROBADO',
+                fuenteInformacion:
+                  null,
+                fechaCreacion:
+                  '2026-09-01T12:00:00.000Z',
+                fechaActualizacion:
+                  '2026-09-01T12:00:00.000Z',
+                fechaRevision:
+                  null,
+                lugar: {
+                  id: 1,
+                  nombre:
+                    'Parque Central de Zamora',
+                  tipoLugar:
+                    'PARQUE',
+                  direccionReferencial:
+                    'Centro de Zamora',
+                  referencia:
+                    null,
+                  latitud:
+                    -4.069,
+                  longitud:
+                    -78.956,
+                  sector: {
+                    id: 1,
+                    nombre:
+                      'Centro',
+                    tipoSector:
+                      'URBANO',
+                    parroquia: {
+                      id: 1,
+                      nombre:
+                        'Zamora',
+                      codigoDpa:
+                        '190101',
+                      canton: {
+                        id: 1,
+                        nombre:
+                          'Zamora',
+                        codigoDpa:
+                          '1901',
+                        provincia: {
+                          id: 1,
+                          nombre:
+                            'Zamora Chinchipe',
+                          codigoDpa:
+                            '19',
+                        },
+                      },
+                    },
+                  },
+                },
+                usuarioCreador: {
+                  id: 1,
+                  nombreCompleto:
+                    'Gestor Cultural',
+                  rol: {
+                    id: 2,
+                    nombre:
+                      'ASISTENTE',
+                  },
+                },
+                usuarioRevisor:
+                  null,
+                categorias: [
+                  {
+                    id: 1,
+                    nombre:
+                      'Cultura',
+                    descripcion:
+                      null,
+                  },
+                ],
               },
             ],
 
@@ -95,7 +179,7 @@ describe(
     });
 
     it(
-      'inicia el flujo académico en la pantalla de login',
+      'inicia ZamoraFest en la agenda pública con acceso visible al login',
       async () => {
         render(
           <App />,
@@ -106,26 +190,30 @@ describe(
             'heading',
             {
               name:
-                'Iniciar sesión',
+                'Descubre Zamora Chinchipe',
             },
           ),
         ).toBeInTheDocument();
 
-        const submitButton =
+        expect(
           screen.getByText(
-            'Ingresar',
+            'Iniciar sesión',
             {
               selector:
                 'ion-button',
             },
-          );
+          ),
+        ).toBeInTheDocument();
 
         expect(
-          submitButton,
-        ).toHaveAttribute(
-          'type',
-          'submit',
-        );
+          screen.getByRole(
+            'heading',
+            {
+              name:
+                'Evento de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
       },
     );
 

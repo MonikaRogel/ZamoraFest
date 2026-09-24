@@ -49,8 +49,8 @@ function ManagementPage() {
 
   const description =
     role === 'ASISTENTE'
-      ? 'Tu sesión está autorizada para las funciones de gestión compatibles con el rol Asistente.'
-      : 'Tu sesión autenticada mantiene acceso únicamente a las funciones compatibles con tu rol.';
+      ? 'Tu sesión está autorizada para registrar eventos y consultar la agenda cultural.'
+      : 'Consulta la información y las opciones disponibles para tu cuenta.';
 
   function handleCreateEvent() {
     history.push(
@@ -86,7 +86,7 @@ function ManagementPage() {
         <main className="zf-management">
           <ScreenHeader
             eyebrow="Área protegida"
-            title="Gestión de ZamoraFest"
+            title="Mi cuenta"
             description={
               description
             }

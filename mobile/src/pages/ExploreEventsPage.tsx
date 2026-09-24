@@ -1,4 +1,6 @@
 import {
+  IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonPage,
@@ -25,6 +27,7 @@ import {
 import {
   eventRepository,
 } from '../features/events/remote-event-repository';
+import { useApplicationState } from '../state/ApplicationStateContext';
 import {
   remoteError,
   remoteLoading,
@@ -121,6 +124,7 @@ function getErrorMessage(
 function ExploreEventsPage() {
   const history =
     useHistory();
+  const { user } = useApplicationState();
 
   const [
     eventsState,
@@ -359,6 +363,16 @@ function ExploreEventsPage() {
               Agenda cultural y festiva
             </span>
           </IonTitle>
+          <IonButtons slot="end" className="zf-app-session-actions">
+            <IonButton
+              className="zf-app-session-button"
+              type="button"
+              aria-label={user === null ? 'Iniciar sesión' : 'Abrir mi cuenta'}
+              onClick={() => history.push(user === null ? '/login' : '/gestion')}
+            >
+              {user === null ? 'Iniciar sesión' : 'Mi cuenta'}
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
 

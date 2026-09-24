@@ -6,6 +6,7 @@ import {
   IonHeader,
   IonIcon,
   IonInput,
+  IonInputPasswordToggle,
   IonItem,
   IonList,
   IonNote,
@@ -15,7 +16,13 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useRef, useState } from 'react';
+import {
+  useRef,
+  useState,
+} from 'react';
+import {
+  useHistory,
+} from 'react-router-dom';
 import {
   leafOutline,
   lockClosedOutline,
@@ -28,7 +35,6 @@ import {
   ApiRequestError,
   zamoraFestApi,
 } from '../services/api/zamorafest-api';
-import type { RegisteredVisitor } from '../types/api';
 
 import './LoginPage.css';
 
@@ -62,45 +68,56 @@ function getRegisterErrorMessage(
 }
 
 function RegisterPage() {
-  const [nombre, setNombre] =
+  const history =
+    useHistory();
+
+  const [
+    nombre,
+    setNombre,
+  ] =
     useState('');
-  const [email, setEmail] =
+
+  const [
+    email,
+    setEmail,
+  ] =
     useState('');
-  const [password, setPassword] =
+
+  const [
+    password,
+    setPassword,
+  ] =
     useState('');
 
   const [
     nombreError,
     setNombreError,
-  ] = useState<string>();
+  ] =
+    useState<string>();
 
   const [
     emailError,
     setEmailError,
-  ] = useState<string>();
+  ] =
+    useState<string>();
 
   const [
     passwordError,
     setPasswordError,
-  ] = useState<string>();
+  ] =
+    useState<string>();
 
   const [
     requestError,
     setRequestError,
-  ] = useState<string>();
-
-  const [
-    registeredVisitor,
-    setRegisteredVisitor,
   ] =
-    useState<RegisteredVisitor | null>(
-      null,
-    );
+    useState<string>();
 
   const [
     isSubmitting,
     setIsSubmitting,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const inFlightRef =
     useRef(false);
@@ -117,39 +134,59 @@ function RegisterPage() {
         password,
       });
 
-    setRequestError(undefined);
+    setRequestError(
+      undefined,
+    );
 
     if (!validation.ok) {
       setNombreError(
-        validation.errors.nombre,
+        validation
+          .errors
+          .nombre,
       );
 
       setEmailError(
-        validation.errors.email,
+        validation
+          .errors
+          .email,
       );
 
       setPasswordError(
-        validation.errors.password,
+        validation
+          .errors
+          .password,
       );
 
       return;
     }
 
-    setNombreError(undefined);
-    setEmailError(undefined);
-    setPasswordError(undefined);
+    setNombreError(
+      undefined,
+    );
 
-    inFlightRef.current = true;
-    setIsSubmitting(true);
+    setEmailError(
+      undefined,
+    );
+
+    setPasswordError(
+      undefined,
+    );
+
+    inFlightRef.current =
+      true;
+
+    setIsSubmitting(
+      true,
+    );
 
     try {
-      const visitor =
-        await zamoraFestApi.register(
+      await zamoraFestApi
+        .register(
           validation.input,
         );
 
-      setRegisteredVisitor(
-        visitor,
+      history.push(
+        '/login?registered=1',
       );
     } catch (error) {
       setRequestError(
@@ -157,112 +194,14 @@ function RegisterPage() {
           error,
         ),
       );
-    } finally {
-      inFlightRef.current = false;
-      setIsSubmitting(false);
+
+      inFlightRef.current =
+        false;
+
+      setIsSubmitting(
+        false,
+      );
     }
-  }
-
-  if (registeredVisitor !== null) {
-    return (
-      <IonPage className="zf-auth-page">
-        <IonHeader className="zf-auth-header">
-          <IonToolbar className="zf-auth-toolbar">
-            <IonTitle>
-              ZamoraFest
-            </IonTitle>
-          </IonToolbar>
-        </IonHeader>
-
-        <IonContent
-          fullscreen
-          className="zf-auth-content"
-        >
-          <main className="zf-auth-shell">
-            <section
-              className="zf-brand-block"
-              aria-label="ZamoraFest"
-            >
-              <div
-                className="zf-mark"
-                aria-hidden="true"
-              >
-                <IonIcon
-                  icon={leafOutline}
-                />
-              </div>
-
-              <div className="zf-brand-copy">
-                <p className="zf-brand-name">
-                  Zamora
-                  <strong>Fest</strong>
-                </p>
-
-                <p className="zf-brand-tagline">
-                  Agenda cultural de
-                  Zamora Chinchipe
-                </p>
-              </div>
-            </section>
-
-            <IonText className="zf-title">
-              <h1>
-                Registro completado
-              </h1>
-            </IonText>
-
-            <IonCard className="zf-auth-card">
-              <IonCardContent>
-                <IonText>
-                  <p>
-                    Su cuenta fue creada
-                    correctamente. Ahora
-                    puede iniciar sesión.
-                  </p>
-                </IonText>
-
-                <dl className="zf-user-summary">
-                  <div>
-                    <dt>Nombre</dt>
-                    <dd>
-                      {
-                        registeredVisitor.nombre
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Correo</dt>
-                    <dd>
-                      {
-                        registeredVisitor.email
-                      }
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Rol</dt>
-                    <dd>
-                      {
-                        registeredVisitor.rol
-                      }
-                    </dd>
-                  </div>
-                </dl>
-
-                <IonButton
-                  className="zf-submit"
-                  expand="block"
-                  routerLink="/login"
-                >
-                  Ir a iniciar sesión
-                </IonButton>
-              </IonCardContent>
-            </IonCard>
-          </main>
-        </IonContent>
-      </IonPage>
-    );
   }
 
   return (
@@ -296,7 +235,9 @@ function RegisterPage() {
             <div className="zf-brand-copy">
               <p className="zf-brand-name">
                 Zamora
-                <strong>Fest</strong>
+                <strong>
+                  Fest
+                </strong>
               </p>
 
               <p className="zf-brand-tagline">
@@ -323,8 +264,12 @@ function RegisterPage() {
               </IonText>
 
               <form
-                onSubmit={(event) => {
-                  event.preventDefault();
+                onSubmit={(
+                  event,
+                ) => {
+                  event
+                    .preventDefault();
+
                   void handleSubmit();
                 }}
                 noValidate
@@ -336,7 +281,9 @@ function RegisterPage() {
                   <IonItem className="zf-field">
                     <IonIcon
                       className="zf-field-icon"
-                      icon={personOutline}
+                      icon={
+                        personOutline
+                      }
                       slot="start"
                       aria-hidden="true"
                     />
@@ -383,7 +330,9 @@ function RegisterPage() {
                   <IonItem className="zf-field">
                     <IonIcon
                       className="zf-field-icon"
-                      icon={mailOutline}
+                      icon={
+                        mailOutline
+                      }
                       slot="start"
                       aria-hidden="true"
                     />
@@ -463,7 +412,12 @@ function RegisterPage() {
                             .value ?? '',
                         );
                       }}
-                    />
+                    >
+                      <IonInputPasswordToggle
+                        slot="end"
+                        color="light"
+                      />
+                    </IonInput>
                   </IonItem>
 
                   {passwordError !==
@@ -473,7 +427,9 @@ function RegisterPage() {
                       role="alert"
                       className="zf-field-error"
                     >
-                      {passwordError}
+                      {
+                        passwordError
+                      }
                     </IonNote>
                   )}
                 </IonList>
@@ -485,7 +441,9 @@ function RegisterPage() {
                     role="alert"
                   >
                     <p>
-                      {requestError}
+                      {
+                        requestError
+                      }
                     </p>
                   </IonText>
                 )}
@@ -494,7 +452,9 @@ function RegisterPage() {
                   className="zf-submit"
                   expand="block"
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting
+                  }
                   aria-busy={
                     isSubmitting
                   }
@@ -515,6 +475,7 @@ function RegisterPage() {
                 </IonButton>
 
                 <IonButton
+                  className="zf-auth-secondary"
                   fill="clear"
                   expand="block"
                   routerLink="/login"

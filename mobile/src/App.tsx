@@ -109,7 +109,7 @@ function App() {
               path="/"
               render={() => (
                 <Redirect
-                  to="/login"
+                  to="/explore"
                 />
               )}
             />

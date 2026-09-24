@@ -236,6 +236,37 @@
 }
 
 /* ===================================================== */
+/* REGISTRO EXITOSO                                      */
+/* ===================================================== */
+
+.zf-registration-success {
+  display: block;
+
+  margin: 0 0 14px;
+
+  border:
+    1px solid
+    rgba(67, 189, 170, 0.38);
+
+  border-radius: 12px;
+
+  background:
+    rgba(67, 189, 170, 0.09);
+}
+
+.zf-registration-success p {
+  margin: 0;
+  padding: 10px 12px;
+
+  color: var(--zf-text);
+
+  font-size: 0.82rem;
+  font-weight: 500;
+
+  line-height: 1.45;
+}
+
+/* ===================================================== */
 /* CAMPOS                                                */
 /* ===================================================== */
 
@@ -358,7 +389,7 @@ ion-item.zf-field:focus-within {
 }
 
 /* ===================================================== */
-/* BOTON                                                 */
+/* BOTONES                                               */
 /* ===================================================== */
 
 ion-button.zf-submit {
@@ -372,7 +403,8 @@ ion-button.zf-submit {
   --box-shadow:
     0 6px 16px rgba(228, 164, 60, 0.1);
 
-  height: 47px;
+  min-height:
+    var(--zf-control-min-size);
 
   margin: 15px 0 0;
 
@@ -386,6 +418,22 @@ ion-button.zf-submit {
 
   letter-spacing: 0.01em;
   text-transform: none;
+}
+
+ion-button.zf-auth-secondary {
+  min-height:
+    var(--zf-control-min-size);
+}
+
+ion-button.zf-submit::part(native):focus-visible,
+ion-button.zf-auth-secondary::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-focus);
+
+  outline-offset:
+    var(--zf-focus-ring-offset);
 }
 
 ion-button.zf-submit[disabled] {
@@ -490,7 +538,8 @@ ion-button.zf-submit[disabled] {
 
 @media (prefers-reduced-motion: reduce) {
   ion-item.zf-field,
-  ion-button.zf-submit {
+  ion-button.zf-submit,
+  ion-button.zf-auth-secondary {
     transition: none;
   }
 }
