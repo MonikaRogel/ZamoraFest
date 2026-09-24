@@ -52,10 +52,19 @@ interface EventoEnvelope {
   readonly data: Evento;
 }
 
+export interface GetEventosParams {
+  readonly page?: number;
+  readonly limit?: number;
+  readonly cantonId?: number;
+  readonly categoriaId?: number;
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
 
-  getEventos(): Promise<EventosResponse>;
+  getEventos(
+    params?: GetEventosParams,
+  ): Promise<EventosResponse>;
 
   getEventoById(
     id: number,
@@ -890,22 +899,57 @@ export function createZamoraFestApi(
       );
     },
 
-    getEventos() {
+    getEventos(
+      params:
+        GetEventosParams = {},
+    ) {
       const url =
         new URL(
           '/api/v1/eventos',
           resolveBaseUrl(),
         );
 
+      const page =
+        params.page ??
+        1;
+
+      const limit =
+        params.limit ??
+        5;
+
       url.searchParams.set(
         'page',
-        '1',
+        String(page),
       );
 
       url.searchParams.set(
         'limit',
-        '5',
+        String(limit),
       );
+
+      if (
+        params.cantonId !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'cantonId',
+          String(
+            params.cantonId,
+          ),
+        );
+      }
+
+      if (
+        params.categoriaId !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'categoriaId',
+          String(
+            params.categoriaId,
+          ),
+        );
+      }
 
       return requestJson(
         url,
@@ -1116,10 +1160,15 @@ export const zamoraFestApi:
     );
   },
 
-  getEventos() {
+  getEventos(
+    params?:
+      GetEventosParams,
+  ) {
     return (
       createZamoraFestApi()
-        .getEventos()
+        .getEventos(
+          params,
+        )
     );
   },
 

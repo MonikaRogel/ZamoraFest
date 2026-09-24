@@ -151,6 +151,76 @@ describe(
         );
 
         expect(
+          getEventos,
+        ).toHaveBeenCalledWith();
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
+      },
+    );
+
+    it(
+      'obtiene una página de eventos conservando la metadata de paginación',
+      async () => {
+        const pagedResponse:
+          EventosResponse = {
+          ...response,
+          meta: {
+            page: 2,
+            limit: 10,
+            total: 11,
+            totalPages: 2,
+          },
+        };
+
+        const getEventos =
+          vi.fn()
+            .mockResolvedValueOnce(
+              pagedResponse,
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
+
+        const repository =
+          createRemoteEventRepository({
+            getEventos,
+            getEventoById,
+          });
+
+        const query = {
+          page: 2,
+          limit: 10,
+          cantonId: 1,
+          categoriaId: 1,
+        };
+
+        await expect(
+          repository.listEventPage(
+            query,
+          ),
+        ).resolves.toEqual({
+          events: [
+            event,
+          ],
+          meta:
+            pagedResponse.meta,
+        });
+
+        expect(
+          getEventos,
+        ).toHaveBeenCalledTimes(
+          1,
+        );
+
+        expect(
+          getEventos,
+        ).toHaveBeenCalledWith(
+          query,
+        );
+
+        expect(
           getEventoById,
         ).not.toHaveBeenCalled();
       },
