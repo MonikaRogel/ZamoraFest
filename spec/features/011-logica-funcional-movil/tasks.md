@@ -38,7 +38,6 @@
 - [x] T022 Detectar que el cliente móvil descarta actualmente los tokens recibidos en login.
 - [x] T023 Detectar que el backend responde actualmente `400` ante errores Zod.
 - [x] T024 Detectar ausencia de un endpoint público específico para consultar lugares.
-- [ ] T025 Regularizar la trazabilidad de T046 y T047 de Feature 010 como actividad separada y no como deuda técnica del Avance 10.
 
 ## 3. Documentación SDD
 
@@ -342,24 +341,7 @@
 - [ ] T254 Registrar modificaciones humanas realizadas.
 - [ ] T255 Registrar verificaciones técnicas efectuadas sobre los resultados.
 
-## 27. Video y entrega externa
-
-- [ ] T256 Preparar recorrido del video de 3 a 5 minutos.
-- [ ] T257 Grabar ejecución real de ZamoraFest.
-- [ ] T258 Mostrar validaciones de login.
-- [ ] T259 Mostrar credenciales o datos incorrectos.
-- [ ] T260 Mostrar autenticación correcta.
-- [ ] T261 Mostrar funcionalidad protegida.
-- [ ] T262 Mostrar navegación entre al menos tres pantallas o funcionalidades.
-- [ ] T263 Mostrar mantenimiento del estado.
-- [ ] T264 Mostrar logout.
-- [ ] T265 Mostrar intento de acceso protegido después del logout.
-- [ ] T266 Explicar brevemente navegación y manejo de estado.
-- [ ] T267 Publicar video en plataforma externa accesible.
-- [ ] T268 Registrar enlace de visualización en la evidencia correspondiente.
-- [ ] T269 Verificar que el código mostrado en el video corresponda con `main`.
-
-## 28. Cierre Git
+## 27. Cierre Git
 
 - [ ] T270 Revisar cambios completos antes de stage.
 - [ ] T271 Ejecutar revisión de markdownlint de documentación.

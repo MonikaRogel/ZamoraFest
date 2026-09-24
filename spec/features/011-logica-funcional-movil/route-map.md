@@ -506,4 +506,4 @@ El recorrido funcional principal de Semana 11 será:
 → intento de acceso protegido
 → `/login`
 
-Este recorrido se utilizará como base para las pruebas funcionales y el video demostrativo.
+Este recorrido se utilizará como base para las pruebas funcionales.

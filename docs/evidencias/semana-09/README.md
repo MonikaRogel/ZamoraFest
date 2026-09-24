@@ -24,26 +24,11 @@ El hot reload fue comprobado previamente mediante Ionic/Capacitor con `--liverel
 
 La repetición final de esta comprobación se realizará durante T065 para obtener evidencia actualizada antes de publicar la feature.
 
-## Evidencia visual sugerida para el video
-
-El video académico deberá mostrar, como mínimo:
-
-1. versiones principales del entorno;
-2. diagnóstico de Ionic y Android;
-3. estructura de `mobile/`;
-4. aplicación ejecutándose en el Samsung;
-5. demostración de hot reload;
-6. dirección utilizada para alcanzar el backend;
-7. respuesta funcional de la API propia de ZamoraFest.
-
-La evidencia del consumo exitoso de la API se documenta específicamente en T060.
-
 ## Seguridad
 
 Las evidencias no deben mostrar contraseñas, access tokens, refresh tokens, secretos JWT, cadenas de conexión ni contenido real de archivos `.env`.
 - `auditoria-seguridad-t066.md`: auditoría de secretos, dependencias, HTTP de desarrollo y riesgo residual.
 - `api-eventos-exitosa.md`: evidencia de solicitud exitosa hacia la API propia y respuesta de eventos.
-- `guion-video.md`: guion de demostración verificado contra los criterios de evaluación de Semana 9.
 - `validacion-cliente-t062.md`: evidencia de instalación limpia, build, typecheck, lint y pruebas del cliente móvil.
 - `validacion-backend-cors-t063.md`: evidencia de pruebas backend, integración y política CORS.
 - `build-android-t064.md`: evidencia del build, sincronización y compilación Android reproducible.

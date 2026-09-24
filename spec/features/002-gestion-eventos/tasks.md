@@ -56,7 +56,7 @@
 
 - [x] **T025** Ejecutar formato, tipos, lint, pruebas y build.
 - [x] **T026** Confirmar que no existan secretos ni cambios fuera del alcance.
-- [ ] **T027** Documentar resultados reales para el video.
+- [ ] **T027** Documentar resultados reales de las pruebas funcionales.
 - [x] **T028** Crear commits descriptivos.
 - [x] **T029** Publicar la rama y abrir el pull request.
 - [ ] **T030** Revisar y fusionar en `main`.

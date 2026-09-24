@@ -19,7 +19,6 @@ No se marcarán como realizadas:
 - funcionamiento no comprobado;
 - resultados estimados;
 - evidencia de dispositivo físico aún no repetida para Feature 011;
-- video aún no grabado.
 
 Las evidencias se incorporarán progresivamente durante la implementación.
 
@@ -34,8 +33,6 @@ Rama utilizada para Semana 11:
 `main`
 
 La Feature 011 se desarrollará directamente sobre `main`, conforme al flujo de trabajo definido para esta etapa del proyecto.
-
-El video demostrativo no se almacenará como archivo pesado dentro del repositorio.
 
 ## 3. Baseline móvil previo a Feature 011
 
@@ -348,7 +345,7 @@ También se verificó la lectura correcta del archivo en UTF-8.
 
 ### 13.3 Plan técnico
 
-`plan.md` documenta el orden incremental de implementación desde contratos backend hasta video y cierre.
+`plan.md` documenta el orden incremental de implementación desde contratos backend hasta la verificación funcional.
 
 Se comprobó la existencia diferenciada de las verificaciones:
 
@@ -457,49 +454,7 @@ Las decisiones técnicas deberán comprobarse mediante código, pruebas, ejecuci
 
 Este registro se ampliará durante el desarrollo.
 
-## 19. Evidencia del video
-
-La entrega de Semana 11 requiere un video demostrativo de entre 3 y 5 minutos.
-
-El video deberá demostrar el funcionamiento real de la aplicación y no únicamente capturas estáticas.
-
-La evidencia deberá incluir:
-
-- ejecución;
-- login;
-- validaciones;
-- datos o credenciales incorrectas;
-- autenticación correcta;
-- funcionalidad protegida;
-- navegación entre al menos tres pantallas o funcionalidades;
-- mantenimiento del estado;
-- logout;
-- intento de acceso protegido después del logout;
-- explicación breve de navegación y estado.
-
-El archivo de video no se almacenará en Git.
-
-Se publicará posteriormente mediante una plataforma externa accesible.
-
-Enlace:
-
-`PENDIENTE`
-
-## 20. Correspondencia entre video y repositorio
-
-Antes de la entrega deberá verificarse que:
-
-1. el código mostrado en el video corresponde con `main`;
-2. el repositorio es accesible para el docente;
-3. el enlace del video tiene permisos de visualización;
-4. no existen secretos o credenciales publicados;
-5. las funcionalidades demostradas pueden reproducirse desde el código entregado.
-
-Estado actual:
-
-`PENDIENTE`
-
-## 21. Modelo de sesión móvil
+## 19. Modelo de sesión móvil
 
 Durante Feature 011 se evolucionó el contrato de autenticación del cliente móvil para conservar la sesión completa devuelta por el backend.
 
@@ -573,7 +528,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 22. Estado global de aplicación
+## 20. Estado global de aplicación
 
 Durante Feature 011 se implementó un estado global de aplicación basado en React Context y `useReducer`.
 
@@ -684,7 +639,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 23. Estado remoto cerrado
+## 21. Estado remoto cerrado
 
 Durante Feature 011 se implementó un modelo reusable y cerrado para representar operaciones remotas.
 
@@ -789,7 +744,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 24. Infraestructura de protección de rutas
+## 22. Infraestructura de protección de rutas
 
 Durante Feature 011 se implementó la infraestructura de protección de navegación compatible con Ionic React Router y React Router 5.
 
@@ -907,7 +862,7 @@ Estado:
 
 `INFRAESTRUCTURA COMPLETADA Y VERIFICADA; REGISTRO DE RUTAS FINALES PENDIENTE`
 
-## 25. Evolución del login
+## 23. Evolución del login
 
 Se auditó la evolución de `LoginPage` después de incorporar el estado global y la protección de rutas.
 
@@ -989,7 +944,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 26. Registro público de visitantes
+## 24. Registro público de visitantes
 
 Se implementó el flujo público de registro de visitantes de ZamoraFest.
 
@@ -1114,7 +1069,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 27. Separación de datos de eventos
+## 25. Separación de datos de eventos
 
 Se introdujo una capa de repositorio para desacoplar la interfaz de exploración de la implementación HTTP.
 
@@ -1227,7 +1182,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 28. Detalle público de eventos
+## 26. Detalle público de eventos
 
 Se implementó y verificó el detalle público de eventos correspondiente a las tareas `T121` a `T133` de Feature 011.
 
@@ -1471,7 +1426,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO`
 
-## 29. Área protegida
+## 27. Área protegida
 
 Se implementó y verificó el área protegida correspondiente a las tareas `T134` a `T141`, con excepción de `T139`, que permanecerá pendiente hasta existir el formulario real de creación de eventos.
 
@@ -1657,7 +1612,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO, EXCEPTO ACCESO REAL A CREACIÓN`
 
-## 30. Datos auxiliares del formulario de Evento
+## 28. Datos auxiliares del formulario de Evento
 
 Se implementó la infraestructura móvil necesaria para consultar los datos auxiliares que posteriormente consumirá el formulario de creación de eventos.
 
@@ -1891,7 +1846,7 @@ Ambas dependen de la ruta real:
 
 `/gestion/eventos/nuevo`.
 
-## 31. Formulario protegido de creación de Evento
+## 29. Formulario protegido de creación de Evento
 
 Se implementó la primera versión funcional de la pantalla de creación de eventos.
 
@@ -2134,7 +2089,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T090, T139, T144-T147 Y T149-T159`
 
-## 32. Creación protegida de eventos
+## 30. Creación protegida de eventos
 
 Se completó el flujo de creación remota correspondiente a `T160`, `T161` y `T162`.
 
@@ -2265,7 +2220,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T160-T162`
 
-## 33. Validaciones móviles del formulario de Evento
+## 31. Validaciones móviles del formulario de Evento
 
 Se completaron las validaciones móviles correspondientes a `T163` hasta `T177`.
 
@@ -2447,7 +2402,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T163-T177`
 
-## 34. Mapeo estructurado de errores HTTP 422
+## 32. Mapeo estructurado de errores HTTP 422
 
 Se completó el flujo móvil para conservar, interpretar y presentar los errores estructurados de validación devueltos por el backend durante la creación de eventos.
 
@@ -2646,7 +2601,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T178-T183`
 
-## 35. Tratamiento diferenciado de HTTP 401 y 403
+## 33. Tratamiento diferenciado de HTTP 401 y 403
 
 Se completó el tratamiento móvil diferenciado de fallos de autenticación y autorización durante operaciones protegidas.
 
@@ -2899,7 +2854,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T184-T192`
 
-## 36. Preservación del borrador T193-T198
+## 34. Preservación del borrador T193-T198
 
 Se completó y verificó la preservación del borrador de creación de eventos durante la misma ejecución de la aplicación.
 
@@ -3045,7 +3000,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T193-T198`
 
-## 37. Logout T199-T205
+## 35. Logout T199-T205
 
 Se completó y verificó el flujo de cierre explícito de sesión de Feature 011.
 
@@ -3206,7 +3161,7 @@ Estado:
 
 `COMPLETADO Y VERIFICADO PARA T199-T205`
 
-## 38. Próxima fase: accesibilidad y reutilización visual
+## 36. Próxima fase: accesibilidad y reutilización visual
 
 La siguiente fase corresponde a:
 
