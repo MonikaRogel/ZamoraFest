@@ -31,6 +31,51 @@ const ROLE_LABELS:
       'Administrador',
   };
 
+function getInitials(
+  name: string | undefined,
+): string {
+  if (
+    name ===
+    undefined
+  ) {
+    return '?';
+  }
+
+  const words =
+    name
+      .trim()
+      .split(
+        /\s+/,
+      )
+      .filter(
+        Boolean,
+      );
+
+  if (
+    words.length ===
+    0
+  ) {
+    return '?';
+  }
+
+  return words
+    .slice(
+      0,
+      2,
+    )
+    .map(
+      (word) =>
+        word
+          .charAt(
+            0,
+          )
+          .toUpperCase(),
+    )
+    .join(
+      '',
+    );
+}
+
 function ManagementPage() {
   const history =
     useHistory();
@@ -43,14 +88,23 @@ function ManagementPage() {
     useApplicationState();
 
   const roleLabel =
-    role === null
+    role ===
+      null
       ? 'No disponible'
-      : ROLE_LABELS[role];
+      : ROLE_LABELS[
+          role
+        ];
 
   const description =
-    role === 'ASISTENTE'
+    role ===
+      'ASISTENTE'
       ? 'Tu sesión está autorizada para registrar eventos y consultar la agenda cultural.'
       : 'Consulta la información y las opciones disponibles para tu cuenta.';
+
+  const initials =
+    getInitials(
+      user?.nombre,
+    );
 
   function handleCreateEvent() {
     history.push(
@@ -93,57 +147,50 @@ function ManagementPage() {
           />
 
           <section
-            className="zf-management__panel"
-            aria-labelledby="zf-management-session-title"
+            className="zf-management__account-card"
+            aria-labelledby="zf-management-account-title"
           >
-            <div className="zf-management__section-heading">
-              <h2 id="zf-management-session-title">
-                Sesión activa
-              </h2>
+            <p
+              className="zf-management__session-status"
+              role="status"
+              aria-label="Sesión activa"
+            >
+              <span
+                className="zf-management__status-dot"
+                aria-hidden="true"
+              />
 
-              <p>
-                Información de la cuenta
-                autenticada actualmente.
-              </p>
-            </div>
+              Activo
+            </p>
 
-            <dl className="zf-management__identity">
-              <div className="zf-management__identity-item">
-                <dt>
-                  Nombre
-                </dt>
+            <div className="zf-management__profile">
+              <div
+                className="zf-management__avatar"
+                aria-hidden="true"
+              >
+                {initials}
+              </div>
 
-                <dd>
+              <div className="zf-management__profile-copy">
+                <h2 id="zf-management-account-title">
                   {user?.nombre ??
-                    'No disponible'}
-                </dd>
-              </div>
+                    'Usuario de ZamoraFest'}
+                </h2>
 
-              <div className="zf-management__identity-item">
-                <dt>
-                  Correo
-                </dt>
-
-                <dd>
+                <p className="zf-management__email">
                   {user?.email ??
-                    'No disponible'}
-                </dd>
-              </div>
+                    'Correo no disponible'}
+                </p>
 
-              <div className="zf-management__identity-item">
-                <dt>
-                  Rol
-                </dt>
-
-                <dd>
+                <p className="zf-management__role">
                   {roleLabel}
-                </dd>
+                </p>
               </div>
-            </dl>
+            </div>
           </section>
 
           <section
-            className="zf-management__panel"
+            className="zf-management__actions-card"
             aria-labelledby="zf-management-actions-title"
           >
             <div className="zf-management__section-heading">
@@ -192,6 +239,11 @@ function ManagementPage() {
               >
                 Explorar eventos
               </IonButton>
+
+              <div
+                className="zf-management__logout-separator"
+                aria-hidden="true"
+              />
 
               <IonButton
                 className="zf-management__logout"

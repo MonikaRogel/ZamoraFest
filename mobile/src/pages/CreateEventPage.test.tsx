@@ -99,6 +99,10 @@ function DraftProbe() {
           .categoriaIds
           .join(',')}
       </output>
+
+      <output data-testid="draft-cost">
+        {eventDraft.costoReferencial}
+      </output>
     </div>
   );
 }
@@ -223,6 +227,16 @@ describe(
 
         expect(
           screen.getByRole(
+            'switch',
+            {
+              name:
+                /Evento gratuito/i,
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByRole(
             'option',
             {
               name:
@@ -333,6 +347,176 @@ describe(
           ),
         ).toHaveTextContent(
           '41',
+        );
+      },
+    );
+
+    it(
+      'registra costo cero y bloquea el campo cuando el evento es gratuito',
+      async () => {
+        const repository:
+          EventFormDataRepository = {
+          load:
+            vi.fn(
+              async () =>
+                formData,
+            ),
+        };
+
+        renderPage(
+          repository,
+        );
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Información principal',
+          },
+        );
+
+        const freeSwitch =
+          screen.getByRole(
+            'switch',
+            {
+              name:
+                /Evento gratuito/i,
+            },
+          );
+
+        const costInput =
+          screen.getByLabelText(
+            'Costo referencial',
+          ) as HTMLInputElement;
+
+        expect(
+          freeSwitch,
+        ).not.toBeChecked();
+
+        expect(
+          costInput,
+        ).not.toBeDisabled();
+
+        fireEvent.click(
+          freeSwitch,
+        );
+
+        expect(
+          freeSwitch,
+        ).toBeChecked();
+
+        expect(
+          costInput,
+        ).toBeDisabled();
+
+        expect(
+          costInput.value,
+        ).toBe(
+          '0',
+        );
+
+        expect(
+          screen.getByTestId(
+            'draft-cost',
+          ),
+        ).toHaveTextContent(
+          '0',
+        );
+      },
+    );
+
+    it(
+      'vacía el costo al desactivar gratuito y no recupera un precio anterior',
+      async () => {
+        const repository:
+          EventFormDataRepository = {
+          load:
+            vi.fn(
+              async () =>
+                formData,
+            ),
+        };
+
+        renderPage(
+          repository,
+        );
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Información principal',
+          },
+        );
+
+        const freeSwitch =
+          screen.getByRole(
+            'switch',
+            {
+              name:
+                /Evento gratuito/i,
+            },
+          );
+
+        const costInput =
+          screen.getByLabelText(
+            'Costo referencial',
+          ) as HTMLInputElement;
+
+        fireEvent.change(
+          costInput,
+          {
+            target: {
+              value:
+                '12.50',
+            },
+          },
+        );
+
+        expect(
+          costInput.value,
+        ).toBe(
+          '12.50',
+        );
+
+        fireEvent.click(
+          freeSwitch,
+        );
+
+        expect(
+          costInput.value,
+        ).toBe(
+          '0',
+        );
+
+        expect(
+          costInput,
+        ).toBeDisabled();
+
+        fireEvent.click(
+          freeSwitch,
+        );
+
+        expect(
+          freeSwitch,
+        ).not.toBeChecked();
+
+        expect(
+          costInput,
+        ).not.toBeDisabled();
+
+        expect(
+          costInput.value,
+        ).toBe(
+          '',
+        );
+
+        expect(
+          screen.getByTestId(
+            'draft-cost',
+          ).textContent,
+        ).toBe(
+          '',
         );
       },
     );

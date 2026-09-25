@@ -251,6 +251,21 @@ function CreateEventPage({
     );
   }
 
+  function handleFreeEventChange(
+    checked: boolean,
+  ) {
+    clearFieldError(
+      'costoReferencial',
+    );
+
+    updateEventDraft({
+      costoReferencial:
+        checked
+          ? '0'
+          : '',
+    });
+  }
+
   function handlePlaceChange(
     value: string,
   ) {
@@ -717,6 +732,39 @@ function CreateEventPage({
                     </div>
                   </div>
 
+                  <label className="zf-create-event__free-toggle">
+                    <span className="zf-create-event__free-copy">
+                      <strong>
+                        Evento gratuito
+                      </strong>
+
+                      <small id="event-free-help">
+                        Al activarlo, el costo referencial se registrará en $0,00.
+                      </small>
+                    </span>
+
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      name="eventoGratuito"
+                      checked={
+                        eventDraft
+                          .costoReferencial ===
+                        '0'
+                      }
+                      aria-describedby="event-free-help"
+                      onChange={(
+                        event,
+                      ) => {
+                        handleFreeEventChange(
+                          event
+                            .currentTarget
+                            .checked,
+                        );
+                      }}
+                    />
+                  </label>
+
                   <div className="zf-create-event__field">
                     <label htmlFor="event-cost">
                       Costo referencial
@@ -729,6 +777,11 @@ function CreateEventPage({
                       inputMode="decimal"
                       min="0"
                       step="0.01"
+                      disabled={
+                        eventDraft
+                          .costoReferencial ===
+                        '0'
+                      }
                       value={
                         eventDraft
                           .costoReferencial

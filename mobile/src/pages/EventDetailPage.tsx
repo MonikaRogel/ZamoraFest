@@ -1,4 +1,5 @@
 import {
+  IonButton,
   IonContent,
   IonHeader,
   IonPage,
@@ -12,6 +13,7 @@ import {
   useState,
 } from 'react';
 import {
+  useHistory,
   useParams,
 } from 'react-router-dom';
 
@@ -86,10 +88,14 @@ function formatEventDate(
   return new Intl.DateTimeFormat(
     'es-EC',
     {
-      dateStyle: 'long',
-      timeStyle: 'short',
+      dateStyle:
+        'long',
+      timeStyle:
+        'short',
     },
-  ).format(date);
+  ).format(
+    date,
+  );
 }
 
 function formatEventDateRange(
@@ -101,7 +107,8 @@ function formatEventDateRange(
     );
 
   if (
-    event.fechaFin === null
+    event.fechaFin ===
+    null
   ) {
     return start;
   }
@@ -117,17 +124,24 @@ function formatEventDateRange(
 function formatEventCost(
   value: number,
 ): string {
-  if (value === 0) {
+  if (
+    value ===
+    0
+  ) {
     return 'Gratuito';
   }
 
   return new Intl.NumberFormat(
     'es-EC',
     {
-      style: 'currency',
-      currency: 'USD',
+      style:
+        'currency',
+      currency:
+        'USD',
     },
-  ).format(value);
+  ).format(
+    value,
+  );
 }
 
 function getErrorMessage(
@@ -163,6 +177,9 @@ function getErrorMessage(
 }
 
 function EventDetailPage() {
+  const history =
+    useHistory();
+
   const {
     id,
   } =
@@ -176,26 +193,30 @@ function EventDetailPage() {
         parseEventIdParam(
           id,
         ),
-      [id],
+      [
+        id,
+      ],
     );
 
   const [
     eventState,
     setEventState,
-  ] = useState<
-    RemoteData<
-      Evento | null,
-      string
-    >
-  >(
-    remoteLoading(),
-  );
+  ] =
+    useState<
+      RemoteData<
+        Evento | null,
+        string
+      >
+    >(
+      remoteLoading(),
+    );
 
   const loadEvent =
     useCallback(
       async () => {
         if (
-          eventId === null
+          eventId ===
+          null
         ) {
           return;
         }
@@ -216,7 +237,9 @@ function EventDetailPage() {
               event,
             ),
           );
-        } catch (error) {
+        } catch (
+          error
+        ) {
           setEventState(
             remoteError(
               getErrorMessage(
@@ -226,25 +249,37 @@ function EventDetailPage() {
           );
         }
       },
-      [eventId],
+      [
+        eventId,
+      ],
     );
 
-  useEffect(() => {
-    if (
-      eventId === null
-    ) {
-      return;
-    }
+  useEffect(
+    () => {
+      if (
+        eventId ===
+        null
+      ) {
+        return;
+      }
 
-    void loadEvent();
-  }, [
-    eventId,
-    loadEvent,
-  ]);
+      void loadEvent();
+    },
+    [
+      eventId,
+      loadEvent,
+    ],
+  );
+
+  function handleBackToExplore() {
+    history.push(
+      '/explore',
+    );
+  }
 
   const event =
     eventState.status ===
-      'success'
+    'success'
       ? eventState.data
       : null;
 
@@ -260,7 +295,21 @@ function EventDetailPage() {
 
       <IonContent fullscreen>
         <main className="zf-event-detail">
-          {eventId === null && (
+          <div className="zf-event-detail__navigation">
+            <IonButton
+              fill="outline"
+              type="button"
+              aria-label="Volver a eventos"
+              onClick={
+                handleBackToExplore
+              }
+            >
+              Volver a eventos
+            </IonButton>
+          </div>
+
+          {eventId ===
+            null && (
             <AsyncStateView
               state="error"
               title="Enlace de evento inválido"
@@ -268,7 +317,8 @@ function EventDetailPage() {
             />
           )}
 
-          {eventId !== null &&
+          {eventId !==
+            null &&
             (
               eventState.status ===
                 'idle' ||
@@ -282,7 +332,8 @@ function EventDetailPage() {
               />
             )}
 
-          {eventId !== null &&
+          {eventId !==
+            null &&
             eventState.status ===
               'error' && (
               <AsyncStateView
@@ -297,7 +348,8 @@ function EventDetailPage() {
               />
             )}
 
-          {eventId !== null &&
+          {eventId !==
+            null &&
             eventState.status ===
               'success' &&
             eventState.data ===
@@ -309,8 +361,10 @@ function EventDetailPage() {
               />
             )}
 
-          {eventId !== null &&
-            event !== null && (
+          {eventId !==
+            null &&
+            event !==
+              null && (
               <>
                 <ScreenHeader
                   eyebrow="Detalle del evento"

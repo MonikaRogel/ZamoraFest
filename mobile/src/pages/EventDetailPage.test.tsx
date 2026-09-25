@@ -1,4 +1,5 @@
 import {
+  fireEvent,
   render,
   screen,
 } from '@testing-library/react';
@@ -135,6 +136,15 @@ function renderDetail(
       >
         <EventDetailPage />
       </Route>
+
+      <Route
+        exact
+        path="/explore"
+      >
+        <h1>
+          Agenda pública de prueba
+        </h1>
+      </Route>
     </MemoryRouter>,
   );
 }
@@ -218,6 +228,48 @@ describe(
         expect(
           screen.getByText(
             'Dirección de Cultura',
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'permite volver a la agenda pública desde el detalle',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .getEventById,
+        ).mockResolvedValueOnce(
+          event,
+        );
+
+        renderDetail();
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Festival Cultural de Zamora',
+          },
+        );
+
+        fireEvent.click(
+          screen.getByText(
+            'Volver a eventos',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Agenda pública de prueba',
+            },
           ),
         ).toBeInTheDocument();
       },

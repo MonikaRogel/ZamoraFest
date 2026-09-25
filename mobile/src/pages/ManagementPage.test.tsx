@@ -284,6 +284,41 @@ describe(
     );
 
     it(
+      'muestra la sesión activa y genera las iniciales desde el nombre del usuario',
+      async () => {
+        enterManagement(
+          assistantSession,
+        );
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Mi cuenta',
+          },
+        );
+
+        expect(
+          screen.getByRole(
+            'status',
+            {
+              name:
+                'Sesión activa',
+            },
+          ),
+        ).toHaveTextContent(
+          'Activo',
+        );
+
+        expect(
+          screen.getByText(
+            'AD',
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
       'habilita el acceso al formulario únicamente para ASISTENTE',
       async () => {
         enterManagement(
