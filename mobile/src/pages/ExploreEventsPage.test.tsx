@@ -41,6 +41,8 @@ vi.mock(
     eventRepository: {
       listEvents:
         vi.fn(),
+      listEventPage:
+        vi.fn(),
       getEventById:
         vi.fn(),
     },
@@ -370,6 +372,45 @@ describe(
   () => {
     beforeEach(() => {
       vi.clearAllMocks();
+
+      vi.mocked(
+        eventRepository
+          .listEventPage,
+      ).mockImplementation(
+        async (
+          query = {},
+        ) => {
+          const events =
+            await eventRepository
+              .listEvents();
+
+          const page =
+            query.page ??
+            1;
+
+          const limit =
+            query.limit ??
+            5;
+
+          return {
+            events,
+            meta: {
+              page,
+              limit,
+              total:
+                events.length,
+              totalPages:
+                events.length ===
+                0
+                  ? 0
+                  : Math.ceil(
+                      events.length /
+                        limit,
+                    ),
+            },
+          };
+        },
+      );
     });
 
     afterEach(() => {

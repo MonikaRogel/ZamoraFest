@@ -40,6 +40,8 @@ import type {
 
 import './ExploreEventsPage.css';
 
+const EVENTS_PAGE_SIZE = 5;
+
 function formatEventDate(
   value: string,
 ): string {
@@ -155,13 +157,16 @@ function ExploreEventsPage() {
         );
 
         try {
-          const events =
+          const page =
             await eventRepository
-              .listEvents();
+              .listEventPage({
+                page: 1,
+                limit: EVENTS_PAGE_SIZE,
+              });
 
           setEventsState(
             remoteSuccess(
-              events,
+              page.events,
             ),
           );
         } catch (error) {
