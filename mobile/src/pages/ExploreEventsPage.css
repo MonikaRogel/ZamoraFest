@@ -282,3 +282,57 @@
     transition: none;
   }
 }
+
+/* ====================================================== */
+/* Paginación                                             */
+/* ====================================================== */
+
+.zf-explore > p[role='alert'] {
+  margin:
+    var(--zf-space-4)
+    0
+    0;
+  padding:
+    var(--zf-space-3)
+    var(--zf-space-4);
+
+  border:
+    1px
+    solid
+    var(--zf-color-border);
+  border-radius:
+    var(--zf-radius-md);
+
+  background:
+    var(--zf-color-surface);
+  color:
+    var(--zf-color-text-primary);
+
+  font-size:
+    var(--zf-font-size-label);
+  text-align:
+    center;
+}
+
+.zf-explore > ion-button {
+  --border-radius:
+    var(--zf-radius-md);
+
+  width:
+    min(
+      100%,
+      20rem
+    );
+  min-height:
+    var(--zf-control-min-size);
+
+  margin:
+    var(--zf-space-6)
+    auto
+    0;
+
+  font-weight:
+    var(--zf-font-weight-bold);
+  text-transform:
+    none;
+}

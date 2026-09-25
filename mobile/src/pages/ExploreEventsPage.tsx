@@ -36,6 +36,7 @@ import {
 } from '../state/remote-data';
 import type {
   Evento,
+  PaginationMeta,
 } from '../types/api';
 
 import './ExploreEventsPage.css';
@@ -98,6 +99,41 @@ function getEventStartTime(
     : startTime;
 }
 
+function mergeEvents(
+  currentEvents:
+    readonly Evento[],
+  newEvents:
+    readonly Evento[],
+): readonly Evento[] {
+  const eventsById =
+    new Map<
+      number,
+      Evento
+    >();
+
+  currentEvents.forEach(
+    (event) => {
+      eventsById.set(
+        event.id,
+        event,
+      );
+    },
+  );
+
+  newEvents.forEach(
+    (event) => {
+      eventsById.set(
+        event.id,
+        event,
+      );
+    },
+  );
+
+  return Array.from(
+    eventsById.values(),
+  );
+}
+
 function getErrorMessage(
   error: unknown,
 ): string {
@@ -141,6 +177,31 @@ function ExploreEventsPage() {
   );
 
   const [
+    pagination,
+    setPagination,
+  ] = useState<
+    PaginationMeta | null
+  >(
+    null,
+  );
+
+  const [
+    isLoadingMore,
+    setIsLoadingMore,
+  ] = useState(
+    false,
+  );
+
+  const [
+    loadMoreError,
+    setLoadMoreError,
+  ] = useState<
+    string | null
+  >(
+    null,
+  );
+
+  const [
     selectedCategory,
     setSelectedCategory,
   ] = useState<
@@ -156,6 +217,14 @@ function ExploreEventsPage() {
           remoteLoading(),
         );
 
+        setPagination(
+          null,
+        );
+
+        setLoadMoreError(
+          null,
+        );
+
         try {
           const page =
             await eventRepository
@@ -163,6 +232,10 @@ function ExploreEventsPage() {
                 page: 1,
                 limit: EVENTS_PAGE_SIZE,
               });
+
+          setPagination(
+            page.meta,
+          );
 
           setEventsState(
             remoteSuccess(
@@ -180,6 +253,79 @@ function ExploreEventsPage() {
         }
       },
       [],
+    );
+
+  const loadMoreEvents =
+    useCallback(
+      async () => {
+        if (
+          pagination ===
+            null ||
+          pagination.page >=
+            pagination.totalPages ||
+          isLoadingMore
+        ) {
+          return;
+        }
+
+        setIsLoadingMore(
+          true,
+        );
+
+        setLoadMoreError(
+          null,
+        );
+
+        try {
+          const page =
+            await eventRepository
+              .listEventPage({
+                page:
+                  pagination.page +
+                  1,
+                limit:
+                  pagination.limit,
+              });
+
+          setEventsState(
+            (
+              currentState,
+            ) => {
+              if (
+                currentState.status !==
+                'success'
+              ) {
+                return currentState;
+              }
+
+              return remoteSuccess(
+                mergeEvents(
+                  currentState.data,
+                  page.events,
+                ),
+              );
+            },
+          );
+
+          setPagination(
+            page.meta,
+          );
+        } catch (error) {
+          setLoadMoreError(
+            getErrorMessage(
+              error,
+            ),
+          );
+        } finally {
+          setIsLoadingMore(
+            false,
+          );
+        }
+      },
+      [
+        isLoadingMore,
+        pagination,
+      ],
     );
 
   const openEventDetail =
@@ -349,6 +495,12 @@ function ExploreEventsPage() {
         visibleEvents,
       ],
     );
+
+  const hasMoreEvents =
+    pagination !==
+      null &&
+    pagination.page <
+      pagination.totalPages;
 
   return (
     <IonPage>
@@ -616,6 +768,35 @@ function ExploreEventsPage() {
                       </section>
                     )}
                   </>
+                )}
+
+                {loadMoreError !==
+                  null && (
+                  <p role="alert">
+                    {
+                      loadMoreError
+                    }
+                  </p>
+                )}
+
+                {hasMoreEvents && (
+                  <IonButton
+                    type="button"
+                    expand="block"
+                    disabled={
+                      isLoadingMore
+                    }
+                    aria-busy={
+                      isLoadingMore
+                    }
+                    onClick={() => {
+                      void loadMoreEvents();
+                    }}
+                  >
+                    {isLoadingMore
+                      ? 'Cargando más eventos...'
+                      : 'Cargar más'}
+                  </IonButton>
                 )}
               </>
             )}
