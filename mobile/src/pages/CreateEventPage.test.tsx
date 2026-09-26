@@ -197,7 +197,7 @@ describe(
 
         expect(
           screen.getByLabelText(
-            'Descripción',
+            'Descripción (opcional)',
           ),
         ).toBeInTheDocument();
 
@@ -221,7 +221,7 @@ describe(
 
         expect(
           screen.getByLabelText(
-            'Fuente de información',
+            'Fuente de información (opcional)',
           ),
         ).toBeInTheDocument();
 

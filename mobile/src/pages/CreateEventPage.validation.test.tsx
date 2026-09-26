@@ -245,7 +245,7 @@ async function submitForm() {
   const button =
     await screen
       .findByLabelText(
-        'Crear evento',
+        'Guardar borrador',
       );
 
   const form =

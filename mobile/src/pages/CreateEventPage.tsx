@@ -499,9 +499,13 @@ function CreateEventPage({
                     </h2>
 
                     <p>
-                      Completa los datos
-                      principales del
-                      evento.
+                      Título, fechas,
+                      costo, lugar y al
+                      menos una categoría
+                      son obligatorios.
+                      Descripción y fuente
+                      de información son
+                      opcionales.
                     </p>
                   </div>
 
@@ -565,7 +569,7 @@ function CreateEventPage({
 
                   <div className="zf-create-event__field">
                     <label htmlFor="event-description">
-                      Descripción
+                      Descripción (opcional)
                     </label>
 
                     <textarea
@@ -830,7 +834,7 @@ function CreateEventPage({
 
                   <div className="zf-create-event__field">
                     <label htmlFor="event-source">
-                      Fuente de información
+                      Fuente de información (opcional)
                     </label>
 
                     <textarea
@@ -1115,7 +1119,7 @@ function CreateEventPage({
                   >
                     <div className="zf-create-event__section-heading">
                       <h2>
-                        Evento creado correctamente
+                        Borrador guardado
                       </h2>
 
                       <p>
@@ -1131,6 +1135,8 @@ function CreateEventPage({
                             .data
                             .id
                         }.
+                        {' '}
+                        Pendiente de revisión.
                       </p>
                     </div>
                   </section>
@@ -1151,10 +1157,10 @@ function CreateEventPage({
                         .status ===
                       'loading'
                     }
-                    loadingLabel="Creando evento..."
-                    ariaLabel="Crear evento"
+                    loadingLabel="Guardando borrador..."
+                    ariaLabel="Guardar borrador"
                   >
-                    Crear evento
+                    Guardar borrador
                   </PrimaryButton>
                 </section>
               </form>

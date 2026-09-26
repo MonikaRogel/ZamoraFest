@@ -369,7 +369,7 @@ async function submitForm() {
   const button =
     await screen
       .findByLabelText(
-        'Crear evento',
+        'Guardar borrador',
       );
 
   const form =
@@ -460,7 +460,7 @@ describe(
             'heading',
             {
               name:
-                'Evento creado correctamente',
+                'Borrador guardado',
             },
           ),
         ).toBeInTheDocument();
@@ -517,7 +517,7 @@ describe(
 
         const loadingLabel =
           screen.getByText(
-            'Creando evento...',
+            'Guardando borrador...',
           );
 
         expect(
