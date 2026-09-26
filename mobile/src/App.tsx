@@ -17,6 +17,7 @@ import EventDetailPage from './pages/EventDetailPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
 import LoginRoute from './routing/LoginRoute';
 import ManagementPage from './pages/ManagementPage';
+import MyEventsPage from './pages/MyEventsPage';
 import RegisterPage from './pages/RegisterPage';
 import ProtectedRoute from './routing/ProtectedRoute';
 import {
@@ -83,6 +84,17 @@ function App() {
               component={
                 EventDetailPage
               }
+            />
+
+            <ProtectedRoute
+              exact
+              path="/gestion/eventos"
+              allowedRoles={[
+                'ASISTENTE',
+              ]}
+              render={() => (
+                <MyEventsPage />
+              )}
             />
 
             <ProtectedRoute

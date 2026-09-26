@@ -8,6 +8,7 @@ import {
   deleteEventoController,
   getEventoController,
   listEventosController,
+  listOwnEventosController,
   publishEventoController,
   reviewEventoController,
   updateEventoController,
@@ -19,6 +20,8 @@ eventoRouter
   .route('/')
   .get(listEventosController)
   .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
+
+eventoRouter.get('/mios', authenticate, authorizeRoles('ASISTENTE'), listOwnEventosController);
 
 eventoRouter.post(
   '/:id/revision',

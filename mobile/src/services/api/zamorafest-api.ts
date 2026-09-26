@@ -59,11 +59,22 @@ export interface GetEventosParams {
   readonly categoriaId?: number;
 }
 
+export interface GetOwnEventosParams {
+  readonly page?: number;
+  readonly limit?: number;
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
 
   getEventos(
     params?: GetEventosParams,
+  ): Promise<EventosResponse>;
+
+  getOwnEventos(
+    params:
+      GetOwnEventosParams | undefined,
+    accessToken: string,
   ): Promise<EventosResponse>;
 
   getEventoById(
@@ -958,6 +969,53 @@ export function createZamoraFestApi(
       );
     },
 
+    getOwnEventos(
+      params:
+        GetOwnEventosParams | undefined,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          '/api/v1/eventos/mios',
+          resolveBaseUrl(),
+        );
+
+      const page =
+        params?.page ??
+        1;
+
+      const limit =
+        params?.limit ??
+        20;
+
+      url.searchParams.set(
+        'page',
+        String(page),
+      );
+
+      url.searchParams.set(
+        'limit',
+        String(limit),
+      );
+
+      return requestJson(
+        url,
+        isEventosResponse,
+        fetcher,
+        {
+          method:
+            'GET',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        },
+      );
+    },
+
     getEventoById(
       id: number,
     ) {
@@ -1168,6 +1226,21 @@ export const zamoraFestApi:
       createZamoraFestApi()
         .getEventos(
           params,
+        )
+    );
+  },
+
+  getOwnEventos(
+    params:
+      GetOwnEventosParams | undefined,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getOwnEventos(
+          params,
+          accessToken,
         )
     );
   },

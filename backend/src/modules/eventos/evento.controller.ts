@@ -7,6 +7,7 @@ import {
   createEventoSchema,
   eventoIdParamsSchema,
   listEventosQuerySchema,
+  listOwnEventosQuerySchema,
   reviewEventoSchema,
   updateEventoSchema,
 } from './evento.schemas.js';
@@ -46,6 +47,16 @@ export const listEventosController: RequestHandler = async (request, response) =
   response.setHeader('X-Cache', result.cacheStatus);
 
   response.status(200).json(result.payload);
+};
+
+export const listOwnEventosController: RequestHandler = async (request, response) => {
+  const identity = requireIdentity(request);
+
+  const query = listOwnEventosQuerySchema.parse(request.query);
+
+  const result = await eventoService.listOwn(identity, query);
+
+  response.status(200).json(result);
 };
 
 export const getEventoController: RequestHandler = async (request, response) => {

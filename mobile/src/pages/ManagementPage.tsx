@@ -106,6 +106,12 @@ function ManagementPage() {
       user?.nombre,
     );
 
+  function handleMyEvents() {
+    history.push(
+      '/gestion/eventos',
+    );
+  }
+
   function handleCreateEvent() {
     history.push(
       '/gestion/eventos/nuevo',
@@ -208,23 +214,46 @@ function ManagementPage() {
             <div className="zf-management__actions">
               {role ===
                 'ASISTENTE' && (
-                <div className="zf-management__action-group">
-                  <PrimaryButton
-                    ariaLabel="Crear evento"
-                    onClick={
-                      handleCreateEvent
-                    }
-                  >
-                    Crear evento
-                  </PrimaryButton>
+                <>
+                  <div className="zf-management__action-group">
+                    <IonButton
+                      className="zf-management__secondary-action"
+                      fill="outline"
+                      expand="block"
+                      type="button"
+                      aria-label="Mis eventos"
+                      onClick={
+                        handleMyEvents
+                      }
+                    >
+                      Mis eventos
+                    </IonButton>
 
-                  <p className="zf-management__action-note">
-                    Registra un nuevo
-                    borrador de evento
-                    utilizando los lugares y
-                    categorías disponibles.
-                  </p>
-                </div>
+                    <p className="zf-management__action-note">
+                      Consulta tus borradores,
+                      eventos registrados y
+                      estados de revisión.
+                    </p>
+                  </div>
+
+                  <div className="zf-management__action-group">
+                    <PrimaryButton
+                      ariaLabel="Crear evento"
+                      onClick={
+                        handleCreateEvent
+                      }
+                    >
+                      Crear evento
+                    </PrimaryButton>
+
+                    <p className="zf-management__action-note">
+                      Registra un nuevo
+                      borrador de evento
+                      utilizando los lugares y
+                      categorías disponibles.
+                    </p>
+                  </div>
+                </>
               )}
 
               <IonButton

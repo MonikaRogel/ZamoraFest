@@ -199,11 +199,20 @@ export const listEventosQuerySchema = z
   })
   .strict();
 
+export const listOwnEventosQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+  })
+  .strict();
+
 export type CreateEventoInput = z.infer<typeof createEventoSchema>;
 
 export type UpdateEventoInput = z.infer<typeof updateEventoSchema>;
 
 export type ListEventosQuery = z.infer<typeof listEventosQuerySchema>;
+
+export type ListOwnEventosQuery = z.infer<typeof listOwnEventosQuerySchema>;
 
 export const reviewEventoSchema = z
   .object({

@@ -30,6 +30,8 @@ import type {
 
 type EventoRecord = NonNullable<Awaited<ReturnType<typeof eventoRepository.findById>>>;
 
+type ListOwnEventosQuery = Pick<ListEventosQuery, 'page' | 'limit'>;
+
 function serializeEvento(evento: EventoRecord) {
   return {
     id: evento.id,
@@ -104,6 +106,16 @@ async function ensureActiveCategories(categoriaIds: number[]): Promise<void> {
 function ensureCanCreate(identidad: IdentidadAcceso): void {
   if (!puedeCrearEvento(identidad.rol)) {
     throw new AppError(403, 'FORBIDDEN', 'No tiene permisos para crear eventos.');
+  }
+}
+
+function ensureCanListOwn(identidad: IdentidadAcceso): void {
+  if (identidad.rol !== 'ASISTENTE') {
+    throw new AppError(
+      403,
+      'FORBIDDEN',
+      'No tiene permisos para consultar eventos propios en este flujo.',
+    );
   }
 }
 
@@ -286,6 +298,29 @@ export const eventoService = {
     return {
       payload,
       cacheStatus: 'MISS',
+    };
+  },
+
+  async listOwn(
+    identidad: IdentidadAcceso,
+    query: ListOwnEventosQuery,
+  ): Promise<ListEventosPayload> {
+    ensureCanListOwn(identidad);
+
+    const result = await eventoRepository.listByCreator(
+      identidad.id,
+      query.page,
+      query.limit,
+    );
+
+    return {
+      data: result.eventos.map(serializeEvento),
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total: result.total,
+        totalPages: Math.ceil(result.total / query.limit),
+      },
     };
   },
 

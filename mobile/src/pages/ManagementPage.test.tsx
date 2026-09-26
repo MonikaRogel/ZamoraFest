@@ -25,66 +25,66 @@ import ManagementPage from './ManagementPage';
 
 const assistantSession:
   AuthSession = {
-    accessToken:
-      'access-asistente',
-    refreshToken:
-      'refresh-asistente',
-    tokenType:
-      'Bearer',
-    expiresIn:
-      900,
-    usuario: {
-      id: 10,
-      nombre:
-        'Asistente Demo',
-      email:
-        'asistente@zamorafest.ec',
-      rol:
-        'ASISTENTE',
-    },
-  };
+  accessToken:
+    'access-asistente',
+  refreshToken:
+    'refresh-asistente',
+  tokenType:
+    'Bearer',
+  expiresIn:
+    900,
+  usuario: {
+    id: 10,
+    nombre:
+      'Asistente Demo',
+    email:
+      'asistente@zamorafest.ec',
+    rol:
+      'ASISTENTE',
+  },
+};
 
 const visitorSession:
   AuthSession = {
-    accessToken:
-      'access-visitante',
-    refreshToken:
-      'refresh-visitante',
-    tokenType:
-      'Bearer',
-    expiresIn:
-      900,
-    usuario: {
-      id: 20,
-      nombre:
-        'Visitante Demo',
-      email:
-        'visitante@zamorafest.ec',
-      rol:
-        'VISITANTE',
-    },
-  };
+  accessToken:
+    'access-visitante',
+  refreshToken:
+    'refresh-visitante',
+  tokenType:
+    'Bearer',
+  expiresIn:
+    900,
+  usuario: {
+    id: 20,
+    nombre:
+      'Visitante Demo',
+    email:
+      'visitante@zamorafest.ec',
+    rol:
+      'VISITANTE',
+  },
+};
 
 const administratorSession:
   AuthSession = {
-    accessToken:
-      'access-administrador',
-    refreshToken:
-      'refresh-administrador',
-    tokenType:
-      'Bearer',
-    expiresIn:
-      900,
-    usuario: {
-      id: 30,
-      nombre:
-        'Administrador Demo',
-      email:
-        'administrador@zamorafest.ec',
-      rol:
-        'ADMINISTRADOR',
-    },
-  };
+  accessToken:
+    'access-administrador',
+  refreshToken:
+    'refresh-administrador',
+  tokenType:
+    'Bearer',
+  expiresIn:
+    900,
+  usuario: {
+    id: 30,
+    nombre:
+      'Administrador Demo',
+    email:
+      'administrador@zamorafest.ec',
+    rol:
+      'ADMINISTRADOR',
+  },
+};
 
 interface SeedSessionProps {
   readonly session:
@@ -158,6 +158,14 @@ function CreateEventProbe() {
   );
 }
 
+function MyEventsProbe() {
+  return (
+    <h1>
+      Mis eventos de prueba
+    </h1>
+  );
+}
+
 interface TestAppProps {
   readonly session:
     AuthSession;
@@ -189,6 +197,14 @@ function TestApp({
           path="/gestion"
           component={
             ManagementPage
+          }
+        />
+
+        <Route
+          exact
+          path="/gestion/eventos"
+          component={
+            MyEventsProbe
           }
         />
 
@@ -319,6 +335,43 @@ describe(
     );
 
     it(
+      'permite al ASISTENTE abrir sus eventos',
+      async () => {
+        enterManagement(
+          assistantSession,
+        );
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Mi cuenta',
+          },
+        );
+
+        fireEvent.click(
+          screen.getByText(
+            'Mis eventos',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Mis eventos de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
       'habilita el acceso al formulario únicamente para ASISTENTE',
       async () => {
         enterManagement(
@@ -356,7 +409,7 @@ describe(
     );
 
     it(
-      'no muestra creación de eventos a VISITANTE',
+      'no muestra gestión de eventos a VISITANTE',
       async () => {
         enterManagement(
           visitorSession,
@@ -373,6 +426,16 @@ describe(
         expect(
           screen.queryByText(
             'Crear evento',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        ).not.toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            'Mis eventos',
             {
               selector:
                 'ion-button',
@@ -412,6 +475,16 @@ describe(
         expect(
           screen.queryByText(
             'Crear evento',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        ).not.toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            'Mis eventos',
             {
               selector:
                 'ion-button',

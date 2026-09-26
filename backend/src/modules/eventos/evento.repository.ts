@@ -387,6 +387,46 @@ export const eventoRepository = {
     };
   },
 
+  async listByCreator(
+    creatorId: number,
+    page: number,
+    limit: number,
+  ) {
+    const skip = (page - 1) * limit;
+
+    const where = {
+      idUsuarioCreador: creatorId,
+      estadoEvento: {
+        not: 'ELIMINADO',
+      },
+    } satisfies Prisma.EventoWhereInput;
+
+    const [total, eventos] = await prisma.$transaction([
+      prisma.evento.count({
+        where,
+      }),
+      prisma.evento.findMany({
+        where,
+        select: eventoBasicSelect,
+        orderBy: [
+          {
+            fechaCreacion: 'desc',
+          },
+          {
+            id: 'desc',
+          },
+        ],
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      total,
+      eventos,
+    };
+  },
+
   findPublicById(id: number, detailLevel: EventoDetailLevel = 'detailed') {
     if (detailLevel === 'detailed') {
       return prisma.evento.findFirst({
