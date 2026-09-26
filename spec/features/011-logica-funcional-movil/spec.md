@@ -402,10 +402,6 @@ Se conservarán evidencias del recorrido:
 10. cierre de sesión;
 11. intento de entrar nuevamente a una ruta protegida.
 
-El video final será una evidencia externa y no se almacenará como archivo pesado en el repositorio.
-
-El repositorio conservará únicamente su trazabilidad y, cuando exista, el enlace de visualización.
-
 ## 19. Criterios de aceptación
 
 Feature 011 se considerará técnicamente completa cuando:
@@ -434,5 +430,4 @@ Feature 011 se considerará técnicamente completa cuando:
 - el backend conserve sus verificaciones;
 - el recorrido funcional se pruebe en dispositivo físico;
 - las evidencias requeridas queden documentadas;
-- el video demuestre el flujo exigido;
-- el código demostrado esté publicado en `main`.
+- el código verificado esté publicado en `main`.
