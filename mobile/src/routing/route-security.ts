@@ -6,11 +6,13 @@ const STATIC_APP_PATHS = new Set([
   '/explore',
   '/environment',
   '/gestion',
+  '/gestion/eventos',
   '/gestion/eventos/nuevo',
 ]);
 
 const PROTECTED_PATHS = new Set([
   '/gestion',
+  '/gestion/eventos',
   '/gestion/eventos/nuevo',
 ]);
 

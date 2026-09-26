@@ -25,21 +25,23 @@ Las rutas deben poder abrirse directamente y no depender de objetos transportado
 
 | Ruta | Acceso | Rol | Pantalla | Endpoint principal | Estado |
 | --- | --- | --- | --- | --- | --- |
-| `/` | Público | Ninguno | Redirección inicial | Ninguno | Existente |
-| `/login` | Público | Ninguno | `LoginPage` | `POST /api/v1/auth/login` | Implementado y evolucionado |
+| `/` | Público | Ninguno | Redirección inicial | Ninguno | Implementado |
+| `/login` | Público | Ninguno | `LoginPage` | `POST /api/v1/auth/login` | Implementado |
 | `/register` | Público | Ninguno | `RegisterPage` | `POST /api/v1/auth/register` | Implementado |
+| `/environment` | Público | Ninguno | `EnvironmentStatusPage` | `GET /api/v1/health` y `GET /api/v1/eventos` | Implementado |
 | `/explore` | Público | Ninguno | `ExploreEventsPage` | `GET /api/v1/eventos` | Implementado |
 | `/eventos/:id` | Público | Ninguno | `EventDetailPage` | `GET /api/v1/eventos/:id` | Implementado |
 | `/gestion` | Protegido | Usuario autenticado | `ManagementPage` | Ninguno obligatorio | Implementado |
+| `/gestion/eventos` | Protegido | `ASISTENTE` | `MyEventsPage` | `GET /api/v1/eventos/mios` | Implementado |
 | `/gestion/eventos/nuevo` | Protegido | `ASISTENTE` | `CreateEventPage` | `POST /api/v1/eventos` | Implementado |
 
 ## 4. Ruta inicial
 
-La ruta `/` conservará inicialmente el comportamiento académico existente y redirigirá hacia `/login`.
+La ruta `/` redirige actualmente hacia `/explore`.
 
-Esta decisión evita alterar innecesariamente el flujo ya probado durante Semanas 9 y 10.
+Esta decisión permite que la agenda pública sea el punto de entrada principal de ZamoraFest sin exigir autenticación al visitante.
 
-La navegación pública hacia `/explore` continuará disponible sin autenticación.
+La autenticación continúa disponible mediante `/login`, mientras que las funcionalidades de gestión permanecen protegidas mediante `ProtectedRoute`.
 
 ## 5. Inicio de sesión
 
@@ -203,6 +205,39 @@ La pantalla podrá mostrar:
 - cierre de sesión.
 
 No requiere necesariamente un endpoint propio.
+
+### 9.5 Eventos propios del ASISTENTE
+
+La gestión protegida incorpora la ruta:
+
+`/gestion/eventos`
+
+Esta ruta requiere autenticación y el rol `ASISTENTE`.
+
+La pantalla asociada es:
+
+`MyEventsPage`
+
+El endpoint principal utilizado es:
+
+`GET /api/v1/eventos/mios`
+
+La consulta utiliza paginación del servidor y devuelve únicamente los eventos asociados al usuario autenticado, excluyendo los eliminados lógicamente.
+
+La pantalla permite consultar tanto borradores como eventos propios en otros estados funcionales y presenta de forma separada:
+
+- estado del evento;
+- estado de revisión;
+- fecha de inicio;
+- fecha de fin;
+- lugar;
+- cantón;
+- categorías.
+
+La ruta también participa del tratamiento protegido de autenticación:
+
+- una respuesta `401` invalida la sesión en memoria y vuelve a exigir autenticación;
+- una respuesta `403` conserva la sesión y comunica la falta de autorización.
 
 ## 10. Crear evento
 
@@ -496,10 +531,12 @@ El recorrido funcional principal de Semana 11 será:
 `/login`
 → autenticación
 → `/gestion`
+→ `/gestion/eventos`
 → `/explore`
 → `/eventos/:id`
 → `/gestion/eventos/nuevo`
 → creación
+→ `/gestion/eventos`
 → navegación
 → regreso al formulario o área protegida
 → cierre de sesión

@@ -59,7 +59,7 @@ vi.mock(
                 fechaInicio:
                   '2026-09-26T19:00:00.000Z',
                 fechaFin:
-                  null,
+                  '2026-09-26T22:00:00.000Z',
                 costoReferencial:
                   0,
                 estadoEvento:

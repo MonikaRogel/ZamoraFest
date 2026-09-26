@@ -224,8 +224,8 @@
 - [x] T163 Validar título obligatorio.
 - [x] T164 Validar longitud permitida del título.
 - [x] T165 Validar fecha de inicio.
-- [x] T166 Validar fecha final opcional.
-- [x] T167 Validar que fecha final no sea anterior a fecha inicial.
+- [x] T166 Validar fecha final obligatoria y válida.
+- [x] T167 Validar que la fecha final sea estrictamente posterior a la fecha inicial.
 - [x] T168 Validar costo no negativo.
 - [x] T169 Validar máximo de dos decimales.
 - [x] T170 Validar lugar entero positivo.
@@ -291,17 +291,17 @@
 
 ## 23. Verificación automatizada final
 
-- [ ] T215 Ejecutar typecheck móvil final.
-- [ ] T216 Ejecutar lint móvil final.
-- [ ] T217 Ejecutar pruebas móviles específicas.
-- [ ] T218 Ejecutar suite móvil completa sin regresiones.
-- [ ] T219 Ejecutar build móvil final.
-- [ ] T220 Ejecutar typecheck backend final.
-- [ ] T221 Ejecutar lint backend final.
-- [ ] T222 Ejecutar pruebas backend específicas.
-- [ ] T223 Ejecutar suite backend completa sin regresiones.
-- [ ] T224 Ejecutar build backend final.
-- [ ] T225 Ejecutar `git diff --check`.
+- [x] T215 Ejecutar typecheck móvil final.
+- [x] T216 Ejecutar lint móvil final.
+- [x] T217 Ejecutar pruebas móviles específicas.
+- [x] T218 Ejecutar suite móvil completa sin regresiones.
+- [x] T219 Ejecutar build móvil final.
+- [x] T220 Ejecutar typecheck backend final.
+- [x] T221 Ejecutar lint backend final.
+- [x] T222 Ejecutar pruebas backend específicas.
+- [x] T223 Ejecutar suite backend completa sin regresiones.
+- [x] T224 Ejecutar build backend final.
+- [x] T225 Ejecutar `git diff --check`.
 
 ## 24. Verificación funcional
 
@@ -332,15 +332,15 @@
 - [ ] T247 Registrar evidencia de logout.
 - [ ] T248 Registrar evidencia de acceso protegido posterior al logout.
 - [ ] T249 Registrar verificación de accesibilidad.
-- [ ] T250 Actualizar `evidence.md` únicamente con resultados ejecutados.
+- [x] T250 Actualizar `evidence.md` únicamente con resultados ejecutados.
 
 ## 26. Uso de inteligencia artificial
 
-- [ ] T251 Registrar herramienta de IA utilizada.
-- [ ] T252 Registrar consultas relevantes utilizadas durante Feature 011.
-- [ ] T253 Registrar resultados de IA realmente incorporados.
-- [ ] T254 Registrar modificaciones humanas realizadas.
-- [ ] T255 Registrar verificaciones técnicas efectuadas sobre los resultados.
+- [x] T251 Registrar herramienta de IA utilizada.
+- [x] T252 Registrar consultas relevantes utilizadas durante Feature 011.
+- [x] T253 Registrar resultados de IA realmente incorporados.
+- [x] T254 Registrar modificaciones humanas realizadas.
+- [x] T255 Registrar verificaciones técnicas efectuadas sobre los resultados.
 
 ## 27. Video y entrega externa
 

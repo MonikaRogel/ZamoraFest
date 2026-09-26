@@ -14,6 +14,12 @@ describe('route-security', () => {
         '/gestion/eventos/nuevo',
       ),
     ).toBe('/gestion/eventos/nuevo');
+
+    expect(
+      sanitizeInternalAppDestination(
+        '/gestion/eventos',
+      ),
+    ).toBe('/gestion/eventos');
   });
 
   it('conserva query y hash de una ruta interna reconocida', () => {
@@ -56,6 +62,12 @@ describe('route-security', () => {
     ).toBe('/gestion/eventos/nuevo');
 
     expect(
+      sanitizeProtectedDestination(
+        '/gestion/eventos',
+      ),
+    ).toBe('/gestion/eventos');
+
+    expect(
       sanitizeProtectedDestination('/explore'),
     ).toBeNull();
   });
@@ -68,6 +80,20 @@ describe('route-security', () => {
     ).toBe(
       '/login?redirect=%2Fgestion%2Feventos%2Fnuevo',
     );
+
+    expect(
+      buildLoginRedirect(
+        '/gestion/eventos',
+      ),
+    ).toBe(
+      '/login?redirect=%2Fgestion%2Feventos',
+    );
+
+    expect(
+      resolvePostLoginDestination(
+        '/gestion/eventos',
+      ),
+    ).toBe('/gestion/eventos');
   });
 
   it('utiliza una ruta pública segura si el retorno es inválido', () => {

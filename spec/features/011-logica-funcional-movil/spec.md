@@ -277,8 +277,8 @@ Como mínimo se verificará:
 
 - título obligatorio y dentro de su longitud permitida;
 - fecha de inicio válida;
-- fecha final opcional;
-- fecha final no anterior a la fecha inicial;
+- fecha final obligatoria y válida;
+- fecha final estrictamente posterior a la fecha inicial;
 - costo no negativo;
 - máximo de dos decimales para el costo;
 - `lugarId` entero positivo;

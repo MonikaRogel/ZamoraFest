@@ -6,7 +6,9 @@
 - **Feature:** `011-logica-funcional-movil`
 - **Semana:** 11
 - **Proyecto:** ZamoraFest - Agenda Cultural y Festiva de Zamora Chinchipe
-- **Estado actual:** preparación SDD previa a implementación funcional
+- **Estado actual:** implementación funcional completada; cierre técnico y documental en verificación final
+
+> **Nota de trazabilidad:** las secciones intermedias conservan el estado existente en el momento en que cada fase fue ejecutada. Cuando una condición cambió posteriormente, como la obligatoriedad de `fechaFin` o la incorporación de `/gestion/eventos`, prevalecen las secciones de cierre y la especificación vigente.
 
 ## 1. Política de evidencias
 
@@ -1359,7 +1361,7 @@ El estado exitoso muestra información real del evento obtenida desde el reposit
 - título;
 - descripción cuando existe;
 - fecha de inicio;
-- fecha final cuando existe;
+- fecha final;
 - lugar;
 - dirección referencial;
 - cantón;
@@ -2280,8 +2282,8 @@ Las reglas implementadas se mantienen alineadas con el contrato actual del backe
 - título obligatorio;
 - título con máximo de 200 caracteres;
 - fecha y hora de inicio obligatoria y válida;
-- fecha final opcional;
-- fecha final no anterior a la fecha inicial;
+- fecha final obligatoria y válida;
+- fecha final estrictamente posterior a la fecha inicial;
 - costo referencial obligatorio;
 - costo no negativo;
 - costo máximo de `99_999_999.99`;
@@ -2341,7 +2343,7 @@ Se añadieron pruebas puras para `validateEventCreateDraft`.
 
 Resultado:
 
-`15 pruebas aprobadas`
+`16 pruebas aprobadas`
 
 Estas pruebas cubren:
 
@@ -2349,7 +2351,7 @@ Estas pruebas cubren:
 - título obligatorio;
 - máximo de caracteres del título;
 - fecha inicial vacía o inválida;
-- fecha final opcional;
+- fecha final obligatoria;
 - fecha final inválida;
 - rango incorrecto de fechas;
 - costo vacío;
@@ -2905,7 +2907,7 @@ Se completó y verificó la preservación del borrador de creación de eventos d
 
 La implementación reutiliza el estado global existente y no introduce una segunda fuente de verdad.
 
-### Estado de aplicación
+### Estado de aplicación para T193-T198
 
 `eventDraft` ya forma parte de `ApplicationState`.
 
@@ -2958,7 +2960,7 @@ La prueba existente de `applicationReducer` confirma que el cierre explícito de
 
 Este comportamiento se mantiene separado de `INVALIDATE_SESSION`, que conserva el borrador cuando la autenticación deja de ser válida por un `401`.
 
-### Pruebas específicas
+### Pruebas específicas de preservación del borrador
 
 Se añadieron:
 
@@ -2978,7 +2980,7 @@ También se mantuvieron las pruebas existentes de:
 - `ApplicationStateContext`;
 - autorización `401` y `403`.
 
-### Verificación focalizada
+### Verificación focalizada de T199-T205
 
 Se ejecutó:
 
@@ -3002,7 +3004,7 @@ Resultado:
 
 `5 archivos de prueba aprobados`
 
-### Verificación global
+### Verificación global de T193-T198
 
 La suite móvil completa se ejecutó dos veces después del cambio.
 
@@ -3051,7 +3053,7 @@ Se completó y verificó el flujo de cierre explícito de sesión de Feature 011
 
 La auditoría previa confirmó que el comportamiento de producción ya existía y no requería duplicar lógica.
 
-### Estado de aplicación
+### Estado de aplicación para T199-T205
 
 `applicationReducer` define `LOGOUT` restableciendo:
 
@@ -3124,7 +3126,7 @@ La diferencia se conserva porque:
 - `LOGOUT` limpia sesión, destino pendiente y borrador;
 - `INVALIDATE_SESSION` invalida la sesión pero conserva destino y borrador cuando corresponde al flujo de recuperación de autenticación.
 
-### Verificación focalizada
+### Verificación focalizada de T193-T198
 
 Se ejecutó:
 
@@ -3163,7 +3165,7 @@ Resultado:
 
 `2 pruebas aprobadas`
 
-### Verificación global
+### Verificación global de T199-T205
 
 Se ejecutó la suite móvil completa.
 
@@ -3223,3 +3225,397 @@ La siguiente fase corresponde a:
 Antes de modificar código se deberá auditar lo ya implementado en Feature 010 y Feature 011 para distinguir requisitos ya satisfechos de aquellos que todavía necesitan comprobación o ajustes.
 
 La verificación con TalkBack deberá documentarse únicamente después de ejecutarse realmente en dispositivo físico.
+
+## 39. Auditoría técnica de cierre de Feature 011
+
+Antes del cierre de Semana 11 se realizó una auditoría adicional de coherencia entre navegación, contratos HTTP, estado de autenticación, pruebas y documentación.
+
+La auditoría no incorporó nuevas funcionalidades ajenas al alcance de Semana 11. Se concentró en eliminar inconsistencias detectadas entre comportamientos ya implementados y los contratos vigentes del proyecto.
+
+### 39.1 Ruta protegida de eventos propios
+
+Se verificó la ruta:
+
+`/gestion/eventos`
+
+La ruta utiliza:
+
+`MyEventsPage`
+
+y consume:
+
+`GET /api/v1/eventos/mios`
+
+El acceso está restringido al rol:
+
+`ASISTENTE`
+
+La auditoría detectó que la ruta existía en `App.tsx`, pero todavía no estaba registrada en las listas internas utilizadas por `route-security.ts`.
+
+Esta diferencia provocaba que un usuario no autenticado pudiera ser enviado correctamente al login, pero el destino `/gestion/eventos` no se conservara como retorno válido.
+
+Se corrigieron:
+
+- `STATIC_APP_PATHS`;
+- `PROTECTED_PATHS`.
+
+Después de la corrección se comprobó que:
+
+- `/gestion/eventos` es reconocido como destino interno;
+- `/gestion/eventos` es reconocido como destino protegido;
+- `buildLoginRedirect('/gestion/eventos')` conserva el destino;
+- después de una autenticación válida el destino puede recuperarse;
+- URLs externas continúan siendo rechazadas.
+
+La cobertura correspondiente se mantiene en:
+
+`src/routing/route-security.test.ts`
+
+### 39.2 Contrato obligatorio de fecha final
+
+El modelo vigente de ZamoraFest establece que todo `Evento` concreto debe disponer de:
+
+- `fechaInicio`;
+- `fechaFin`.
+
+La regla vigente es:
+
+`fechaFin > fechaInicio`
+
+Durante la auditoría se detectó que el tipo TypeScript ya definía `Evento.fechaFin` como `string`, pero el validador runtime de la API móvil todavía aceptaba `null`.
+
+Se corrigió el contrato de respuesta para exigir:
+
+`isString(value.fechaFin)`
+
+en lugar de aceptar una cadena o `null`.
+
+También se actualizó una fixture histórica de `App.test.tsx` que todavía utilizaba:
+
+`fechaFin: null`
+
+Se añadió la prueba:
+
+`src/services/api/event-end-date-contract.test.ts`
+
+La prueba confirma que una respuesta remota con `fechaFin: null` se rechaza como incompatible con el contrato esperado.
+
+De esta forma quedan alineados:
+
+- modelo de base de datos;
+- backend;
+- tipos TypeScript;
+- formulario móvil;
+- validación runtime de respuestas;
+- fixtures y pruebas.
+
+### 39.3 Tratamiento de 401 y 403 en Mis eventos
+
+Se auditó `MyEventsPage` para comprobar la política de autenticación definida para operaciones protegidas.
+
+Se confirmó el comportamiento final:
+
+#### HTTP 401
+
+Una respuesta `401 Unauthorized` durante la consulta de eventos propios:
+
+1. se reconoce como fallo de autenticación;
+2. ejecuta `invalidateSession()`;
+3. elimina la sesión autenticada de memoria;
+4. permite que `ProtectedRoute` vuelva a exigir autenticación;
+5. conserva el tratamiento seguro del destino protegido.
+
+#### HTTP 403
+
+Una respuesta `403 Forbidden`:
+
+1. no invalida la sesión;
+2. conserva usuario y rol;
+3. no ejecuta logout;
+4. muestra un mensaje de autorización insuficiente.
+
+Se añadió:
+
+`src/pages/MyEventsPage.authorization.test.tsx`
+
+La prueba diferencia explícitamente ambos estados HTTP.
+
+La misma política se aplica tanto durante la carga inicial como durante la carga incremental de eventos propios.
+
+### 39.4 Pruebas dirigidas de cierre
+
+Durante la corrección se ejecutaron pruebas específicas antes y después de cada cambio.
+
+Se verificaron de forma dirigida:
+
+- seguridad de rutas;
+- retorno posterior al login;
+- ruta real de Mis eventos;
+- contrato obligatorio de `fechaFin`;
+- contrato de eventos propios;
+- comportamiento `401`;
+- comportamiento `403`;
+- regresión de `MyEventsPage`;
+- regresión de `App`.
+
+Las pruebas inicialmente diseñadas para detectar las inconsistencias fallaron antes de la corrección y pasaron después de aplicar el cambio correspondiente.
+
+### 39.5 Suite móvil completa
+
+Desde:
+
+`mobile`
+
+se ejecutó:
+
+`npm test`
+
+Resultado:
+
+`PASS`
+
+Resumen confirmado:
+
+`48 archivos de prueba aprobados de 48`
+
+Entre las pruebas ejecutadas se encuentran:
+
+- `ExploreEventsPage.test.tsx`;
+- `CreateEventPage.test.tsx`;
+- `CreateEventPage.validation.test.tsx`;
+- `CreateEventPage.creation.test.tsx`;
+- `CreateEventPage.draft-navigation.test.tsx`;
+- `EventDetailPage.test.tsx`;
+- `ManagementPage.test.tsx`;
+- `MyEventsPage.test.tsx`;
+- `MyEventsPage.authorization.test.tsx`;
+- `LoginRoute.test.tsx`;
+- `ProtectedRoute.test.tsx`;
+- `logout-flow.test.tsx`;
+- `route-security.test.ts`;
+- `event-create-validation.test.ts`;
+- `event-create-server-validation.test.ts`;
+- `event-own-list-contract.test.ts`;
+- `event-end-date-contract.test.ts`.
+
+No se registraron archivos de prueba fallidos.
+
+### 39.6 TypeScript y ESLint
+
+Se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+También se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+No se registraron errores de TypeScript ni de ESLint.
+
+### 39.7 Build móvil de producción
+
+Se ejecutó:
+
+`npm run build`
+
+El comando ejecutó:
+
+`tsc --noEmit && vite build`
+
+Resultado:
+
+`PASS`
+
+Vite transformó correctamente:
+
+`265 módulos`
+
+El build finalizó correctamente.
+
+Persisten advertencias no bloqueantes ya conocidas relacionadas con:
+
+- procesamiento de `:host-context` perteneciente al CSS de Ionic mediante LightningCSS;
+- chunks superiores a `500 kB` después de minificación.
+
+Estas advertencias no impidieron generar el build y no fueron introducidas por los ajustes de cierre de Semana 11.
+
+### 39.8 Integridad del diff
+
+Se ejecutó repetidamente:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+No se detectaron errores de whitespace.
+
+También se revisaron los diffs individuales para confirmar que los cambios funcionales se limitaron a:
+
+- reconocimiento de `/gestion/eventos` como ruta interna y protegida;
+- obligatoriedad runtime de `Evento.fechaFin`;
+- actualización de la fixture correspondiente;
+- invalidación de sesión ante `401` en `MyEventsPage`;
+- pruebas asociadas;
+- actualización de documentación de Feature 011.
+
+### 39.9 Registro actualizado de uso de inteligencia artificial
+
+Durante Feature 011 se utilizó ChatGPT de OpenAI como herramienta de apoyo para análisis técnico, revisión y verificación.
+
+Las consultas relevantes se concentraron en:
+
+- auditar el cumplimiento de Semana 11 frente al material académico;
+- revisar navegación pública y protegida;
+- revisar conservación del destino posterior al login;
+- detectar inconsistencias entre tipos TypeScript y validación runtime;
+- revisar la obligatoriedad de `fechaFin`;
+- revisar el comportamiento diferenciado de `401` y `403`;
+- diseñar pruebas de regresión;
+- revisar diffs antes de realizar stage;
+- revisar consistencia entre código, especificación, mapa de rutas, tareas y evidencia.
+
+Resultados de IA realmente incorporados después de verificación:
+
+- detección de la ausencia de `/gestion/eventos` en `route-security.ts`;
+- incorporación de pruebas para el retorno seguro hacia dicha ruta;
+- detección del contrato runtime permisivo para `fechaFin`;
+- prueba negativa para respuestas con `fechaFin: null`;
+- homogeneización del tratamiento `401` de `MyEventsPage`;
+- prueba específica que diferencia `401` y `403`;
+- actualización de documentación técnica.
+
+Las propuestas no se incorporaron automáticamente.
+
+Las modificaciones humanas registradas durante esta fase incluyeron:
+
+- revisión y aceptación selectiva de cambios propuestos;
+- ejecución local de comandos de prueba, lint, typecheck y build;
+- inspección manual de los diffs antes de conservar los cambios;
+- corrección manual de la documentación de rutas, requisitos, tareas y evidencias;
+- decisión de no mezclar advertencias no bloqueantes o deudas técnicas con cambios funcionales ajenos al alcance de Semana 11.
+
+Cada modificación fue revisada mediante una o más de las siguientes verificaciones:
+
+- prueba roja antes de corregir cuando correspondía;
+- prueba verde después de corregir;
+- pruebas de regresión dirigidas;
+- `npm run typecheck`;
+- `npm run lint`;
+- `npm test`;
+- `npm run build`;
+- `git diff --check`;
+- revisión manual del diff.
+
+Las decisiones finales se mantuvieron bajo control humano y se contrastaron con el código, las pruebas y los requisitos académicos.
+
+### 39.10 Verificación final del backend
+
+Como parte del cierre técnico de Feature 011 se ejecutó una regresión final del backend sin introducir cambios funcionales adicionales en esta fase.
+
+Desde:
+
+`backend`
+
+se ejecutó:
+
+`npm run typecheck`
+
+Resultado:
+
+`PASS`
+
+También se ejecutó:
+
+`npm run lint`
+
+Resultado:
+
+`PASS`
+
+La suite backend no integrada se ejecutó mediante:
+
+`npm test`
+
+Resultado:
+
+`39 archivos de prueba aprobados de 39`
+
+No se registraron archivos de prueba fallidos.
+
+Posteriormente se ejecutó:
+
+`npm run test:integration`
+
+La preparación de la base de pruebas confirmó:
+
+- base `zamorafest_test`;
+- esquema `public`;
+- `5` migraciones encontradas;
+- ninguna migración pendiente;
+- seed ejecutado correctamente.
+
+Resultado de integración:
+
+`5 archivos de prueba aprobados de 5`
+
+Entre las pruebas de integración ejecutadas se encuentran:
+
+- autenticación y refresh token;
+- creación y actualización de eventos;
+- modelo de datos;
+- recordatorios;
+- consulta de eventos propios.
+
+Durante algunas pruebas de integración se presentó una advertencia de deprecación de `pg` relacionada con el uso de `client.query()` mientras otra consulta se encuentra en ejecución.
+
+La advertencia no produjo fallos y no impidió que las pruebas de integración finalizaran correctamente. Se conserva como deuda técnica independiente y no se mezcló con el cierre funcional de Semana 11.
+
+También se ejecutó:
+
+`npm run build`
+
+Resultado:
+
+`PASS`
+
+Finalmente se ejecutó desde la raíz del repositorio:
+
+`git diff --check`
+
+Resultado:
+
+`PASS`
+
+Con estas verificaciones quedan confirmados en el cierre:
+
+- typecheck backend;
+- lint backend;
+- pruebas backend;
+- pruebas de integración;
+- preparación de la base de pruebas;
+- build backend;
+- integridad del diff.
+
+### 39.11 Elementos todavía no declarados como completados
+
+Esta auditoría no se utiliza para afirmar comprobaciones que todavía no se han ejecutado en esta fase.
+
+Continúan pendientes hasta disponer de evidencia real:
+
+- ejecución del flujo principal completo contra backend real para el cierre;
+- repetición del flujo de Feature 011 en dispositivo Android físico;
+- comprobación final con TalkBack;
+- capturas definitivas de evidencia;
+- grabación y publicación del video demostrativo.
+
+Estos elementos deberán registrarse únicamente después de ser ejecutados.

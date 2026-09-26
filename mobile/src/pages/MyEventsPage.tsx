@@ -126,6 +126,19 @@ function formatReviewStatus(
   }
 }
 
+function isAuthenticationFailure(
+  error: unknown,
+): boolean {
+  return (
+    error instanceof
+      EventRepositoryError &&
+    error.kind ===
+      'request' &&
+    error.status ===
+      401
+  );
+}
+
 function getErrorMessage(
   error: unknown,
 ): string {
@@ -210,6 +223,7 @@ function MyEventsPage() {
 
   const {
     accessToken,
+    invalidateSession,
   } =
     useApplicationState();
 
@@ -302,6 +316,16 @@ function MyEventsPage() {
         } catch (
           error
         ) {
+          if (
+            isAuthenticationFailure(
+              error,
+            )
+          ) {
+            invalidateSession();
+
+            return;
+          }
+
           setPageState({
             status:
               'error',
@@ -314,6 +338,7 @@ function MyEventsPage() {
       },
       [
         accessToken,
+        invalidateSession,
       ],
     );
 
@@ -385,6 +410,16 @@ function MyEventsPage() {
         } catch (
           error
         ) {
+          if (
+            isAuthenticationFailure(
+              error,
+            )
+          ) {
+            invalidateSession();
+
+            return;
+          }
+
           setLoadMoreError(
             getErrorMessage(
               error,
@@ -398,6 +433,7 @@ function MyEventsPage() {
       },
       [
         accessToken,
+        invalidateSession,
         isLoadingMore,
         pageState.status,
         pagination,

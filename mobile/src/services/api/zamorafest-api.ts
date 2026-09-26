@@ -587,7 +587,7 @@ function isEvento(
     isString(
       value.fechaInicio,
     ) &&
-    isNullableString(
+    isString(
       value.fechaFin,
     ) &&
     isFiniteNumber(
