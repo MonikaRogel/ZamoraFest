@@ -52,12 +52,16 @@ interface EventFixtureInput {
 
   readonly start:
     string;
+
+  readonly end:
+    string;
 }
 
 function createEventFixture({
   id,
   title,
   start,
+  end,
 }: EventFixtureInput): Evento {
   return {
     id,
@@ -68,7 +72,7 @@ function createEventFixture({
     fechaInicio:
       start,
     fechaFin:
-      null,
+      end,
     costoReferencial:
       0,
     estadoEvento:
@@ -157,6 +161,8 @@ const firstEvent =
       'Festival Cultural de Zamora',
     start:
       '2026-09-25T18:00:00.000Z',
+    end:
+      '2026-09-25T22:00:00.000Z',
   });
 
 const secondEvent =
@@ -166,6 +172,8 @@ const secondEvent =
       'Feria Gastronómica Provincial',
     start:
       '2026-09-27T15:00:00.000Z',
+    end:
+      '2026-09-27T20:00:00.000Z',
   });
 
 const thirdEvent =
@@ -175,6 +183,8 @@ const thirdEvent =
       'Encuentro de Artes de Zamora Chinchipe',
     start:
       '2026-09-30T17:00:00.000Z',
+    end:
+      '2026-09-30T21:00:00.000Z',
   });
 
 function renderExplore() {

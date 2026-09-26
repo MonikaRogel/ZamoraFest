@@ -347,7 +347,49 @@ describe(
     );
 
     it(
-      'valida la relación entre fecha inicial y fecha final al abandonar la fecha final',
+      'exige fecha final al abandonar el campo',
+      async () => {
+        renderPage({
+          fechaInicio:
+            '2026-09-25T18:00',
+          fechaFin:
+            '',
+        });
+
+        const endDate =
+          await screen
+            .findByLabelText(
+              'Fecha y hora de fin',
+            );
+
+        fireEvent.blur(
+          endDate,
+        );
+
+        expect(
+          await screen.findByText(
+            'Ingrese la fecha y hora de fin.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          endDate,
+        ).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+
+        expect(
+          endDate,
+        ).toHaveAttribute(
+          'aria-describedby',
+          'event-end-error',
+        );
+      },
+    );
+
+    it(
+      'valida que la fecha final sea posterior a la fecha inicial',
       async () => {
         renderPage({
           fechaInicio:
@@ -369,7 +411,7 @@ describe(
 
         expect(
           await screen.findByText(
-            'La fecha de fin no puede ser anterior a la fecha de inicio.',
+            'La fecha de fin debe ser posterior a la fecha de inicio.',
           ),
         ).toBeInTheDocument();
 
@@ -410,6 +452,12 @@ describe(
 
         expect(
           screen.getByText(
+            'Ingrese la fecha y hora de fin.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
             'Ingrese el costo referencial.',
           ),
         ).toBeInTheDocument();
@@ -429,6 +477,15 @@ describe(
         expect(
           screen.getByLabelText(
             'Título',
+          ),
+        ).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+
+        expect(
+          screen.getByLabelText(
+            'Fecha y hora de fin',
           ),
         ).toHaveAttribute(
           'aria-invalid',

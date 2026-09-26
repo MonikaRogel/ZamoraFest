@@ -34,7 +34,7 @@ const validEventosResponse:
       fechaInicio:
         '2026-08-27T10:00:00.000Z',
       fechaFin:
-        null,
+        '2026-08-27T14:00:00.000Z',
       costoReferencial:
         0,
       estadoEvento:

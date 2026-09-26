@@ -110,7 +110,7 @@ export interface Evento {
   readonly titulo: string;
   readonly descripcion: string | null;
   readonly fechaInicio: string;
-  readonly fechaFin: string | null;
+  readonly fechaFin: string;
   readonly costoReferencial: number;
   readonly estadoEvento: string;
   readonly estadoRevision: string;
@@ -133,7 +133,7 @@ export interface CreateEventoRequest {
   readonly titulo: string;
   readonly descripcion: string | null;
   readonly fechaInicio: string;
-  readonly fechaFin: string | null;
+  readonly fechaFin: string;
   readonly costoReferencial: number;
   readonly lugarId: number;
   readonly categoriaIds: readonly number[];

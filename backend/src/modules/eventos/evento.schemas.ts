@@ -57,6 +57,7 @@ const entityIdSchema = z
   .int('El identificador debe ser un número entero.')
   .min(1, 'El identificador debe ser mayor que cero.')
   .max(POSTGRES_INT_MAX, 'El identificador supera el rango permitido.');
+
 const categoriaIdsSchema = z
   .array(entityIdSchema)
   .min(1, 'Debe seleccionar al menos una categoría.')
@@ -102,21 +103,20 @@ const fuenteInformacionSchema = z
 
 function rangoFechasValido(
   fechaInicio: string | undefined,
-  fechaFin: string | null | undefined,
+  fechaFin: string | undefined,
 ): boolean {
-  if (fechaInicio === undefined || fechaFin === undefined || fechaFin === null) {
+  if (fechaInicio === undefined || fechaFin === undefined) {
     return true;
   }
 
   const inicio = wallClockMillis(fechaInicio);
-
   const fin = wallClockMillis(fechaFin);
 
   if (inicio === null || fin === null) {
     return true;
   }
 
-  return fin >= inicio;
+  return fin > inicio;
 }
 
 export const createEventoSchema = z
@@ -124,7 +124,7 @@ export const createEventoSchema = z
     titulo: tituloSchema,
     descripcion: descripcionSchema.nullable().optional(),
     fechaInicio: fechaHoraLocalSchema,
-    fechaFin: fechaHoraLocalSchema.nullable().optional(),
+    fechaFin: fechaHoraLocalSchema,
     costoReferencial: costoReferencialSchema,
     lugarId: entityIdSchema,
     categoriaIds: categoriaIdsSchema,
@@ -136,7 +136,7 @@ export const createEventoSchema = z
       context.addIssue({
         code: 'custom',
         path: ['fechaFin'],
-        message: 'La fecha de fin no puede ser anterior a la fecha de inicio.',
+        message: 'La fecha de fin debe ser posterior a la fecha de inicio.',
       });
     }
   });
@@ -146,7 +146,7 @@ export const updateEventoSchema = z
     titulo: tituloSchema.optional(),
     descripcion: descripcionSchema.nullable().optional(),
     fechaInicio: fechaHoraLocalSchema.optional(),
-    fechaFin: fechaHoraLocalSchema.nullable().optional(),
+    fechaFin: fechaHoraLocalSchema.optional(),
     costoReferencial: costoReferencialSchema.optional(),
     lugarId: entityIdSchema.optional(),
     categoriaIds: categoriaIdsSchema.optional(),
@@ -161,7 +161,7 @@ export const updateEventoSchema = z
       context.addIssue({
         code: 'custom',
         path: ['fechaFin'],
-        message: 'La fecha de fin no puede ser anterior a la fecha de inicio.',
+        message: 'La fecha de fin debe ser posterior a la fecha de inicio.',
       });
     }
   });
@@ -183,6 +183,7 @@ export const eventoIdParamsSchema = z
       ),
   })
   .strict();
+
 const queryEntityIdSchema = z.coerce
   .number()
   .int('El identificador debe ser un n?mero entero.')

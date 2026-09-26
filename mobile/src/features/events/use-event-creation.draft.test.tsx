@@ -43,7 +43,7 @@ const input:
       '2026-09-25T18:00',
 
     fechaFin:
-      null,
+      '2026-09-25T22:00',
 
     costoReferencial:
       5.5,
@@ -74,7 +74,7 @@ const createdEvent:
       '2026-09-25T18:00:00.000',
 
     fechaFin:
-      null,
+      '2026-09-25T22:00:00.000',
 
     costoReferencial:
       5.5,
@@ -271,6 +271,9 @@ describe(
                 fechaInicio:
                   '2026-09-25T18:00',
 
+                fechaFin:
+                  '2026-09-25T22:00',
+
                 costoReferencial:
                   '5.50',
 
@@ -382,6 +385,12 @@ describe(
               .updateEventDraft({
                 titulo:
                   'Festival pendiente',
+
+                fechaInicio:
+                  '2026-09-25T18:00',
+
+                fechaFin:
+                  '2026-09-25T22:00',
 
                 lugarId:
                   73,

@@ -27,7 +27,8 @@ const event: Evento = {
     'Música, danza y tradiciones locales.',
   fechaInicio:
     '2026-09-20T18:00:00.000Z',
-  fechaFin: null,
+  fechaFin:
+    '2026-09-20T22:00:00.000Z',
   costoReferencial: 0,
   estadoEvento:
     'PROGRAMADO',

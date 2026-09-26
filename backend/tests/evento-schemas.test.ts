@@ -22,6 +22,7 @@ describe('T033 - createEventoSchema', () => {
     const result = createEventoSchema.safeParse({
       titulo: 'Festival de Zamora',
       fechaInicio: '2026-09-05T09:00',
+      fechaFin: '2026-09-05T18:00',
       costoReferencial: 0,
       lugarId: 1,
       categoriaIds: [1],
@@ -30,15 +31,33 @@ describe('T033 - createEventoSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('acepta campos opcionales nulos', () => {
+  it('acepta los campos opcionales nulos', () => {
     const result = createEventoSchema.safeParse({
       ...eventoValido,
       descripcion: null,
-      fechaFin: null,
       fuenteInformacion: null,
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('rechaza fechaFin omitida o nula al crear', () => {
+    const {
+      fechaFin: _fechaFin,
+      ...sinFechaFin
+    } = eventoValido;
+
+    const omitted = createEventoSchema.safeParse(
+      sinFechaFin,
+    );
+
+    const nullable = createEventoSchema.safeParse({
+      ...eventoValido,
+      fechaFin: null,
+    });
+
+    expect(omitted.success).toBe(false);
+    expect(nullable.success).toBe(false);
   });
 
   it('rechaza UUID y exige IDs INT positivos', () => {
@@ -58,9 +77,7 @@ describe('T033 - createEventoSchema', () => {
     });
 
     expect(lugarUuid.success).toBe(false);
-
     expect(categoriaUuid.success).toBe(false);
-
     expect(zero.success).toBe(false);
   });
 
@@ -85,7 +102,6 @@ describe('T033 - createEventoSchema', () => {
     });
 
     expect(invalidCalendar.success).toBe(false);
-
     expect(withOffset.success).toBe(false);
   });
 
@@ -99,14 +115,14 @@ describe('T033 - createEventoSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('acepta fechaFin igual a fechaInicio', () => {
+  it('rechaza fechaFin igual a fechaInicio', () => {
     const result = createEventoSchema.safeParse({
       ...eventoValido,
       fechaInicio: '2026-09-05T18:00:00',
       fechaFin: '2026-09-05T18:00:00',
     });
 
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('valida DECIMAL(10,2) no negativo', () => {
@@ -126,9 +142,7 @@ describe('T033 - createEventoSchema', () => {
     });
 
     expect(negative.success).toBe(false);
-
     expect(decimals.success).toBe(false);
-
     expect(overflow.success).toBe(false);
   });
 
@@ -161,14 +175,26 @@ describe('T033 - updateEventoSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('permite limpiar campos opcionales con null', () => {
+  it('permite limpiar únicamente los campos opcionales anulables', () => {
     const result = updateEventoSchema.safeParse({
       descripcion: null,
-      fechaFin: null,
       fuenteInformacion: null,
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('permite omitir fechaFin pero rechaza fechaFin nula', () => {
+    const omitted = updateEventoSchema.safeParse({
+      titulo: 'Cambio sin modificar la fecha de fin',
+    });
+
+    const nullable = updateEventoSchema.safeParse({
+      fechaFin: null,
+    });
+
+    expect(omitted.success).toBe(true);
+    expect(nullable.success).toBe(false);
   });
 
   it('rechaza body vacío', () => {
@@ -176,12 +202,24 @@ describe('T033 - updateEventoSchema', () => {
   });
 
   it('valida rango cuando ambas fechas vienen en el PATCH', () => {
-    const result = updateEventoSchema.safeParse({
+    const previous = updateEventoSchema.safeParse({
       fechaInicio: '2026-10-10T12:00:00',
       fechaFin: '2026-10-10T11:59:59',
     });
 
-    expect(result.success).toBe(false);
+    const equal = updateEventoSchema.safeParse({
+      fechaInicio: '2026-10-10T12:00:00',
+      fechaFin: '2026-10-10T12:00:00',
+    });
+
+    const valid = updateEventoSchema.safeParse({
+      fechaInicio: '2026-10-10T12:00:00',
+      fechaFin: '2026-10-10T12:00:01',
+    });
+
+    expect(previous.success).toBe(false);
+    expect(equal.success).toBe(false);
+    expect(valid.success).toBe(true);
   });
 
   it.each([
@@ -211,7 +249,11 @@ describe('T033 - eventoIdParamsSchema', () => {
   });
 
   it('rechaza UUID, cero y valores decimales', () => {
-    const values = ['550e8400-e29b-41d4-a716-446655440000', '0', '1.5'];
+    const values = [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '0',
+      '1.5',
+    ];
 
     for (const id of values) {
       expect(
@@ -222,6 +264,7 @@ describe('T033 - eventoIdParamsSchema', () => {
     }
   });
 });
+
 describe('T033 - limites PostgreSQL INT', () => {
   it('rechaza IDs de body fuera del rango INTEGER de PostgreSQL', () => {
     const lugarFueraDeRango = createEventoSchema.safeParse({
@@ -235,7 +278,6 @@ describe('T033 - limites PostgreSQL INT', () => {
     });
 
     expect(lugarFueraDeRango.success).toBe(false);
-
     expect(categoriaFueraDeRango.success).toBe(false);
   });
 
@@ -246,7 +288,14 @@ describe('T033 - limites PostgreSQL INT', () => {
 
     expect(maximo.id).toBe(2_147_483_647);
 
-    const invalidos = ['2147483648', '1e2', '+42', '-1', ' 42 ', '01'];
+    const invalidos = [
+      '2147483648',
+      '1e2',
+      '+42',
+      '-1',
+      ' 42 ',
+      '01',
+    ];
 
     for (const id of invalidos) {
       expect(

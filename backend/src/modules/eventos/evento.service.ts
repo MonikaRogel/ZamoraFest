@@ -36,7 +36,7 @@ function serializeEvento(evento: EventoRecord) {
     titulo: evento.titulo,
     descripcion: evento.descripcion,
     fechaInicio: databaseDateToEventoLocalDateTime(evento.fechaInicio),
-    fechaFin: evento.fechaFin === null ? null : databaseDateToEventoLocalDateTime(evento.fechaFin),
+    fechaFin: databaseDateToEventoLocalDateTime(evento.fechaFin),
     costoReferencial: Number(evento.costoReferencial.toString()),
     estadoEvento: evento.estadoEvento,
     estadoRevision: evento.estadoRevision,
@@ -154,12 +154,12 @@ function ensureCanUpdate(identidad: IdentidadAcceso, evento: EventoRecord): void
   }
 }
 
-function ensureDateRange(fechaInicio: Date, fechaFin: Date | null): void {
-  if (fechaFin !== null && fechaFin.getTime() < fechaInicio.getTime()) {
+function ensureDateRange(fechaInicio: Date, fechaFin: Date): void {
+  if (fechaFin.getTime() <= fechaInicio.getTime()) {
     throw new AppError(
       400,
       'INVALID_DATE_RANGE',
-      'La fecha de fin no puede ser anterior a la fecha de inicio.',
+      'La fecha de fin debe ser posterior a la fecha de inicio.',
     );
   }
 }
@@ -223,6 +223,7 @@ export const eventoService = {
     const repositoryInput: CreateEventoRepositoryInput = {
       titulo: input.titulo,
       fechaInicio: eventoLocalDateTimeToDatabaseDate(input.fechaInicio),
+      fechaFin: eventoLocalDateTimeToDatabaseDate(input.fechaFin),
       costoReferencial: input.costoReferencial,
       lugarId: input.lugarId,
       categoriaIds: input.categoriaIds,
@@ -233,11 +234,6 @@ export const eventoService = {
 
     if (input.descripcion !== undefined) {
       repositoryInput.descripcion = input.descripcion;
-    }
-
-    if (input.fechaFin !== undefined) {
-      repositoryInput.fechaFin =
-        input.fechaFin === null ? null : eventoLocalDateTimeToDatabaseDate(input.fechaFin);
     }
 
     if (input.fuenteInformacion !== undefined) {
@@ -346,9 +342,7 @@ export const eventoService = {
     const nextFechaFin =
       input.fechaFin === undefined
         ? actual.fechaFin
-        : input.fechaFin === null
-          ? null
-          : eventoLocalDateTimeToDatabaseDate(input.fechaFin);
+        : eventoLocalDateTimeToDatabaseDate(input.fechaFin);
 
     ensureDateRange(nextFechaInicio, nextFechaFin);
 

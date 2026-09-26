@@ -28,7 +28,7 @@ const input:
     fechaInicio:
       '2026-09-25T18:00',
     fechaFin:
-      null,
+      '2026-09-25T22:00',
     costoReferencial:
       0,
     lugarId:
@@ -55,7 +55,7 @@ const evento:
       '2026-09-25T18:00:00.000',
 
     fechaFin:
-      null,
+      '2026-09-25T22:00:00.000',
 
     costoReferencial:
       0,

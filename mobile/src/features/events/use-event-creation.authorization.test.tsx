@@ -69,7 +69,7 @@ const input:
       '2026-09-25T18:00',
 
     fechaFin:
-      null,
+      '2026-09-25T22:00',
 
     costoReferencial:
       5.5,

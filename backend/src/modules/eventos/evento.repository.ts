@@ -13,7 +13,7 @@ export interface CreateEventoRepositoryInput {
   titulo: string;
   descripcion?: string | null;
   fechaInicio: Date;
-  fechaFin?: Date | null;
+  fechaFin: Date;
   costoReferencial: number;
   lugarId: number;
   categoriaIds: number[];
@@ -27,7 +27,7 @@ export interface UpdateEventoRepositoryInput {
   titulo?: string;
   descripcion?: string | null;
   fechaInicio?: Date;
-  fechaFin?: Date | null;
+  fechaFin?: Date;
   costoReferencial?: number;
   lugarId?: number;
   categoriaIds?: number[];
@@ -296,7 +296,7 @@ export const eventoRepository = {
         titulo: input.titulo,
         descripcion: input.descripcion ?? null,
         fechaInicio: input.fechaInicio,
-        fechaFin: input.fechaFin ?? null,
+        fechaFin: input.fechaFin,
         costoReferencial: input.costoReferencial,
         fuenteInformacion: input.fuenteInformacion ?? null,
         lugar: {

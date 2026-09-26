@@ -163,7 +163,7 @@ describe(
     );
 
     it(
-      'acepta fecha final vacía',
+      'rechaza fecha final vacía',
       () => {
         const result =
           validate({
@@ -174,17 +174,17 @@ describe(
         expect(
           result,
         ).toMatchObject({
-          ok: true,
-          input: {
+          ok: false,
+          errors: {
             fechaFin:
-              null,
+              'Ingrese la fecha y hora de fin.',
           },
         });
       },
     );
 
     it(
-      'rechaza fecha final inválida o anterior al inicio',
+      'rechaza fecha final inválida, anterior o igual al inicio',
       () => {
         expect(
           validate({
@@ -208,7 +208,45 @@ describe(
           ok: false,
           errors: {
             fechaFin:
-              'La fecha de fin no puede ser anterior a la fecha de inicio.',
+              'La fecha de fin debe ser posterior a la fecha de inicio.',
+          },
+        });
+
+        expect(
+          validate({
+            fechaFin:
+              '2026-09-25T18:00',
+          }),
+        ).toMatchObject({
+          ok: false,
+          errors: {
+            fechaFin:
+              'La fecha de fin debe ser posterior a la fecha de inicio.',
+          },
+        });
+      },
+    );
+
+    it(
+      'acepta fecha final posterior al inicio',
+      () => {
+        const result =
+          validate({
+            fechaInicio:
+              '2026-09-25T18:00',
+            fechaFin:
+              '2026-09-25T18:01',
+          });
+
+        expect(
+          result,
+        ).toMatchObject({
+          ok: true,
+          input: {
+            fechaInicio:
+              '2026-09-25T18:00',
+            fechaFin:
+              '2026-09-25T18:01',
           },
         });
       },

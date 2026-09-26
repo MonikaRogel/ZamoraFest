@@ -461,12 +461,15 @@ describe('T048 - modelo canónico Semana 4', () => {
     const context = await getSeedContext();
     const inicio = new Date('2026-10-20T20:00:00.000Z');
     const finAnterior = new Date('2026-10-20T19:00:00.000Z');
+    const finIgual = new Date('2026-10-20T20:00:00.000Z');
+    const finValido = new Date('2026-10-20T21:00:00.000Z');
 
     await expect(
       prisma.evento.create({
         data: {
           titulo: `${TEST_PREFIX}COSTO_NEGATIVO`,
           fechaInicio: inicio,
+          fechaFin: finValido,
           costoReferencial: '-0.01',
           idLugar: context.lugarId,
           idUsuarioCreador: context.asistenteId,
@@ -485,6 +488,20 @@ describe('T048 - modelo canónico Semana 4', () => {
           idLugar: context.lugarId,
           idUsuarioCreador: context.asistenteId,
           fuenteInformacion: `${TEST_PREFIX}FECHAS_INVALIDAS`,
+        },
+      }),
+    ).rejects.toThrow();
+
+    await expect(
+      prisma.evento.create({
+        data: {
+          titulo: `${TEST_PREFIX}FECHAS_IGUALES`,
+          fechaInicio: inicio,
+          fechaFin: finIgual,
+          costoReferencial: '0.00',
+          idLugar: context.lugarId,
+          idUsuarioCreador: context.asistenteId,
+          fuenteInformacion: `${TEST_PREFIX}FECHAS_IGUALES`,
         },
       }),
     ).rejects.toThrow();

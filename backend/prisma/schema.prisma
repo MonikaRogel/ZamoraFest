@@ -165,7 +165,7 @@ model Evento {
   titulo             String    @db.VarChar(200)
   descripcion        String?   @db.Text
   fechaInicio        DateTime  @map("fecha_inicio") @db.Timestamp(3)
-  fechaFin           DateTime? @map("fecha_fin") @db.Timestamp(3)
+  fechaFin           DateTime  @map("fecha_fin") @db.Timestamp(3)
   costoReferencial   Decimal   @map("costo_referencial") @db.Decimal(10, 2)
   idLugar            Int       @map("id_lugar")
   idUsuarioCreador   Int       @map("id_usuario_creador")

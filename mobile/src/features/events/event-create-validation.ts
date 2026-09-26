@@ -300,33 +300,31 @@ export function validateEventCreateDraft(
       'Ingrese una fecha y hora de inicio válida.';
   }
 
-  let endMillis:
-    number | null = null;
+  const endMillis =
+    wallClockMillis(
+      endDate,
+    );
 
   if (
-    endDate.length >
+    endDate.length ===
     0
   ) {
-    endMillis =
-      wallClockMillis(
-        endDate,
-      );
-
-    if (
-      endMillis ===
-      null
-    ) {
-      errors.fechaFin =
-        'Ingrese una fecha y hora de fin válida.';
-    } else if (
-      startMillis !==
-        null &&
-      endMillis <
-        startMillis
-    ) {
-      errors.fechaFin =
-        'La fecha de fin no puede ser anterior a la fecha de inicio.';
-    }
+    errors.fechaFin =
+      'Ingrese la fecha y hora de fin.';
+  } else if (
+    endMillis ===
+    null
+  ) {
+    errors.fechaFin =
+      'Ingrese una fecha y hora de fin válida.';
+  } else if (
+    startMillis !==
+      null &&
+    endMillis <=
+      startMillis
+  ) {
+    errors.fechaFin =
+      'La fecha de fin debe ser posterior a la fecha de inicio.';
   }
 
   let cost:
@@ -465,10 +463,7 @@ export function validateEventCreateDraft(
         startDate,
 
       fechaFin:
-        endDate.length ===
-        0
-          ? null
-          : endDate,
+        endDate,
 
       costoReferencial:
         cost,
