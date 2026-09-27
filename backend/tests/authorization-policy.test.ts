@@ -36,15 +36,19 @@ describe('T032 - matriz de autorizacion ZamoraFest', () => {
   it('ASISTENTE puede crear eventos y actualizar borradores', () => {
     expect(puedeCrearEvento(asistente.rol)).toBe(true);
 
-    expect(puedeActualizarEvento(asistente.rol, 'BORRADOR')).toBe(true);
+    expect(puedeActualizarEvento(asistente.rol, 'BORRADOR', 'PENDIENTE')).toBe(true);
 
-    expect(puedeActualizarEvento(asistente.rol, 'PROGRAMADO')).toBe(false);
+    expect(puedeActualizarEvento(asistente.rol, 'BORRADOR', 'RECHAZADO')).toBe(true);
 
-    expect(puedeActualizarEvento(asistente.rol, 'CANCELADO')).toBe(false);
+    expect(puedeActualizarEvento(asistente.rol, 'BORRADOR', 'APROBADO')).toBe(false);
 
-    expect(puedeActualizarEvento(asistente.rol, 'FINALIZADO')).toBe(false);
+    expect(puedeActualizarEvento(asistente.rol, 'PROGRAMADO', 'APROBADO')).toBe(false);
 
-    expect(puedeActualizarEvento(asistente.rol, 'ELIMINADO')).toBe(false);
+    expect(puedeActualizarEvento(asistente.rol, 'CANCELADO', 'APROBADO')).toBe(false);
+
+    expect(puedeActualizarEvento(asistente.rol, 'FINALIZADO', 'APROBADO')).toBe(false);
+
+    expect(puedeActualizarEvento(asistente.rol, 'ELIMINADO', 'APROBADO')).toBe(false);
   });
 
   it('ASISTENTE no puede revisar, publicar ni eliminar', () => {
@@ -60,9 +64,9 @@ describe('T032 - matriz de autorizacion ZamoraFest', () => {
 
     expect(puedePublicarEvento(administrador.rol)).toBe(true);
 
-    expect(puedeActualizarEvento(administrador.rol, 'BORRADOR')).toBe(true);
+    expect(puedeActualizarEvento(administrador.rol, 'BORRADOR', 'APROBADO')).toBe(true);
 
-    expect(puedeActualizarEvento(administrador.rol, 'PROGRAMADO')).toBe(true);
+    expect(puedeActualizarEvento(administrador.rol, 'PROGRAMADO', 'APROBADO')).toBe(true);
 
     expect(puedeEliminarEvento(administrador.rol)).toBe(true);
   });
@@ -70,7 +74,7 @@ describe('T032 - matriz de autorizacion ZamoraFest', () => {
   it('VISITANTE no obtiene privilegios de gestion de eventos', () => {
     expect(puedeCrearEvento(visitante.rol)).toBe(false);
 
-    expect(puedeActualizarEvento(visitante.rol, 'BORRADOR')).toBe(false);
+    expect(puedeActualizarEvento(visitante.rol, 'BORRADOR', 'PENDIENTE')).toBe(false);
 
     expect(puedeRevisarEvento(visitante.rol)).toBe(false);
 

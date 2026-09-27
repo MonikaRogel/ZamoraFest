@@ -312,6 +312,29 @@ describe('T040-B - servicio de imágenes', () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
+  it('ASISTENTE no administra imágenes de un borrador ya APROBADO', async () => {
+    vi.spyOn(eventoRepository, 'findById').mockResolvedValue(
+      buildEvento({
+        estadoRevision: 'APROBADO',
+      }),
+    );
+
+    const createSpy = vi.spyOn(imagenRepository, 'create');
+
+    await expect(
+      imagenService.create(15, asistente, {
+        urlImagen: 'https://example.com/aprobado.jpg',
+        tipoImagen: 'FOTOGRAFIA',
+        esPrincipal: false,
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: 'FORBIDDEN',
+    });
+
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
   it('DELETE exige imagen perteneciente al evento', async () => {
     vi.spyOn(eventoRepository, 'findById').mockResolvedValue(buildEvento());
 

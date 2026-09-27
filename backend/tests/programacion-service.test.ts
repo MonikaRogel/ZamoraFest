@@ -217,6 +217,28 @@ describe('T039-B - servicio de programación', () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
+  it('ASISTENTE no administra programación de un borrador ya APROBADO', async () => {
+    vi.spyOn(eventoRepository, 'findById').mockResolvedValue(
+      buildEvento({
+        estadoRevision: 'APROBADO',
+      }),
+    );
+
+    const createSpy = vi.spyOn(programacionRepository, 'create');
+
+    await expect(
+      programacionService.create(15, asistente, {
+        tituloActividad: 'Cambio posterior a aprobación',
+        fechaHoraInicio: '2026-09-05T10:00',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: 'FORBIDDEN',
+    });
+
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
   it('update exige programación perteneciente al evento y valida fechas combinadas', async () => {
     vi.spyOn(eventoRepository, 'findById').mockResolvedValue(buildEvento());
 
