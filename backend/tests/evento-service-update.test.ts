@@ -19,9 +19,12 @@ function buildEvento(
   options: {
     creadorId?: number;
     estadoEvento?: string;
+    estadoRevision?: string;
     titulo?: string;
     fechaInicio?: Date;
     fechaFin?: Date | null;
+    revisorId?: number | null;
+    fechaRevision?: Date | null;
   } = {},
 ) {
   return {
@@ -35,11 +38,11 @@ function buildEvento(
       toString: () => '0',
     },
     estadoEvento: options.estadoEvento ?? 'BORRADOR',
-    estadoRevision: 'PENDIENTE',
+    estadoRevision: options.estadoRevision ?? 'PENDIENTE',
     fuenteInformacion: 'Dirección de Cultura',
     fechaCreacion: new Date('2026-08-20T13:00:00.000Z'),
     fechaActualizacion: null,
-    fechaRevision: null,
+    fechaRevision: options.fechaRevision === undefined ? null : options.fechaRevision,
     lugar: {
       id: 10,
       nombre: 'Parque Central',
@@ -77,7 +80,17 @@ function buildEvento(
         nombre: 'ASISTENTE',
       },
     },
-    usuarioRevisor: null,
+    usuarioRevisor:
+      options.revisorId == null
+        ? null
+        : {
+            id: options.revisorId,
+            nombreCompleto: 'Administrador',
+            rol: {
+              id: 1,
+              nombre: 'ADMINISTRADOR',
+            },
+          },
     categorias: [
       {
         categoria: {
@@ -129,6 +142,29 @@ describe('T035-C - actualización segura', () => {
     await expect(
       eventoService.update(100, asistente, {
         titulo: 'Cambio no autorizado',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      code: 'FORBIDDEN',
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('impide al asistente modificar un borrador ya APROBADO', async () => {
+    vi.spyOn(eventoRepository, 'findById').mockResolvedValue(
+      buildEvento({
+        estadoRevision: 'APROBADO',
+        revisorId: 1,
+        fechaRevision: new Date('2026-08-20T19:51:12.345Z'),
+      }),
+    );
+
+    const updateSpy = vi.spyOn(eventoRepository, 'update');
+
+    await expect(
+      eventoService.update(100, asistente, {
+        titulo: 'Cambio posterior a aprobación',
       }),
     ).rejects.toMatchObject({
       statusCode: 403,

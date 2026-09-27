@@ -3,6 +3,8 @@
 export type EstadoEventoAutorizacion =
   'BORRADOR' | 'PROGRAMADO' | 'CANCELADO' | 'FINALIZADO' | 'ELIMINADO';
 
+export type EstadoRevisionAutorizacion = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+
 export function puedeGestionarRecursoPropio(
   identidad: IdentidadAcceso,
   usuarioPropietarioId: number,
@@ -17,12 +19,17 @@ export function puedeCrearEvento(rol: RolAutorizado): boolean {
 export function puedeActualizarEvento(
   rol: RolAutorizado,
   estadoEvento: EstadoEventoAutorizacion,
+  estadoRevision: EstadoRevisionAutorizacion,
 ): boolean {
   if (rol === 'ADMINISTRADOR') {
     return true;
   }
 
-  return rol === 'ASISTENTE' && estadoEvento === 'BORRADOR';
+  return (
+    rol === 'ASISTENTE' &&
+    estadoEvento === 'BORRADOR' &&
+    estadoRevision !== 'APROBADO'
+  );
 }
 
 export function puedeRevisarEvento(rol: RolAutorizado): boolean {

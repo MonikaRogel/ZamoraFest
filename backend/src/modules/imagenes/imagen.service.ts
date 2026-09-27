@@ -5,6 +5,7 @@ import {
   puedeActualizarEvento,
   puedeGestionarRecursoPropio,
   type EstadoEventoAutorizacion,
+  type EstadoRevisionAutorizacion,
 } from '../auth/authorization.policy.js';
 import {
   databaseDateToEventoLocalDateTime,
@@ -64,6 +65,22 @@ function toEstadoEventoAutorizacion(value: string): EstadoEventoAutorizacion {
   }
 }
 
+function toEstadoRevisionAutorizacion(value: string): EstadoRevisionAutorizacion {
+  switch (value) {
+    case 'PENDIENTE':
+    case 'APROBADO':
+    case 'RECHAZADO':
+      return value;
+
+    default:
+      throw new AppError(
+        500,
+        'INVALID_EVENT_REVIEW_STATE',
+        'El evento contiene un estado de revisión no reconocido.',
+      );
+  }
+}
+
 async function getEventoForManagement(idEvento: number): Promise<EventoRecord> {
   const evento = await eventoRepository.findById(idEvento, 'basic');
 
@@ -75,9 +92,10 @@ async function getEventoForManagement(idEvento: number): Promise<EventoRecord> {
 }
 
 function ensureCanManage(identidad: IdentidadAcceso, evento: EventoRecord): void {
-  const estado = toEstadoEventoAutorizacion(evento.estadoEvento);
+  const estadoEvento = toEstadoEventoAutorizacion(evento.estadoEvento);
+  const estadoRevision = toEstadoRevisionAutorizacion(evento.estadoRevision);
 
-  if (!puedeActualizarEvento(identidad.rol, estado)) {
+  if (!puedeActualizarEvento(identidad.rol, estadoEvento, estadoRevision)) {
     throw new AppError(
       403,
       'FORBIDDEN',

@@ -441,6 +441,32 @@ describe('T051 - CRUD canónico de eventos', () => {
     expect(persistido.fechaRevision).toBeInstanceOf(Date);
   });
 
+  it('impide que ASISTENTE modifique un BORRADOR ya APROBADO', async () => {
+    const evento = await createEvento('APROBADO_INMUTABLE');
+    const tituloOriginal = evento.titulo;
+
+    await approveEvento(evento.id);
+
+    const response = await request(app)
+      .patch(`/api/v1/eventos/${evento.id}`)
+      .set('Authorization', `Bearer ${support.asistenteToken}`)
+      .send({
+        titulo: 'Cambio posterior a aprobación',
+      });
+
+    expect(response.status).toBe(403);
+
+    const persistido = await prisma.evento.findUniqueOrThrow({
+      where: {
+        id: evento.id,
+      },
+    });
+
+    expect(persistido.titulo).toBe(tituloOriginal);
+    expect(persistido.estadoEvento).toBe('BORRADOR');
+    expect(persistido.estadoRevision).toBe('APROBADO');
+  });
+
   it('publica únicamente un evento previamente aprobado', async () => {
     const evento = await createEvento('PUBLICACION');
 
