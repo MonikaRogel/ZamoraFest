@@ -323,6 +323,7 @@
       100%,
       20rem
     );
+
   min-height:
     var(--zf-control-min-size);
 
@@ -333,6 +334,17 @@
 
   font-weight:
     var(--zf-font-weight-bold);
+
   text-transform:
     none;
+}
+
+.zf-explore > ion-button::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+
+  outline-offset:
+    var(--zf-focus-ring-offset);
 }

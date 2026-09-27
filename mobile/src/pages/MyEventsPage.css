@@ -393,6 +393,16 @@
     none;
 }
 
+.zf-my-events__load-more::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+
+  outline-offset:
+    var(--zf-focus-ring-offset);
+}
+
 @media (min-width: 48rem) {
   .zf-my-events {
     padding:

@@ -35,5 +35,14 @@ export function parseApiBaseUrl(value: unknown): string {
 }
 
 export function getApiBaseUrl(): string {
+  if (
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'http:' ||
+      window.location.protocol === 'https:')
+  ) {
+    return window.location.origin;
+  }
+
   return parseApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 }

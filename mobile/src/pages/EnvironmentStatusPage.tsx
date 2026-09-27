@@ -1,20 +1,17 @@
 import {
-  IonBadge,
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardTitle,
   IonContent,
   IonHeader,
   IonPage,
-  IonSpinner,
-  IonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
+import AsyncStateView from '../components/ui/AsyncStateView';
+import ScreenHeader from '../components/ui/ScreenHeader';
 import {
   ApiRequestError,
   zamoraFestApi,
@@ -49,18 +46,28 @@ function getErrorMessage(error: unknown): string {
 }
 
 function EnvironmentStatusPage() {
-  const [viewState, setViewState] = useState<ViewState>({
+  const [
+    viewState,
+    setViewState,
+  ] = useState<ViewState>({
     status: 'loading',
   });
-  const [requestVersion, setRequestVersion] = useState(0);
+
+  const [
+    requestVersion,
+    setRequestVersion,
+  ] = useState(0);
 
   useEffect(() => {
     let active = true;
 
     async function loadEnvironmentStatus() {
       try {
-        const health = await zamoraFestApi.getHealth();
-        const eventos = await zamoraFestApi.getEventos();
+        const health =
+          await zamoraFestApi.getHealth();
+
+        const eventos =
+          await zamoraFestApi.getEventos();
 
         if (active) {
           setViewState({
@@ -73,7 +80,10 @@ function EnvironmentStatusPage() {
         if (active) {
           setViewState({
             status: 'error',
-            message: getErrorMessage(error),
+            message:
+              getErrorMessage(
+                error,
+              ),
           });
         }
       }
@@ -87,122 +97,226 @@ function EnvironmentStatusPage() {
   }, [requestVersion]);
 
   function retry() {
-    setViewState({ status: 'loading' });
-    setRequestVersion((currentVersion) => currentVersion + 1);
+    setViewState({
+      status: 'loading',
+    });
+
+    setRequestVersion(
+      (currentVersion) =>
+        currentVersion + 1,
+    );
   }
 
   const firstEvent =
-    viewState.status === 'success'
-      ? viewState.eventos.data[0]
+    viewState.status ===
+    'success'
+      ? viewState.eventos
+          .data[0]
       : undefined;
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>ZamoraFest</IonTitle>
+      <IonHeader className="zf-environment__header">
+        <IonToolbar className="zf-environment__toolbar">
+          <IonTitle className="zf-environment__brand">
+            ZamoraFest
+          </IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className="environment-page">
-        <main className="environment-shell">
-          <section className="environment-introduction">
-            <IonText color="dark">
-              <h1>Entorno móvil</h1>
-            </IonText>
-            <p>
-              Verificación de ejecución e integración con la API de
-              ZamoraFest.
-            </p>
+      <IonContent fullscreen>
+        <main className="zf-environment">
+          <ScreenHeader
+            eyebrow="Diagnóstico técnico"
+            title="Entorno móvil"
+            description="Verificación de ejecución e integración con la API de ZamoraFest."
+          />
+
+          <section
+            className="zf-environment__panel"
+            aria-labelledby="zf-environment-app-title"
+          >
+            <div className="zf-environment__status-row">
+              <div>
+                <h2 id="zf-environment-app-title">
+                  Aplicación
+                </h2>
+
+                <p>
+                  Ionic React en
+                  ejecución.
+                </p>
+              </div>
+
+              <span className="zf-environment__badge">
+                Activa
+              </span>
+            </div>
           </section>
 
-          <IonCard>
-            <IonCardHeader>
-              <IonCardTitle>Aplicación</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent className="status-row">
-              <span>Ionic React en ejecución</span>
-              <IonBadge color="success">Activa</IonBadge>
-            </IonCardContent>
-          </IonCard>
-
-          {viewState.status === 'loading' && (
-            <IonCard>
-              <IonCardContent className="loading-state">
-                <IonSpinner name="crescent" />
-                <span>Verificando conectividad y eventos…</span>
-              </IonCardContent>
-            </IonCard>
+          {viewState.status ===
+            'loading' && (
+            <AsyncStateView
+              state="loading"
+              title="Verificando entorno"
+              message="Estamos comprobando la conectividad con el backend y la disponibilidad de eventos."
+            />
           )}
 
-          {viewState.status === 'error' && (
-            <IonCard color="light">
-              <IonCardHeader>
-                <IonCardTitle>Conexión no disponible</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonText color="danger">
-                  <p>{viewState.message}</p>
-                </IonText>
-                <IonButton onClick={retry}>Reintentar</IonButton>
-              </IonCardContent>
-            </IonCard>
+          {viewState.status ===
+            'error' && (
+            <AsyncStateView
+              state="error"
+              title="Conexión no disponible"
+              message={
+                viewState.message
+              }
+              actionLabel="Reintentar"
+              onAction={
+                retry
+              }
+            />
           )}
 
-          {viewState.status === 'success' && (
+          {viewState.status ===
+            'success' && (
             <>
-              <IonCard>
-                <IonCardHeader>
-                  <IonCardTitle>Backend</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <div className="status-row">
-                    <span>Estado de salud</span>
-                    <IonBadge color="success">
-                      {viewState.health.status}
-                    </IonBadge>
-                  </div>
-                  <dl className="response-summary">
-                    <div>
-                      <dt>Servicio</dt>
-                      <dd>{viewState.health.service}</dd>
-                    </div>
-                    <div>
-                      <dt>Conectividad</dt>
-                      <dd>Verificada</dd>
-                    </div>
-                  </dl>
-                </IonCardContent>
-              </IonCard>
+              <section
+                className="zf-environment__panel"
+                aria-labelledby="zf-environment-backend-title"
+              >
+                <div className="zf-environment__status-row">
+                  <div>
+                    <h2 id="zf-environment-backend-title">
+                      Backend
+                    </h2>
 
-              <IonCard>
-                <IonCardHeader>
-                  <IonCardTitle>Respuesta de eventos</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <dl className="response-summary">
-                    <div>
-                      <dt>Recibidos</dt>
-                      <dd>{viewState.eventos.data.length}</dd>
-                    </div>
-                    <div>
-                      <dt>Total disponible</dt>
-                      <dd>{viewState.eventos.meta.total}</dd>
-                    </div>
-                    <div>
-                      <dt>Página</dt>
-                      <dd>
-                        {viewState.eventos.meta.page} de{' '}
-                        {viewState.eventos.meta.totalPages}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Evento de muestra</dt>
-                      <dd>{firstEvent?.titulo ?? 'Sin eventos'}</dd>
-                    </div>
-                  </dl>
-                </IonCardContent>
-              </IonCard>
+                    <p>
+                      Estado de la API
+                      conectada.
+                    </p>
+                  </div>
+
+                  <span className="zf-environment__badge">
+                    {
+                      viewState
+                        .health
+                        .status
+                    }
+                  </span>
+                </div>
+
+                <dl className="zf-environment__summary">
+                  <div>
+                    <dt>
+                      Servicio
+                    </dt>
+
+                    <dd>
+                      {
+                        viewState
+                          .health
+                          .service
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Conectividad
+                    </dt>
+
+                    <dd>
+                      Verificada
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                className="zf-environment__panel"
+                aria-labelledby="zf-environment-events-title"
+              >
+                <div className="zf-environment__section-heading">
+                  <h2 id="zf-environment-events-title">
+                    Respuesta de eventos
+                  </h2>
+
+                  <p>
+                    Resumen de la
+                    respuesta obtenida
+                    desde la API.
+                  </p>
+                </div>
+
+                <dl className="zf-environment__summary">
+                  <div>
+                    <dt>
+                      Recibidos
+                    </dt>
+
+                    <dd>
+                      {
+                        viewState
+                          .eventos
+                          .data
+                          .length
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Total disponible
+                    </dt>
+
+                    <dd>
+                      {
+                        viewState
+                          .eventos
+                          .meta
+                          .total
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Página
+                    </dt>
+
+                    <dd>
+                      {
+                        viewState
+                          .eventos
+                          .meta
+                          .page
+                      }{' '}
+                      de{' '}
+                      {
+                        viewState
+                          .eventos
+                          .meta
+                          .totalPages
+                      }
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>
+                      Evento de muestra
+                    </dt>
+
+                    <dd>
+                      {
+                        firstEvent
+                          ?.titulo ??
+                        'Sin eventos'
+                      }
+                    </dd>
+                  </div>
+                </dl>
+              </section>
             </>
           )}
         </main>

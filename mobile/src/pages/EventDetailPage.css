@@ -24,6 +24,26 @@
     var(--zf-space-8);
 }
 
+.zf-event-detail__navigation ion-button {
+  --border-color: var(--zf-color-primary);
+  --color: var(--zf-color-primary);
+  --border-radius: var(--zf-radius-md);
+
+  min-height: var(--zf-control-min-size);
+
+  font-weight: var(--zf-font-weight-semibold);
+  text-transform: none;
+}
+
+.zf-event-detail__navigation ion-button::part(native):focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+
+  outline-offset: var(--zf-focus-ring-offset);
+}
+
 .zf-event-detail__panel {
   display: grid;
   gap: var(--zf-space-4);

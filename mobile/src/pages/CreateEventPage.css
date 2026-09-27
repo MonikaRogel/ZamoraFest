@@ -199,6 +199,7 @@
 .zf-create-event__field textarea:focus-visible,
 .zf-create-event__field select:focus-visible,
 .zf-create-event__category input:focus-visible,
+.zf-create-event__free-toggle input:focus-visible,
 .zf-create-event__back::part(native):focus-visible {
   outline:
     var(--zf-focus-ring-width)
@@ -222,6 +223,84 @@
 
   color:
     var(--zf-color-error);
+}
+
+.zf-create-event__free-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap:
+    var(--zf-space-4);
+
+  min-height:
+    var(--zf-control-min-size);
+
+  padding:
+    var(--zf-space-3)
+    var(--zf-space-4);
+
+  color:
+    var(--zf-color-text-primary);
+
+  background:
+    var(--zf-color-surface-muted);
+
+  border:
+    var(--zf-border-width)
+    solid
+    var(--zf-color-border);
+
+  border-radius:
+    var(--zf-radius-md);
+
+  cursor:
+    pointer;
+}
+
+.zf-create-event__free-copy {
+  display: grid;
+  gap:
+    var(--zf-space-1);
+
+  min-width:
+    0;
+}
+
+.zf-create-event__free-copy strong {
+  font-size:
+    var(--zf-font-size-label);
+  font-weight:
+    var(--zf-font-weight-bold);
+  line-height:
+    var(--zf-line-height-body);
+}
+
+.zf-create-event__free-copy small {
+  font-size:
+    var(--zf-font-size-caption);
+  line-height:
+    var(--zf-line-height-body);
+
+  color:
+    var(--zf-color-text-secondary);
+}
+
+.zf-create-event__free-toggle input {
+  flex:
+    0
+    0
+    auto;
+
+  width:
+    1.25rem;
+  height:
+    1.25rem;
+
+  margin:
+    0;
+
+  accent-color:
+    var(--zf-color-primary);
 }
 
 .zf-create-event__categories {
