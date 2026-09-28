@@ -125,7 +125,10 @@ function mapRemoteError(
 
     return new EventCreateRepositoryError(
       'request',
-      'El servidor rechazó la creación del evento.',
+      error.body
+        ?.error
+        .message ??
+        'El servidor rechazó la creación del evento.',
       error.status,
       {
         cause:

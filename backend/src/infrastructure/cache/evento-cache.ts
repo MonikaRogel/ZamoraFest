@@ -116,12 +116,20 @@ export const eventoCache = {
     }, null);
   },
 
-  async set<T>(key: string, value: T): Promise<void> {
+  async set<T>(
+    key: string,
+    value: T,
+    ttlSeconds: number = CACHE_TTL_SECONDS,
+  ): Promise<void> {
+    assertPositiveSafeInteger(ttlSeconds, 'ttlSeconds');
+
+    const effectiveTtlSeconds = Math.min(ttlSeconds, CACHE_TTL_SECONDS);
+
     await withFallback(async () => {
       const client = await getClient();
 
       await client.set(key, JSON.stringify(value), {
-        EX: CACHE_TTL_SECONDS,
+        EX: effectiveTtlSeconds,
       });
     }, undefined);
   },

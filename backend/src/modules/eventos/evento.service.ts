@@ -194,6 +194,18 @@ function ensureDateRange(fechaInicio: Date, fechaFin: Date): void {
   }
 }
 
+function ensureStartInFuture(fechaInicio: Date): void {
+  const now = eventoInstantToDatabaseDate(new Date());
+
+  if (fechaInicio.getTime() <= now.getTime()) {
+    throw new AppError(
+      400,
+      'EVENT_START_NOT_FUTURE',
+      'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+    );
+  }
+}
+
 function ensureCanReview(identidad: IdentidadAcceso): void {
   if (!puedeRevisarEvento(identidad.rol)) {
     throw new AppError(403, 'FORBIDDEN', 'No tiene permisos para revisar eventos.');
@@ -240,6 +252,24 @@ function ensurePublishable(evento: EventoRecord): void {
       'Solo un evento aprobado que permanezca en BORRADOR puede pasar a PROGRAMADO.',
     );
   }
+
+  const now = eventoInstantToDatabaseDate(new Date());
+
+  if (evento.fechaFin.getTime() <= now.getTime()) {
+    throw new AppError(
+      409,
+      'EVENT_PUBLICATION_EXPIRED',
+      'No se puede publicar un evento cuya fecha de finalización ya transcurrió.',
+    );
+  }
+}
+
+function getCacheTtlSecondsUntil(validUntil: Date): number | null {
+  const now = eventoInstantToDatabaseDate(new Date());
+  const remainingMilliseconds = validUntil.getTime() - now.getTime();
+  const ttlSeconds = Math.floor(remainingMilliseconds / 1000);
+
+  return ttlSeconds > 0 ? ttlSeconds : null;
 }
 
 export const eventoService = {
@@ -250,10 +280,16 @@ export const eventoService = {
 
     await ensureActiveCategories(input.categoriaIds);
 
+    const fechaInicio = eventoLocalDateTimeToDatabaseDate(input.fechaInicio);
+    const fechaFin = eventoLocalDateTimeToDatabaseDate(input.fechaFin);
+
+    ensureDateRange(fechaInicio, fechaFin);
+    ensureStartInFuture(fechaInicio);
+
     const repositoryInput: CreateEventoRepositoryInput = {
       titulo: input.titulo,
-      fechaInicio: eventoLocalDateTimeToDatabaseDate(input.fechaInicio),
-      fechaFin: eventoLocalDateTimeToDatabaseDate(input.fechaFin),
+      fechaInicio,
+      fechaFin,
       costoReferencial: input.costoReferencial,
       lugarId: input.lugarId,
       categoriaIds: input.categoriaIds,
@@ -311,7 +347,15 @@ export const eventoService = {
       },
     };
 
-    await eventoCache.set(cacheKey, payload);
+    if (result.earliestFechaFin === null) {
+      await eventoCache.set(cacheKey, payload);
+    } else {
+      const ttlSeconds = getCacheTtlSecondsUntil(result.earliestFechaFin);
+
+      if (ttlSeconds !== null) {
+        await eventoCache.set(cacheKey, payload, ttlSeconds);
+      }
+    }
 
     return {
       payload,
@@ -361,8 +405,11 @@ export const eventoService = {
     }
 
     const payload = serializeEvento(evento);
+    const ttlSeconds = getCacheTtlSecondsUntil(evento.fechaFin);
 
-    await eventoCache.set(cacheKey, payload);
+    if (ttlSeconds !== null) {
+      await eventoCache.set(cacheKey, payload, ttlSeconds);
+    }
 
     return {
       payload,
@@ -398,6 +445,10 @@ export const eventoService = {
         : eventoLocalDateTimeToDatabaseDate(input.fechaFin);
 
     ensureDateRange(nextFechaInicio, nextFechaFin);
+
+    if (input.fechaInicio !== undefined) {
+      ensureStartInFuture(nextFechaInicio);
+    }
 
     const repositoryInput: UpdateEventoRepositoryInput = {};
 

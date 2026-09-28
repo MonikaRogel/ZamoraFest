@@ -403,6 +403,71 @@ describe(
     );
 
     it(
+      'conserva EVENT_START_NOT_FUTURE y el mensaje del backend en un 400',
+      async () => {
+        const repository =
+          createRemoteEventCreateRepository({
+            createEvento:
+              vi.fn(
+                async () => {
+                  throw new ApiRequestError(
+                    'Bad Request',
+                    400,
+                    {
+                      body: {
+                        error: {
+                          code:
+                            'EVENT_START_NOT_FUTURE',
+
+                          message:
+                            'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+                        },
+                      },
+                    },
+                  );
+                },
+              ),
+          });
+
+        try {
+          await repository.create(
+            input,
+            'access-asistente',
+          );
+
+          throw new Error(
+            'La operación debía fallar.',
+          );
+        } catch (error) {
+          expect(
+            error,
+          ).toBeInstanceOf(
+            EventCreateRepositoryError,
+          );
+
+          expect(
+            error,
+          ).toMatchObject({
+            kind:
+              'request',
+
+            status:
+              400,
+
+            code:
+              'EVENT_START_NOT_FUTURE',
+
+            message:
+              'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+
+            details:
+              [],
+          });
+        }
+      },
+    );
+
+    it(
       'traduce errores inesperados',
       async () => {
         const repository =

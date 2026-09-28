@@ -15,6 +15,36 @@ describe(
   'mapEventCreateServerValidation',
   () => {
     it(
+      'asocia EVENT_START_NOT_FUTURE con el campo fechaInicio',
+      () => {
+        const error =
+          new EventCreateRepositoryError(
+            'request',
+            'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+            400,
+            {
+              code:
+                'EVENT_START_NOT_FUTURE',
+            },
+          );
+
+        expect(
+          mapEventCreateServerValidation(
+            error,
+          ),
+        ).toEqual({
+          handled:
+            true,
+
+          fieldErrors: {
+            fechaInicio:
+              'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+          },
+        });
+      },
+    );
+
+    it(
       'asocia rutas directas del backend con los campos del formulario',
       () => {
         const error =

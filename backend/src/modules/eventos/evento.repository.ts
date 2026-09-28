@@ -224,8 +224,21 @@ const publicEventoWhere = {
   },
 } satisfies Prisma.EventoWhereInput;
 
+function buildBasePublicEventoWhere(
+  now: Date = eventoInstantToDatabaseDate(new Date()),
+): Prisma.EventoWhereInput {
+  return {
+    ...publicEventoWhere,
+    fechaFin: {
+      gt: now,
+    },
+  };
+}
+
 function buildPublicEventoWhere(filters: PublicEventoFilters): Prisma.EventoWhereInput {
-  const conditions: Prisma.EventoWhereInput[] = [publicEventoWhere];
+  const basePublicEventoWhere = buildBasePublicEventoWhere();
+
+  const conditions: Prisma.EventoWhereInput[] = [basePublicEventoWhere];
 
   if (filters.cantonId !== undefined) {
     conditions.push({
@@ -255,7 +268,7 @@ function buildPublicEventoWhere(filters: PublicEventoFilters): Prisma.EventoWher
   }
 
   if (conditions.length === 1) {
-    return publicEventoWhere;
+    return basePublicEventoWhere;
   }
 
   return {
@@ -335,7 +348,7 @@ export const eventoRepository = {
     const where = buildPublicEventoWhere(filters);
 
     if (detailLevel === 'detailed') {
-      const [total, eventos] = await prisma.$transaction([
+      const [total, eventos, earliestExpiration] = await prisma.$transaction([
         prisma.evento.count({
           where,
         }),
@@ -353,15 +366,25 @@ export const eventoRepository = {
           skip,
           take: limit,
         }),
+        prisma.evento.findFirst({
+          where,
+          select: {
+            fechaFin: true,
+          },
+          orderBy: {
+            fechaFin: 'asc',
+          },
+        }),
       ]);
 
       return {
         total,
         eventos,
+        earliestFechaFin: earliestExpiration?.fechaFin ?? null,
       };
     }
 
-    const [total, eventos] = await prisma.$transaction([
+    const [total, eventos, earliestExpiration] = await prisma.$transaction([
       prisma.evento.count({
         where,
       }),
@@ -379,11 +402,21 @@ export const eventoRepository = {
         skip,
         take: limit,
       }),
+      prisma.evento.findFirst({
+        where,
+        select: {
+          fechaFin: true,
+        },
+        orderBy: {
+          fechaFin: 'asc',
+        },
+      }),
     ]);
 
     return {
       total,
       eventos,
+      earliestFechaFin: earliestExpiration?.fechaFin ?? null,
     };
   },
 
@@ -431,7 +464,7 @@ export const eventoRepository = {
     if (detailLevel === 'detailed') {
       return prisma.evento.findFirst({
         where: {
-          ...publicEventoWhere,
+          ...buildBasePublicEventoWhere(),
           id,
         },
         select: eventoDetailedSelect,
@@ -440,7 +473,7 @@ export const eventoRepository = {
 
     return prisma.evento.findFirst({
       where: {
-        ...publicEventoWhere,
+        ...buildBasePublicEventoWhere(),
         id,
       },
       select: eventoBasicSelect,

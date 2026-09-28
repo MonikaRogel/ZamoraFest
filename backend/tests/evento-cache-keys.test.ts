@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getMock, onMock } = vi.hoisted(() => ({
+const { getMock, onMock, setMock } = vi.hoisted(() => ({
   getMock: vi.fn(),
   onMock: vi.fn(),
+  setMock: vi.fn(),
 }));
 
 vi.mock('redis', () => ({
@@ -12,7 +13,7 @@ vi.mock('redis', () => ({
     on: onMock,
     get: getMock,
     connect: vi.fn(),
-    set: vi.fn(),
+    set: setMock,
     incr: vi.fn(),
     close: vi.fn(),
   })),
@@ -61,5 +62,21 @@ describe('T044 - claves canonicas de cache', () => {
     await expect(eventoCache.detailKey('uuid-legacy' as unknown as number)).rejects.toBeInstanceOf(
       RangeError,
     );
+  });
+
+  it('permite acortar el TTL de una entrada sin alterar el valor cacheado', async () => {
+    await eventoCache.set('eventos:test', { ok: true }, 15);
+
+    expect(setMock).toHaveBeenCalledWith('eventos:test', JSON.stringify({ ok: true }), {
+      EX: 15,
+    });
+  });
+
+  it('no permite ampliar el TTL por encima del máximo de 60 segundos', async () => {
+    await eventoCache.set('eventos:test', { ok: true }, 120);
+
+    expect(setMock).toHaveBeenCalledWith('eventos:test', JSON.stringify({ ok: true }), {
+      EX: 60,
+    });
   });
 });
