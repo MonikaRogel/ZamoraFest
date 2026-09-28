@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { eventoCache } from '../src/infrastructure/cache/evento-cache.js';
 import type { IdentidadAcceso } from '../src/modules/auth/auth.service.js';
@@ -95,7 +95,13 @@ function buildEventoCreado(): Awaited<ReturnType<typeof eventoRepository.create>
   } as unknown as Awaited<ReturnType<typeof eventoRepository.create>>;
 }
 
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-08-20T15:00:00.000Z'));
+});
+
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -185,6 +191,29 @@ describe('T035 - creación canónica de eventos', () => {
       details: {
         categoriaIds: [21],
       },
+    });
+
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it('rechaza una fecha de inicio que no sea futura según la hora del servidor', async () => {
+    vi.spyOn(eventoRepository, 'findActiveLugar').mockResolvedValue({
+      id: 10,
+    });
+
+    vi.spyOn(eventoRepository, 'findActiveCategoryIds').mockResolvedValue([{ id: 20 }, { id: 21 }]);
+
+    const createSpy = vi.spyOn(eventoRepository, 'create');
+
+    await expect(
+      eventoService.create(asistente, {
+        ...inputValido,
+        fechaInicio: '2026-08-20T10:00',
+        fechaFin: '2026-08-20T12:00',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'EVENT_START_NOT_FUTURE',
     });
 
     expect(createSpy).not.toHaveBeenCalled();

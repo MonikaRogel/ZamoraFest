@@ -191,6 +191,8 @@ describe('T034 - repositorio canónico de eventos', () => {
 
     expect(args).toHaveProperty('where.estadoRevision', 'APROBADO');
 
+    expect(args).toHaveProperty('where.fechaFin.gt');
+
     expect(args).toHaveProperty('where.lugar.estado', true);
 
     expect(args).toHaveProperty('where.lugar.sector.estado', true);

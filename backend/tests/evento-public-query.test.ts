@@ -1,10 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     evento: {
       count: vi.fn(),
       findMany: vi.fn(),
+      findFirst: vi.fn(),
     },
     $transaction: vi.fn(),
   },
@@ -21,6 +22,12 @@ function prepareListMocks(): void {
   prismaMock.evento.count.mockReturnValue(Promise.resolve(0));
 
   prismaMock.evento.findMany.mockReturnValue(Promise.resolve([]));
+
+  prismaMock.evento.findFirst.mockReturnValue(
+    Promise.resolve({
+      fechaFin: new Date('2026-08-20T20:30:00.000Z'),
+    }),
+  );
 
   prismaMock.$transaction.mockImplementation(async (operations: unknown) => {
     if (!Array.isArray(operations)) {
@@ -42,6 +49,12 @@ function firstCountArgs(): unknown {
 describe('T037 - consultas públicas', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-21T00:51:12.345Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('acepta paginación y filtros cantonId/categoriaId desde query string', () => {
@@ -77,7 +90,7 @@ describe('T037 - consultas públicas', () => {
   it('filtra siempre por PROGRAMADO + APROBADO', async () => {
     prepareListMocks();
 
-    await eventoRepository.list(1, 10, 'basic');
+    const result = await eventoRepository.list(1, 10, 'basic');
 
     const findArgs = firstFindManyArgs();
 
@@ -87,9 +100,21 @@ describe('T037 - consultas públicas', () => {
 
     expect(findArgs).toHaveProperty('where.estadoRevision', 'APROBADO');
 
+    expect(findArgs).toHaveProperty(
+      'where.fechaFin.gt',
+      new Date('2026-08-20T19:51:12.345Z'),
+    );
+
     expect(countArgs).toHaveProperty('where.estadoEvento', 'PROGRAMADO');
 
     expect(countArgs).toHaveProperty('where.estadoRevision', 'APROBADO');
+
+    expect(countArgs).toHaveProperty(
+      'where.fechaFin.gt',
+      new Date('2026-08-20T19:51:12.345Z'),
+    );
+
+    expect(result.earliestFechaFin).toEqual(new Date('2026-08-20T20:30:00.000Z'));
   });
 
   it('aplica cantonId y categoriaId además de la regla pública', async () => {
@@ -101,16 +126,31 @@ describe('T037 - consultas públicas', () => {
     });
 
     const args = firstFindManyArgs();
+    const expirationArgs = prismaMock.evento.findFirst.mock.calls[0]?.[0] as unknown;
 
     expect(args).toHaveProperty('where.AND.0.estadoEvento', 'PROGRAMADO');
 
     expect(args).toHaveProperty('where.AND.0.estadoRevision', 'APROBADO');
+
+    expect(args).toHaveProperty(
+      'where.AND.0.fechaFin.gt',
+      new Date('2026-08-20T19:51:12.345Z'),
+    );
 
     expect(args).toHaveProperty('where.AND.1.lugar.sector.parroquia.canton.id', 3);
 
     expect(args).toHaveProperty('where.AND.2.categorias.some.idCategoria', 9);
 
     expect(args).toHaveProperty('where.AND.2.categorias.some.categoria.estado', true);
+
+    expect(expirationArgs).toHaveProperty(
+      'where.AND.1.lugar.sector.parroquia.canton.id',
+      3,
+    );
+
+    expect(expirationArgs).toHaveProperty('where.AND.2.categorias.some.idCategoria', 9);
+
+    expect(expirationArgs).toHaveProperty('orderBy.fechaFin', 'asc');
   });
 
   it('mantiene paginación mediante skip y take', async () => {

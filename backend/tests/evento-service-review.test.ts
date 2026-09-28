@@ -219,6 +219,9 @@ describe('T035-D2 - revisión y publicación', () => {
   });
 
   it('publica únicamente un BORRADOR previamente APROBADO', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-05T13:00:00.000Z'));
+
     vi.spyOn(eventoRepository, 'findById').mockResolvedValue(
       buildEvento({
         estadoEvento: 'BORRADOR',
@@ -247,6 +250,29 @@ describe('T035-D2 - revisión y publicación', () => {
       estadoEvento: 'PROGRAMADO',
       estadoRevision: 'APROBADO',
     });
+  });
+
+  it('impide publicar un evento que ya finalizó', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-05T23:00:00.000Z'));
+
+    vi.spyOn(eventoRepository, 'findById').mockResolvedValue(
+      buildEvento({
+        estadoEvento: 'BORRADOR',
+        estadoRevision: 'APROBADO',
+        revisorId: 1,
+        fechaRevision: new Date('2026-09-05T16:00:00.000Z'),
+      }),
+    );
+
+    const publishSpy = vi.spyOn(eventoRepository, 'publish');
+
+    await expect(eventoService.publish(100, administrador)).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'EVENT_PUBLICATION_EXPIRED',
+    });
+
+    expect(publishSpy).not.toHaveBeenCalled();
   });
 
   it('impide publicar un evento PENDIENTE', async () => {

@@ -104,6 +104,7 @@ function buildEvento(
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -230,6 +231,26 @@ describe('T035-C - actualización segura', () => {
     ).rejects.toMatchObject({
       statusCode: 400,
       code: 'INVALID_DATE_RANGE',
+    });
+
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('rechaza mover fechaInicio a una hora que ya transcurrió', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-05T17:00:00.000Z'));
+
+    vi.spyOn(eventoRepository, 'findById').mockResolvedValue(buildEvento());
+
+    const updateSpy = vi.spyOn(eventoRepository, 'update');
+
+    await expect(
+      eventoService.update(100, asistente, {
+        fechaInicio: '2026-09-05T11:00',
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      code: 'EVENT_START_NOT_FUTURE',
     });
 
     expect(updateSpy).not.toHaveBeenCalled();

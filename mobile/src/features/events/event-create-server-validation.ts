@@ -61,6 +61,25 @@ export function mapEventCreateServerValidation(
   error: unknown,
 ): EventCreateServerValidationResult {
   if (
+    error instanceof
+      EventCreateRepositoryError &&
+    error.status ===
+      400 &&
+    error.code ===
+      'EVENT_START_NOT_FUTURE'
+  ) {
+    return {
+      handled:
+        true,
+
+      fieldErrors: {
+        fechaInicio:
+          error.message,
+      },
+    };
+  }
+
+  if (
     !(
       error instanceof
       EventCreateRepositoryError

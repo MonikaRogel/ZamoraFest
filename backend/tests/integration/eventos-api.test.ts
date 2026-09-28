@@ -279,8 +279,8 @@ function eventoPayload(label: string) {
   return {
     titulo: `Evento T051 ${label}`,
     descripcion: `Evento de integración para ${label}.`,
-    fechaInicio: '2026-10-15T18:00:00',
-    fechaFin: '2026-10-15T22:00:00',
+    fechaInicio: '2099-10-15T18:00:00',
+    fechaFin: '2099-10-15T22:00:00',
     costoReferencial: 0,
     lugarId: support.lugarId,
     categoriaIds: support.categoriaIds,
@@ -385,6 +385,25 @@ describe('T051 - CRUD canónico de eventos', () => {
     expect(categorias).toBe(support.categoriaIds.length);
   });
 
+  it('rechaza la creación de un evento cuya fecha de inicio ya transcurrió', async () => {
+    const response = await request(app)
+      .post('/api/v1/eventos')
+      .set('Authorization', `Bearer ${support.asistenteToken}`)
+      .send({
+        ...eventoPayload('CREACION_PASADA'),
+        fechaInicio: '2000-01-01T18:00:00',
+        fechaFin: '2000-01-01T20:00:00',
+      });
+
+    expect(response.status).toBe(400);
+
+    expect(response.body as unknown).toMatchObject({
+      error: {
+        code: 'EVENT_START_NOT_FUTURE',
+      },
+    });
+  });
+
   it('actualiza un borrador propio mediante ASISTENTE', async () => {
     const evento = await createEvento('ACTUALIZACION');
 
@@ -487,6 +506,34 @@ describe('T051 - CRUD canónico de eventos', () => {
     expect(persistido.estadoRevision).toBe('APROBADO');
   });
 
+  it('impide publicar un evento aprobado que ya finalizó', async () => {
+    const evento = await createEvento('PUBLICACION_VENCIDA');
+
+    await approveEvento(evento.id);
+
+    await prisma.evento.update({
+      where: {
+        id: evento.id,
+      },
+      data: {
+        fechaInicio: new Date('2000-01-01T18:00:00.000Z'),
+        fechaFin: new Date('2000-01-01T20:00:00.000Z'),
+      },
+    });
+
+    const response = await request(app)
+      .post(`/api/v1/eventos/${evento.id}/publicacion`)
+      .set('Authorization', `Bearer ${support.administradorToken}`);
+
+    expect(response.status).toBe(409);
+
+    expect(response.body as unknown).toMatchObject({
+      error: {
+        code: 'EVENT_PUBLICATION_EXPIRED',
+      },
+    });
+  });
+
   it('realiza eliminación lógica y conserva físicamente el evento', async () => {
     const evento = await createEvento('ELIMINACION');
 
@@ -557,5 +604,36 @@ describe('T051 - CRUD canónico de eventos', () => {
     const draftDetail = await request(app).get(`/api/v1/eventos/${borrador.id}`);
 
     expect(draftDetail.status).toBe(404);
+  });
+
+  it('excluye de listado y detalle públicos un evento PROGRAMADO/APROBADO ya vencido', async () => {
+    const evento = await createEvento('PUBLICO_VENCIDO');
+
+    await approveEvento(evento.id);
+    await publishEvento(evento.id);
+
+    await prisma.evento.update({
+      where: {
+        id: evento.id,
+      },
+      data: {
+        fechaInicio: new Date('2000-01-01T18:00:00.000Z'),
+        fechaFin: new Date('2000-01-01T20:00:00.000Z'),
+      },
+    });
+
+    await eventoCache.invalidate();
+
+    const listResponse = await request(app).get('/api/v1/eventos?page=1&limit=50');
+
+    expect(listResponse.status).toBe(200);
+
+    const listado = listadoResponseSchema.parse(listResponse.body as unknown);
+
+    expect(listado.data.map((item) => item.id)).not.toContain(evento.id);
+
+    const detailResponse = await request(app).get(`/api/v1/eventos/${evento.id}`);
+
+    expect(detailResponse.status).toBe(404);
   });
 });

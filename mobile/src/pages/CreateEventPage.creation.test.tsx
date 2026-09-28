@@ -705,5 +705,61 @@ describe(
         );
       },
     );
+    it(
+      'muestra EVENT_START_NOT_FUTURE como error del campo fechaInicio',
+      async () => {
+        const create =
+          vi.fn<
+            EventCreateRepository['create']
+          >(
+            async () => {
+              throw new EventCreateRepositoryError(
+                'request',
+                'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+                400,
+                {
+                  code:
+                    'EVENT_START_NOT_FUTURE',
+                },
+              );
+            },
+          );
+
+        renderPage({
+          create,
+        });
+
+        await submitForm();
+
+        expect(
+          await screen.findByText(
+            'La fecha de inicio del evento debe ser posterior a la fecha y hora actuales.',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByLabelText(
+            'Fecha y hora de inicio',
+          ),
+        ).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+
+        expect(
+          screen.getByLabelText(
+            'Fecha y hora de inicio',
+          ),
+        ).toHaveValue(
+          '2026-09-25T18:00',
+        );
+
+        expect(
+          create,
+        ).toHaveBeenCalledTimes(
+          1,
+        );
+      },
+    );
   },
 );
