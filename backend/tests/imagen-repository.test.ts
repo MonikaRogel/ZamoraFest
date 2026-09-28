@@ -2,8 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
+    $transaction: vi.fn(),
     programacionEvento: {
       findFirst: vi.fn(),
+    },
+    evento: {
+      update: vi.fn(),
     },
     imagenEvento: {
       findFirst: vi.fn(),
@@ -18,11 +22,25 @@ vi.mock('../src/infrastructure/database/prisma.js', () => ({
   prisma: prismaMock,
 }));
 
+type TransactionCallback = (transaction: typeof prismaMock) => unknown;
+
+function isTransactionCallback(value: unknown): value is TransactionCallback {
+  return typeof value === 'function';
+}
+
 import { imagenRepository } from '../src/modules/imagenes/imagen.repository.js';
 
 describe('T040-A - repository de imágenes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    prismaMock.$transaction.mockImplementation((callback: unknown) => {
+      if (!isTransactionCallback(callback)) {
+        throw new Error('La prueba esperaba una transacción interactiva.');
+      }
+
+      return Promise.resolve(callback(prismaMock));
+    });
   });
 
   it('valida programación activa perteneciente al evento', async () => {

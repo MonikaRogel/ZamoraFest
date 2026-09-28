@@ -1,5 +1,6 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../infrastructure/database/prisma.js';
+import { eventoInstantToDatabaseDate } from '../eventos/evento.datetime.js';
 
 export interface CreateImagenRepositoryInput {
   idEvento: number;
@@ -141,22 +142,50 @@ export const imagenRepository = {
       data.descripcion = input.descripcion;
     }
 
-    return prisma.imagenEvento.create({
-      data,
-      select: imagenSelect,
+    return prisma.$transaction(async (transaction) => {
+      const imagen = await transaction.imagenEvento.create({
+        data,
+        select: imagenSelect,
+      });
+
+      await transaction.evento.update({
+        where: {
+          id: input.idEvento,
+        },
+        data: {
+          fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+        },
+      });
+
+      return imagen;
     });
   },
 
   deactivate(idEvento: number, idImagen: number) {
-    return prisma.imagenEvento.updateMany({
-      where: {
-        id: idImagen,
-        idEvento,
-        estado: true,
-      },
-      data: {
-        estado: false,
-      },
+    return prisma.$transaction(async (transaction) => {
+      const result = await transaction.imagenEvento.updateMany({
+        where: {
+          id: idImagen,
+          idEvento,
+          estado: true,
+        },
+        data: {
+          estado: false,
+        },
+      });
+
+      if (result.count > 0) {
+        await transaction.evento.update({
+          where: {
+            id: idEvento,
+          },
+          data: {
+            fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+          },
+        });
+      }
+
+      return result;
     });
   },
 };
