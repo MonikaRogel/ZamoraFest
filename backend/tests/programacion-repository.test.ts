@@ -2,8 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
+    $transaction: vi.fn(),
     lugar: {
       findFirst: vi.fn(),
+    },
+    evento: {
+      update: vi.fn(),
     },
     programacionEvento: {
       findMany: vi.fn(),
@@ -19,11 +23,25 @@ vi.mock('../src/infrastructure/database/prisma.js', () => ({
   prisma: prismaMock,
 }));
 
+type TransactionCallback = (transaction: typeof prismaMock) => unknown;
+
+function isTransactionCallback(value: unknown): value is TransactionCallback {
+  return typeof value === 'function';
+}
+
 import { programacionRepository } from '../src/modules/programaciones/programacion.repository.js';
 
 describe('T039-A - repository de programación', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    prismaMock.$transaction.mockImplementation((callback: unknown) => {
+      if (!isTransactionCallback(callback)) {
+        throw new Error('La prueba esperaba una transacción interactiva.');
+      }
+
+      return Promise.resolve(callback(prismaMock));
+    });
   });
 
   it('valida lugar activo dentro de jerarquía activa', async () => {
@@ -150,7 +168,10 @@ describe('T039-A - repository de programación', () => {
   });
 
   it('update permite desconectar lugar opcional', async () => {
-    prismaMock.programacionEvento.update.mockResolvedValue({});
+    prismaMock.programacionEvento.update.mockResolvedValue({
+      id: 4,
+      idEvento: 15,
+    });
 
     await programacionRepository.update(4, {
       idLugar: null,

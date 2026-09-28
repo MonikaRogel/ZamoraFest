@@ -312,6 +312,7 @@ export const eventoRepository = {
         fechaFin: input.fechaFin,
         costoReferencial: input.costoReferencial,
         fuenteInformacion: input.fuenteInformacion ?? null,
+        fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
         lugar: {
           connect: {
             id: input.lugarId,
@@ -579,6 +580,7 @@ export const eventoRepository = {
       },
       data: {
         estadoEvento: 'ELIMINADO',
+        fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
       },
       select: eventoBasicSelect,
     });
@@ -597,6 +599,7 @@ export const eventoRepository = {
           },
         },
         fechaRevision: input.fechaRevision,
+        fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
       },
       select: eventoBasicSelect,
     });
@@ -609,6 +612,7 @@ export const eventoRepository = {
       },
       data: {
         estadoEvento: 'PROGRAMADO',
+        fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
       },
       select: eventoBasicSelect,
     });

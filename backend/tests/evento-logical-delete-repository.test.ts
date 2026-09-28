@@ -46,17 +46,21 @@ describe('T036 - repositorio de eliminación lógica', () => {
 
     await eventoRepository.logicalDelete(100);
 
-    expect(prismaMock.evento.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          id: 100,
-        },
-        data: {
-          estadoEvento: 'ELIMINADO',
-        },
-      }),
-    );
+    const updateCall = prismaMock.evento.update.mock.calls[0]?.[0] as unknown as
+      | {
+          where?: {
+            id?: number;
+          };
+          data?: {
+            estadoEvento?: string;
+            fechaActualizacion?: unknown;
+          };
+        }
+      | undefined;
 
+    expect(updateCall?.where).toEqual({ id: 100 });
+    expect(updateCall?.data?.estadoEvento).toBe('ELIMINADO');
+    expect(updateCall?.data?.fechaActualizacion).toBeInstanceOf(Date);
     expect(prismaMock.evento.delete).not.toHaveBeenCalled();
   });
 });

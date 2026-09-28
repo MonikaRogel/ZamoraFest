@@ -1,5 +1,6 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../infrastructure/database/prisma.js';
+import { eventoInstantToDatabaseDate } from '../eventos/evento.datetime.js';
 
 export interface CreateProgramacionRepositoryInput {
   idEvento: number;
@@ -161,9 +162,22 @@ export const programacionRepository = {
       data.orden = input.orden;
     }
 
-    return prisma.programacionEvento.create({
-      data,
-      select: programacionSelect,
+    return prisma.$transaction(async (transaction) => {
+      const programacion = await transaction.programacionEvento.create({
+        data,
+        select: programacionSelect,
+      });
+
+      await transaction.evento.update({
+        where: {
+          id: input.idEvento,
+        },
+        data: {
+          fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+        },
+      });
+
+      return programacion;
     });
   },
 
@@ -207,25 +221,53 @@ export const programacionRepository = {
             };
     }
 
-    return prisma.programacionEvento.update({
-      where: {
-        id: idProgramacion,
-      },
-      data,
-      select: programacionSelect,
+    return prisma.$transaction(async (transaction) => {
+      const programacion = await transaction.programacionEvento.update({
+        where: {
+          id: idProgramacion,
+        },
+        data,
+        select: programacionSelect,
+      });
+
+      await transaction.evento.update({
+        where: {
+          id: programacion.idEvento,
+        },
+        data: {
+          fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+        },
+      });
+
+      return programacion;
     });
   },
 
   deactivate(idEvento: number, idProgramacion: number) {
-    return prisma.programacionEvento.updateMany({
-      where: {
-        id: idProgramacion,
-        idEvento,
-        estado: true,
-      },
-      data: {
-        estado: false,
-      },
+    return prisma.$transaction(async (transaction) => {
+      const result = await transaction.programacionEvento.updateMany({
+        where: {
+          id: idProgramacion,
+          idEvento,
+          estado: true,
+        },
+        data: {
+          estado: false,
+        },
+      });
+
+      if (result.count > 0) {
+        await transaction.evento.update({
+          where: {
+            id: idEvento,
+          },
+          data: {
+            fechaActualizacion: eventoInstantToDatabaseDate(new Date()),
+          },
+        });
+      }
+
+      return result;
     });
   },
 };
