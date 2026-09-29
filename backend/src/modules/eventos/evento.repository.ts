@@ -9,6 +9,10 @@ export interface PublicEventoFilters {
   categoriaId?: number;
 }
 
+export interface AdminEventoFilters {
+  estadoRevision?: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+  estadoEvento?: 'BORRADOR' | 'PROGRAMADO' | 'CANCELADO' | 'FINALIZADO' | 'ELIMINADO';
+}
 export interface CreateEventoRepositoryInput {
   titulo: string;
   descripcion?: string | null;
@@ -421,11 +425,7 @@ export const eventoRepository = {
     };
   },
 
-  async listByCreator(
-    creatorId: number,
-    page: number,
-    limit: number,
-  ) {
+  async listByCreator(creatorId: number, page: number, limit: number) {
     const skip = (page - 1) * limit;
 
     const where = {
@@ -461,6 +461,45 @@ export const eventoRepository = {
     };
   },
 
+  async listForAdmin(page: number, limit: number, filters: AdminEventoFilters = {}) {
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(filters.estadoEvento !== undefined
+        ? { estadoEvento: filters.estadoEvento }
+        : {
+            estadoEvento: {
+              not: 'ELIMINADO',
+            },
+          }),
+      ...(filters.estadoRevision !== undefined ? { estadoRevision: filters.estadoRevision } : {}),
+    } satisfies Prisma.EventoWhereInput;
+
+    const [total, eventos] = await prisma.$transaction([
+      prisma.evento.count({
+        where,
+      }),
+      prisma.evento.findMany({
+        where,
+        select: eventoBasicSelect,
+        orderBy: [
+          {
+            fechaCreacion: 'desc',
+          },
+          {
+            id: 'desc',
+          },
+        ],
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      total,
+      eventos,
+    };
+  },
   findPublicById(id: number, detailLevel: EventoDetailLevel = 'detailed') {
     if (detailLevel === 'detailed') {
       return prisma.evento.findFirst({

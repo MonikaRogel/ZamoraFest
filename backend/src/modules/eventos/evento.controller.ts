@@ -6,6 +6,7 @@ import type { IdentidadAcceso } from '../auth/auth.service.js';
 import {
   createEventoSchema,
   eventoIdParamsSchema,
+  listAdminEventosQuerySchema,
   listEventosQuerySchema,
   listOwnEventosQuerySchema,
   reviewEventoSchema,
@@ -47,6 +48,24 @@ export const listEventosController: RequestHandler = async (request, response) =
   response.setHeader('X-Cache', result.cacheStatus);
 
   response.status(200).json(result.payload);
+};
+
+export const listAdminEventosController: RequestHandler = async (request, response) => {
+  const identity = requireIdentity(request);
+  const query = listAdminEventosQuerySchema.parse(request.query);
+  const result = await eventoService.listAdmin(identity, query);
+
+  response.status(200).json(result);
+};
+
+export const getAdminEventoController: RequestHandler = async (request, response) => {
+  const identity = requireIdentity(request);
+  const { id } = eventoIdParamsSchema.parse(request.params);
+  const evento = await eventoService.getAdminById(identity, id);
+
+  response.status(200).json({
+    data: evento,
+  });
 };
 
 export const listOwnEventosController: RequestHandler = async (request, response) => {

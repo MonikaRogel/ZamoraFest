@@ -101,10 +101,7 @@ const fuenteInformacionSchema = z
     `La fuente de información no puede superar los ${FUENTE_INFORMACION_MAX} caracteres.`,
   );
 
-function rangoFechasValido(
-  fechaInicio: string | undefined,
-  fechaFin: string | undefined,
-): boolean {
+function rangoFechasValido(fechaInicio: string | undefined, fechaFin: string | undefined): boolean {
   if (fechaInicio === undefined || fechaFin === undefined) {
     return true;
   }
@@ -205,6 +202,19 @@ export const listOwnEventosQuerySchema = z
     limit: z.coerce.number().int().min(1).max(50).default(20),
   })
   .strict();
+
+export const listAdminEventosQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+    estadoRevision: z.enum(['PENDIENTE', 'APROBADO', 'RECHAZADO']).optional(),
+    estadoEvento: z
+      .enum(['BORRADOR', 'PROGRAMADO', 'CANCELADO', 'FINALIZADO', 'ELIMINADO'])
+      .optional(),
+  })
+  .strict();
+
+export type ListAdminEventosQuery = z.infer<typeof listAdminEventosQuerySchema>;
 
 export type CreateEventoInput = z.infer<typeof createEventoSchema>;
 

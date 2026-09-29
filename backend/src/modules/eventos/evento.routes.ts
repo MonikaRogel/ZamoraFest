@@ -6,7 +6,9 @@ import { programacionRouter } from '../programaciones/programacion.routes.js';
 import {
   createEventoController,
   deleteEventoController,
+  getAdminEventoController,
   getEventoController,
+  listAdminEventosController,
   listEventosController,
   listOwnEventosController,
   publishEventoController,
@@ -22,6 +24,20 @@ eventoRouter
   .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
 
 eventoRouter.get('/mios', authenticate, authorizeRoles('ASISTENTE'), listOwnEventosController);
+
+eventoRouter.get(
+  '/admin',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  listAdminEventosController,
+);
+
+eventoRouter.get(
+  '/admin/:id',
+  authenticate,
+  authorizeRoles('ADMINISTRADOR'),
+  getAdminEventoController,
+);
 
 eventoRouter.post(
   '/:id/revision',

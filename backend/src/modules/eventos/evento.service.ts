@@ -24,6 +24,7 @@ import {
 } from './evento.repository.js';
 import type {
   CreateEventoInput,
+  ListAdminEventosQuery,
   ListEventosQuery,
   ReviewEventoInput,
   UpdateEventoInput,
@@ -116,6 +117,16 @@ function ensureCanListOwn(identidad: IdentidadAcceso): void {
       403,
       'FORBIDDEN',
       'No tiene permisos para consultar eventos propios en este flujo.',
+    );
+  }
+}
+
+function ensureCanListAdmin(identidad: IdentidadAcceso): void {
+  if (identidad.rol !== 'ADMINISTRADOR') {
+    throw new AppError(
+      403,
+      'FORBIDDEN',
+      'No tiene permisos para consultar la administración de eventos.',
     );
   }
 }
@@ -369,11 +380,7 @@ export const eventoService = {
   ): Promise<ListEventosPayload> {
     ensureCanListOwn(identidad);
 
-    const result = await eventoRepository.listByCreator(
-      identidad.id,
-      query.page,
-      query.limit,
-    );
+    const result = await eventoRepository.listByCreator(identidad.id, query.page, query.limit);
 
     return {
       data: result.eventos.map(serializeEvento),
@@ -384,6 +391,42 @@ export const eventoService = {
         totalPages: Math.ceil(result.total / query.limit),
       },
     };
+  },
+
+  async listAdmin(
+    identidad: IdentidadAcceso,
+    query: ListAdminEventosQuery,
+  ): Promise<ListEventosPayload> {
+    ensureCanListAdmin(identidad);
+    const filters = {
+      ...(query.estadoRevision !== undefined ? { estadoRevision: query.estadoRevision } : {}),
+      ...(query.estadoEvento !== undefined ? { estadoEvento: query.estadoEvento } : {}),
+    };
+    const result = await eventoRepository.listForAdmin(query.page, query.limit, filters);
+    return {
+      data: result.eventos.map(serializeEvento),
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total: result.total,
+        totalPages: Math.ceil(result.total / query.limit),
+      },
+    };
+  },
+
+  async getAdminById(
+    identidad: IdentidadAcceso,
+    id: number,
+  ): Promise<EventoPayload> {
+    ensureCanListAdmin(identidad);
+
+    const evento = await eventoRepository.findById(id, 'basic');
+
+    if (!evento) {
+      throw new AppError(404, 'EVENTO_NOT_FOUND', 'El evento no existe.');
+    }
+
+    return serializeEvento(evento);
   },
 
   async getById(id: number): Promise<CachedResult<EventoPayload>> {
