@@ -64,6 +64,27 @@ export interface GetOwnEventosParams {
   readonly limit?: number;
 }
 
+export interface GetAdminEventosParams {
+  readonly page?: number;
+  readonly limit?: number;
+  readonly estadoRevision?:
+    | 'PENDIENTE'
+    | 'APROBADO'
+    | 'RECHAZADO';
+  readonly estadoEvento?:
+    | 'BORRADOR'
+    | 'PROGRAMADO'
+    | 'CANCELADO'
+    | 'FINALIZADO'
+    | 'ELIMINADO';
+}
+
+export interface ReviewEventoRequest {
+  readonly decision:
+    | 'APROBAR'
+    | 'RECHAZAR';
+}
+
 export interface ZamoraFestApi {
   getHealth(): Promise<HealthResponse>;
 
@@ -76,6 +97,28 @@ export interface ZamoraFestApi {
       GetOwnEventosParams | undefined,
     accessToken: string,
   ): Promise<EventosResponse>;
+
+  getAdminEventos(
+    params:
+      GetAdminEventosParams | undefined,
+    accessToken: string,
+  ): Promise<EventosResponse>;
+
+  getAdminEventoById(
+    id: number,
+    accessToken: string,
+  ): Promise<Evento>;
+
+  reviewEvento(
+    id: number,
+    input: ReviewEventoRequest,
+    accessToken: string,
+  ): Promise<Evento>;
+
+  publishEvento(
+    id: number,
+    accessToken: string,
+  ): Promise<Evento>;
 
   getEventoById(
     id: number,
@@ -1016,6 +1059,184 @@ export function createZamoraFestApi(
       );
     },
 
+    getAdminEventos(
+      params:
+        GetAdminEventosParams | undefined,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          '/api/v1/eventos/admin',
+          resolveBaseUrl(),
+        );
+
+      const page =
+        params?.page ??
+        1;
+
+      const limit =
+        params?.limit ??
+        20;
+
+      url.searchParams.set(
+        'page',
+        String(page),
+      );
+
+      url.searchParams.set(
+        'limit',
+        String(limit),
+      );
+
+      if (
+        params?.estadoRevision !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'estadoRevision',
+          params.estadoRevision,
+        );
+      }
+
+      if (
+        params?.estadoEvento !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'estadoEvento',
+          params.estadoEvento,
+        );
+      }
+
+      return requestJson(
+        url,
+        isEventosResponse,
+        fetcher,
+        {
+          method:
+            'GET',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        },
+      );
+    },
+
+    getAdminEventoById(
+      id: number,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/admin/${id}`,
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isEventoEnvelope,
+        fetcher,
+        {
+          method:
+            'GET',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        },
+      ).then(
+        (response) =>
+          response.data,
+      );
+    },
+
+    async reviewEvento(
+      id: number,
+      input:
+        ReviewEventoRequest,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/${id}/revision`,
+          resolveBaseUrl(),
+        );
+
+      const safeInput:
+        ReviewEventoRequest = {
+        decision:
+          input.decision,
+      };
+
+      const response =
+        await requestJson(
+          url,
+          isEventoEnvelope,
+          fetcher,
+          {
+            method:
+              'POST',
+            headers: {
+              Accept:
+                'application/json',
+              'Content-Type':
+                'application/json',
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+            body:
+              JSON.stringify(
+                safeInput,
+              ),
+          },
+        );
+
+      return (
+        response.data
+      );
+    },
+
+    async publishEvento(
+      id: number,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/${id}/publicacion`,
+          resolveBaseUrl(),
+        );
+
+      const response =
+        await requestJson(
+          url,
+          isEventoEnvelope,
+          fetcher,
+          {
+            method:
+              'POST',
+            headers: {
+              Accept:
+                'application/json',
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+      return (
+        response.data
+      );
+    },
+
     getEventoById(
       id: number,
     ) {
@@ -1240,6 +1461,66 @@ export const zamoraFestApi:
       createZamoraFestApi()
         .getOwnEventos(
           params,
+          accessToken,
+        )
+    );
+  },
+
+  getAdminEventos(
+    params:
+      GetAdminEventosParams | undefined,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getAdminEventos(
+          params,
+          accessToken,
+        )
+    );
+  },
+
+  getAdminEventoById(
+    id: number,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getAdminEventoById(
+          id,
+          accessToken,
+        )
+    );
+  },
+
+  reviewEvento(
+    id: number,
+    input:
+      ReviewEventoRequest,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .reviewEvento(
+          id,
+          input,
+          accessToken,
+        )
+    );
+  },
+
+  publishEvento(
+    id: number,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .publishEvento(
+          id,
           accessToken,
         )
     );
