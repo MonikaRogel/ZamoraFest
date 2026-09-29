@@ -216,7 +216,7 @@ El hot reload se demostrará con el dispositivo y el computador
 en la misma red, usando `--livereload --external` y el target
 ADB `R28M41JD2QN`.
 
-El video de evidencia mostrará versiones, diagnóstico completo,
+Las evidencias técnicas registrarán versiones, diagnóstico completo,
 estructura, ejecución, recarga, dirección utilizada y respuesta de la API.
 
 ## 14. Documentación reproducible
@@ -245,7 +245,7 @@ Limitaciones documentadas:
 - hot reload demostrado;
 - health y eventos consumidos desde la aplicación;
 - CORS y tráfico HTTP limitados a desarrollo;
-- video explicativo con la demostración completa del entorno;
+- evidencias reproducibles de la ejecución y la integración;
 - README reproducible y enlace de GitHub funcional;
 - ausencia de secretos y funcionalidades de Semana 10.
 

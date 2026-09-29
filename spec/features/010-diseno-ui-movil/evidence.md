@@ -382,5 +382,5 @@ Rama utilizada para Feature 010:
 
 `feat/010-diseno-ui-movil`
 
-El informe técnico de Semana 10 incorpora este enlace para permitir la
+El enlace permite la
 consulta del código presentado y de las evidencias asociadas a la feature.

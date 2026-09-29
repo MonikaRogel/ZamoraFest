@@ -404,21 +404,7 @@ Podrán incluir:
 
 No se fabricarán capturas ni resultados.
 
-## 22. Fase T - Video externo
-
-El video demostrativo se realizará después de que el código esté estabilizado.
-
-Duración requerida:
-
-3 a 5 minutos.
-
-El video será alojado externamente en una plataforma accesible.
-
-No se agregará el archivo de video pesado al repositorio.
-
-El video deberá corresponder exactamente con el código publicado en `main`.
-
-## 23. Preparación para Semana 12
+## 22. Preparación para Semana 12
 
 La implementación finalizará con puntos de extensión para:
 
