@@ -1,4 +1,4 @@
-import {
+﻿import {
   render,
   screen,
 } from '@testing-library/react';
@@ -342,6 +342,66 @@ describe(
             },
           ),
         ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      'protege la ruta administrativa cuando no existe sesión',
+      async () => {
+        window.history.pushState(
+          {},
+          '',
+          '/gestion/admin/eventos',
+        );
+
+        render(
+          <App />,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Iniciar sesión',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.queryByRole(
+            'heading',
+            {
+              name:
+                'Administración de eventos',
+            },
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      'protege el detalle administrativo cuando no existe sesión',
+      async () => {
+        window.history.pushState(
+          {},
+          '',
+          '/gestion/admin/eventos/15',
+        );
+
+        render(
+          <App />,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Iniciar sesión',
+            },
+          ),
+        ).toBeInTheDocument();
       },
     );
   },

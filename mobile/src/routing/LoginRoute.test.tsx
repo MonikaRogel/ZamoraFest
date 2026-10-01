@@ -1,4 +1,4 @@
-import {
+﻿import {
   fireEvent,
   render,
   screen,
@@ -106,6 +106,31 @@ const visitorSession:
         'visitante@zamorafest.ec',
       rol:
         'VISITANTE',
+    },
+  };
+
+const administratorSession:
+  AuthSession = {
+    accessToken:
+      'access-administrador',
+
+    refreshToken:
+      'refresh-administrador',
+
+    tokenType:
+      'Bearer',
+
+    expiresIn:
+      900,
+
+    usuario: {
+      id: 30,
+      nombre:
+        'Administrador Demo',
+      email:
+        'administrador@zamorafest.ec',
+      rol:
+        'ADMINISTRADOR',
     },
   };
 
@@ -251,6 +276,20 @@ function TestApp({
             </h1>
           )}
         />
+
+        <ProtectedRoute
+          exact
+          path="/gestion/admin/eventos"
+          allowedRoles={[
+            'ADMINISTRADOR',
+          ]}
+          forbiddenRedirect="/explore"
+          render={() => (
+            <h1>
+              Eventos administrativos protegidos
+            </h1>
+          )}
+        />
       </MemoryRouter>
     </ApplicationStateProvider>
   );
@@ -379,6 +418,44 @@ describe(
             {
               name:
                 'Crear evento protegido',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'regresa a eventos administrativos cuando ADMINISTRADOR solicitó la ruta protegida',
+      async () => {
+        vi.mocked(
+          zamoraFestApi.login,
+        ).mockResolvedValueOnce(
+          administratorSession,
+        );
+
+        const {
+          container,
+        } = render(
+          <TestApp
+            initialEntry="/login?redirect=%2Fgestion%2Fadmin%2Feventos"
+          />,
+        );
+
+        const form =
+          completeLoginForm(
+            container,
+          );
+
+        fireEvent.submit(
+          form,
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Eventos administrativos protegidos',
             },
           ),
         ).toBeInTheDocument();

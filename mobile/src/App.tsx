@@ -1,4 +1,4 @@
-import {
+﻿import {
   IonApp,
   IonRouterOutlet,
   setupIonicReact,
@@ -11,6 +11,8 @@ import {
   Route,
 } from 'react-router-dom';
 
+import AdminEventDetailPage from './pages/AdminEventDetailPage';
+import AdminEventsPage from './pages/AdminEventsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import EventDetailPage from './pages/EventDetailPage';
@@ -84,6 +86,28 @@ function App() {
               component={
                 EventDetailPage
               }
+            />
+
+            <ProtectedRoute
+              exact
+              path="/gestion/admin/eventos/:id"
+              allowedRoles={[
+                'ADMINISTRADOR',
+              ]}
+              render={() => (
+                <AdminEventDetailPage />
+              )}
+            />
+
+            <ProtectedRoute
+              exact
+              path="/gestion/admin/eventos"
+              allowedRoles={[
+                'ADMINISTRADOR',
+              ]}
+              render={() => (
+                <AdminEventsPage />
+              )}
             />
 
             <ProtectedRoute

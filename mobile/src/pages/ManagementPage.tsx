@@ -1,4 +1,4 @@
-import {
+﻿import {
   IonButton,
   IonContent,
   IonHeader,
@@ -115,6 +115,12 @@ function ManagementPage() {
   function handleCreateEvent() {
     history.push(
       '/gestion/eventos/nuevo',
+    );
+  }
+
+  function handleAdminEvents() {
+    history.push(
+      '/gestion/admin/eventos',
     );
   }
 
@@ -254,6 +260,30 @@ function ManagementPage() {
                     </p>
                   </div>
                 </>
+              )}
+
+              {role ===
+                'ADMINISTRADOR' && (
+                <div className="zf-management__action-group">
+                  <IonButton
+                    className="zf-management__secondary-action"
+                    fill="outline"
+                    expand="block"
+                    type="button"
+                    aria-label="Administrar eventos"
+                    onClick={
+                      handleAdminEvents
+                    }
+                  >
+                    Administrar eventos
+                  </IonButton>
+
+                  <p className="zf-management__action-note">
+                    Revisa, aprueba, rechaza
+                    y publica los eventos
+                    registrados.
+                  </p>
+                </div>
               )}
 
               <IonButton

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
 import {
   buildLoginRedirect,
@@ -28,6 +28,28 @@ describe('route-security', () => {
         '/gestion?seccion=eventos#inicio',
       ),
     ).toBe('/gestion?seccion=eventos#inicio');
+  });
+
+  it('acepta las rutas administrativas protegidas', () => {
+    expect(
+      sanitizeInternalAppDestination('/gestion/admin/eventos'),
+    ).toBe('/gestion/admin/eventos');
+
+    expect(
+      sanitizeInternalAppDestination('/gestion/admin/eventos/15'),
+    ).toBe('/gestion/admin/eventos/15');
+
+    expect(
+      sanitizeProtectedDestination('/gestion/admin/eventos'),
+    ).toBe('/gestion/admin/eventos');
+
+    expect(
+      sanitizeProtectedDestination('/gestion/admin/eventos/15'),
+    ).toBe('/gestion/admin/eventos/15');
+
+    expect(
+      buildLoginRedirect('/gestion/admin/eventos/15'),
+    ).toBe('/login?redirect=%2Fgestion%2Fadmin%2Feventos%2F15');
   });
 
   it('rechaza una URL externa absoluta', () => {

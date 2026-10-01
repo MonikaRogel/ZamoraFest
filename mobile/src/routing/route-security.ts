@@ -1,4 +1,4 @@
-const APP_ORIGIN = 'https://zamorafest.invalid';
+﻿const APP_ORIGIN = 'https://zamorafest.invalid';
 
 const STATIC_APP_PATHS = new Set([
   '/login',
@@ -8,12 +8,14 @@ const STATIC_APP_PATHS = new Set([
   '/gestion',
   '/gestion/eventos',
   '/gestion/eventos/nuevo',
+  '/gestion/admin/eventos',
 ]);
 
 const PROTECTED_PATHS = new Set([
   '/gestion',
   '/gestion/eventos',
   '/gestion/eventos/nuevo',
+  '/gestion/admin/eventos',
 ]);
 
 function isRecognizedPath(pathname: string): boolean {
@@ -21,7 +23,7 @@ function isRecognizedPath(pathname: string): boolean {
     return true;
   }
 
-  return /^\/eventos\/[1-9]\d*$/.test(pathname);
+  return /^\/eventos\/[1-9]\d*$/.test(pathname) || /^\/gestion\/admin\/eventos\/[1-9]\d*$/.test(pathname);
 }
 
 export function sanitizeInternalAppDestination(
@@ -70,7 +72,11 @@ export function sanitizeProtectedDestination(
 
   const parsed = new URL(safeDestination, APP_ORIGIN);
 
-  if (!PROTECTED_PATHS.has(parsed.pathname)) {
+  const isProtectedPath =
+    PROTECTED_PATHS.has(parsed.pathname) ||
+    /^\/gestion\/admin\/eventos\/[1-9]\d*$/.test(parsed.pathname);
+
+  if (!isProtectedPath) {
     return null;
   }
 

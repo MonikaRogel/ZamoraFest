@@ -1,4 +1,4 @@
-import {
+﻿import {
   fireEvent,
   render,
   screen,
@@ -166,6 +166,15 @@ function MyEventsProbe() {
   );
 }
 
+function AdminEventsProbe() {
+  return (
+    <h1>
+      Administración de eventos de prueba
+    </h1>
+  );
+}
+
+
 interface TestAppProps {
   readonly session:
     AuthSession;
@@ -197,6 +206,14 @@ function TestApp({
           path="/gestion"
           component={
             ManagementPage
+          }
+        />
+
+        <Route
+          exact
+          path="/gestion/admin/eventos"
+          component={
+            AdminEventsProbe
           }
         />
 
@@ -491,6 +508,43 @@ describe(
             },
           ),
         ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      'permite al ADMINISTRADOR abrir la administración de eventos',
+      async () => {
+        enterManagement(
+          administratorSession,
+        );
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Mi cuenta',
+          },
+        );
+
+        fireEvent.click(
+          screen.getByText(
+            'Administrar eventos',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Administración de eventos de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
       },
     );
 
