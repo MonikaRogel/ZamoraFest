@@ -140,6 +140,9 @@ export interface CreateEventoRequest {
   readonly fuenteInformacion: string | null;
 }
 
+export type UpdateEventoRequest =
+  Partial<CreateEventoRequest>;
+
 export type AuthRole =
   | 'VISITANTE'
   | 'ASISTENTE'

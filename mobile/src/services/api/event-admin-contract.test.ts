@@ -299,5 +299,101 @@ describe(
         });
       },
     );
+
+    it(
+      'actualiza parcialmente un evento mediante PATCH autenticado',
+      async () => {
+        const updatedEvent: Evento = {
+          ...adminEvento,
+          titulo: 'Festival Cultural de Zamora actualizado',
+          fechaActualizacion: '2026-10-02T20:00:00.000',
+        };
+
+        const { fetcher, mock } = createFetchMock(
+          () => jsonResponse({ data: updatedEvent }),
+        );
+
+        const api = createZamoraFestApi({
+          baseUrl: 'http://127.0.0.1:3000',
+          fetcher,
+        });
+
+        await expect(
+          api.updateEvento(
+            301,
+            {
+              titulo: 'Festival Cultural de Zamora actualizado',
+            },
+            'access-admin',
+          ),
+        ).resolves.toEqual(updatedEvent);
+
+        const firstCall = mock.mock.calls.at(0);
+        expect(firstCall).toBeDefined();
+
+        if (!firstCall) {
+          throw new Error('No se registró la solicitud de actualización.');
+        }
+
+        expect(firstCall[0].toString()).toBe(
+          'http://127.0.0.1:3000/api/v1/eventos/301',
+        );
+
+        expect(firstCall[1]).toEqual({
+          method: 'PATCH',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer access-admin',
+          },
+          body: JSON.stringify({
+            titulo: 'Festival Cultural de Zamora actualizado',
+          }),
+        });
+      },
+    );
+
+    it(
+      'elimina lógicamente un evento mediante DELETE autenticado y acepta 204',
+      async () => {
+        const { fetcher, mock } = createFetchMock(
+          () =>
+            new Response(null, {
+              status: 204,
+            }),
+        );
+
+        const api = createZamoraFestApi({
+          baseUrl: 'http://127.0.0.1:3000',
+          fetcher,
+        });
+
+        await expect(
+          api.deleteEvento(
+            301,
+            'access-admin',
+          ),
+        ).resolves.toBeUndefined();
+
+        const firstCall = mock.mock.calls.at(0);
+        expect(firstCall).toBeDefined();
+
+        if (!firstCall) {
+          throw new Error('No se registró la solicitud de eliminación.');
+        }
+
+        expect(firstCall[0].toString()).toBe(
+          'http://127.0.0.1:3000/api/v1/eventos/301',
+        );
+
+        expect(firstCall[1]).toEqual({
+          method: 'DELETE',
+          headers: {
+            Accept: 'application/json',
+            Authorization: 'Bearer access-admin',
+          },
+        });
+      },
+    );
   },
 );

@@ -10,6 +10,7 @@ import type {
   Categoria,
   CategoriasResponse,
   CreateEventoRequest,
+  UpdateEventoRequest,
   Evento,
   EventosResponse,
   HealthResponse,
@@ -132,6 +133,17 @@ export interface ZamoraFestApi {
     input: CreateEventoRequest,
     accessToken: string,
   ): Promise<Evento>;
+
+  updateEvento(
+    id: number,
+    input: UpdateEventoRequest,
+    accessToken: string,
+  ): Promise<Evento>;
+
+  deleteEvento(
+    id: number,
+    accessToken: string,
+  ): Promise<void>;
 
   login(
     input: LoginRequest,
@@ -916,6 +928,58 @@ async function requestJson<T>(
   return payload;
 }
 
+async function requestNoContent(
+  url: URL,
+  fetcher: Fetcher,
+  init: RequestInit,
+): Promise<void> {
+  let response:
+    Response;
+
+  try {
+    response =
+      await fetcher(
+        url,
+        init,
+      );
+  } catch (cause) {
+    throw new ApiRequestError(
+      'No se pudo establecer conexión con la API.',
+      null,
+      {
+        cause,
+      },
+    );
+  }
+
+  if (
+    !response.ok
+  ) {
+    const body =
+      await readApiErrorResponse(
+        response,
+      );
+
+    throw new ApiRequestError(
+      `La API respondió con el estado HTTP ${response.status}.`,
+      response.status,
+      {
+        body,
+      },
+    );
+  }
+
+  if (
+    response.status !==
+    204
+  ) {
+    throw new ApiRequestError(
+      'La API devolvió una respuesta incompatible con el contrato esperado.',
+      response.status,
+    );
+  }
+}
+
 export function createZamoraFestApi(
   options:
     CreateApiOptions = {},
@@ -1346,6 +1410,125 @@ export function createZamoraFestApi(
       );
     },
 
+    async updateEvento(
+      id: number,
+      input:
+        UpdateEventoRequest,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/${id}`,
+          resolveBaseUrl(),
+        );
+
+      const safeInput:
+        UpdateEventoRequest = {
+        ...(
+          input.titulo ===
+          undefined
+            ? {}
+            : { titulo: input.titulo }
+        ),
+        ...(
+          input.descripcion ===
+          undefined
+            ? {}
+            : { descripcion: input.descripcion }
+        ),
+        ...(
+          input.fechaInicio ===
+          undefined
+            ? {}
+            : { fechaInicio: input.fechaInicio }
+        ),
+        ...(
+          input.fechaFin ===
+          undefined
+            ? {}
+            : { fechaFin: input.fechaFin }
+        ),
+        ...(
+          input.costoReferencial ===
+          undefined
+            ? {}
+            : { costoReferencial: input.costoReferencial }
+        ),
+        ...(
+          input.lugarId ===
+          undefined
+            ? {}
+            : { lugarId: input.lugarId }
+        ),
+        ...(
+          input.categoriaIds ===
+          undefined
+            ? {}
+            : { categoriaIds: input.categoriaIds }
+        ),
+        ...(
+          input.fuenteInformacion ===
+          undefined
+            ? {}
+            : { fuenteInformacion: input.fuenteInformacion }
+        ),
+      };
+
+      const response =
+        await requestJson(
+          url,
+          isEventoEnvelope,
+          fetcher,
+          {
+            method:
+              'PATCH',
+            headers: {
+              Accept:
+                'application/json',
+              'Content-Type':
+                'application/json',
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+            body:
+              JSON.stringify(
+                safeInput,
+              ),
+          },
+        );
+
+      return (
+        response.data
+      );
+    },
+
+    async deleteEvento(
+      id: number,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/${id}`,
+          resolveBaseUrl(),
+        );
+
+      await requestNoContent(
+        url,
+        fetcher,
+        {
+          method:
+            'DELETE',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        },
+      );
+    },
     async login(
       input:
         LoginRequest,
@@ -1566,6 +1749,36 @@ export const zamoraFestApi:
     );
   },
 
+  updateEvento(
+    id: number,
+    input:
+      UpdateEventoRequest,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .updateEvento(
+          id,
+          input,
+          accessToken,
+        )
+    );
+  },
+
+  deleteEvento(
+    id: number,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .deleteEvento(
+          id,
+          accessToken,
+        )
+    );
+  },
   login(
     input:
       LoginRequest,
