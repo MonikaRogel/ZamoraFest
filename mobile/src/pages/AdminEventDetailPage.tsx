@@ -1,4 +1,4 @@
-﻿import {
+import {
   IonButton,
   IonContent,
   IonHeader,
@@ -276,6 +276,18 @@ function AdminEventDetailPage() {
       remoteLoading(),
     );
 
+  const [
+    showDeleteConfirmation,
+    setShowDeleteConfirmation,
+  ] =
+    useState(false);
+
+  const [
+    isDeleting,
+    setIsDeleting,
+  ] =
+    useState(false);
+
   const loadEvent =
     useCallback(
       async () => {
@@ -415,6 +427,55 @@ function AdminEventDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (
+      eventId === null ||
+      accessToken === null
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await adminEventRepository
+        .deleteEvent(
+          eventId,
+          accessToken,
+        );
+
+      setIsDeleting(false);
+
+      history.push(
+        '/gestion/admin/eventos',
+      );
+    } catch (error) {
+      setIsDeleting(false);
+
+      if (
+        isAuthenticationFailure(
+          error,
+        )
+      ) {
+        invalidateSession();
+
+        return;
+      }
+
+      setShowDeleteConfirmation(
+        false,
+      );
+
+      setEventState(
+        remoteError(
+          getErrorMessage(
+            error,
+          ),
+        ),
+      );
+    }
+  }
+
   const event =
     eventState.status ===
     'success'
@@ -550,6 +611,67 @@ function AdminEventDetailPage() {
                     </IonButton>
                   </section>
                 )}
+                <section
+                  className="zf-event-detail__panel"
+                  aria-label="Acciones de eliminación"
+                >
+                  <IonButton
+                    type="button"
+                    fill="outline"
+                    color="danger"
+                    disabled={
+                      isDeleting
+                    }
+                    onClick={() => {
+                      setShowDeleteConfirmation(
+                        true,
+                      );
+                    }}
+                  >
+                    Eliminar evento
+                  </IonButton>
+
+                  {showDeleteConfirmation && (
+                    <div
+                      role="alert"
+                    >
+                      <p>
+                        Esta acción marcará el evento como eliminado y dejará de estar disponible.
+                      </p>
+
+                      <IonButton
+                        type="button"
+                        color="danger"
+                        disabled={
+                          isDeleting
+                        }
+                        onClick={() => {
+                          void handleDelete();
+                        }}
+                      >
+                        {isDeleting
+                          ? 'Eliminando...'
+                          : 'Confirmar eliminación'}
+                      </IonButton>
+
+                      <IonButton
+                        type="button"
+                        fill="clear"
+                        disabled={
+                          isDeleting
+                        }
+                        onClick={() => {
+                          setShowDeleteConfirmation(
+                            false,
+                          );
+                        }}
+                      >
+                        Cancelar
+                      </IonButton>
+                    </div>
+                  )}
+                </section>
+
                 <section
                   className="zf-event-detail__panel"
                   aria-labelledby="zf-event-information-heading"

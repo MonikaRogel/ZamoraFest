@@ -110,6 +110,8 @@ describe(
               vi.fn(),
             publishEvento:
               vi.fn(),
+            deleteEvento:
+              vi.fn(),
           });
 
         const query = {
@@ -162,6 +164,8 @@ describe(
               vi.fn(),
             publishEvento:
               vi.fn(),
+            deleteEvento:
+              vi.fn(),
           });
 
         await expect(
@@ -202,6 +206,8 @@ describe(
               vi.fn(),
             publishEvento:
               vi.fn(),
+            deleteEvento:
+              vi.fn(),
           });
 
         await expect(
@@ -239,6 +245,8 @@ describe(
               vi.fn(),
             reviewEvento,
             publishEvento:
+              vi.fn(),
+            deleteEvento:
               vi.fn(),
           });
 
@@ -294,6 +302,8 @@ describe(
             reviewEvento:
               vi.fn(),
             publishEvento,
+            deleteEvento:
+              vi.fn(),
           });
 
         await expect(
@@ -333,6 +343,8 @@ describe(
             reviewEvento:
               vi.fn(),
             publishEvento:
+              vi.fn(),
+            deleteEvento:
               vi.fn(),
           });
 
@@ -382,6 +394,8 @@ describe(
                     null,
                   ),
                 ),
+            deleteEvento:
+              vi.fn(),
           });
 
         await expect(
@@ -398,6 +412,44 @@ describe(
           status:
             null,
         });
+      },
+    );
+    it(
+      'delega la eliminación lógica con el token del administrador',
+      async () => {
+        const deleteEvento =
+          vi.fn()
+            .mockResolvedValueOnce(
+              undefined,
+            );
+
+        const repository =
+          createRemoteAdminEventRepository({
+            getAdminEventos:
+              vi.fn(),
+            getAdminEventoById:
+              vi.fn(),
+            reviewEvento:
+              vi.fn(),
+            publishEvento:
+              vi.fn(),
+            deleteEvento,
+          });
+
+        await expect(
+          repository
+            .deleteEvent(
+              301,
+              'access-admin',
+            ),
+        ).resolves.toBeUndefined();
+
+        expect(
+          deleteEvento,
+        ).toHaveBeenCalledWith(
+          301,
+          'access-admin',
+        );
       },
     );
   },

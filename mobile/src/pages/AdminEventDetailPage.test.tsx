@@ -1,4 +1,4 @@
-﻿import {
+import {
   act,
   fireEvent,
   render,
@@ -42,6 +42,8 @@ vi.mock(
       reviewEvent:
         vi.fn(),
       publishEvent:
+        vi.fn(),
+      deleteEvent:
         vi.fn(),
     },
   }),
@@ -536,6 +538,86 @@ describe(
           99,
           'access-admin',
         );
+      },
+    );
+
+    it(
+      'elimina lógicamente un evento solo después de confirmarlo',
+      async () => {
+        vi.mocked(
+          adminEventRepository
+            .getAdminEventById,
+        ).mockResolvedValueOnce(
+          event,
+        );
+
+        vi.mocked(
+          adminEventRepository
+            .deleteEvent,
+        ).mockResolvedValueOnce(
+          undefined,
+        );
+
+        renderDetail();
+
+        await screen.findByRole(
+          'heading',
+          {
+            name:
+              'Festival Cultural de Zamora',
+          },
+        );
+
+        fireEvent.click(
+          screen.getByText(
+            'Eliminar evento',
+            {
+              selector:
+                'ion-button',
+            },
+          ),
+        );
+
+        expect(
+          adminEventRepository
+            .deleteEvent,
+        ).not.toHaveBeenCalled();
+
+        expect(
+          screen.getByText(
+            'Esta acción marcará el evento como eliminado y dejará de estar disponible.',
+          ),
+        ).toBeInTheDocument();
+
+        await act(async () => {
+          fireEvent.click(
+            screen.getByText(
+              'Confirmar eliminación',
+              {
+                selector:
+                  'ion-button',
+              },
+            ),
+          );
+        });
+
+        expect(
+          adminEventRepository
+            .deleteEvent,
+        ).toHaveBeenCalledWith(
+          7,
+          'access-admin',
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Administración de eventos de prueba',
+            },
+          ),
+        ).toBeInTheDocument();
       },
     );
 

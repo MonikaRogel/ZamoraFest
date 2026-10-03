@@ -55,6 +55,11 @@ export interface AdminEventRepository {
     id: number,
     accessToken: string,
   ): Promise<Evento>;
+
+  deleteEvent(
+    id: number,
+    accessToken: string,
+  ): Promise<void>;
 }
 
 type AdminEventsApi =
@@ -64,6 +69,7 @@ type AdminEventsApi =
     | 'getAdminEventoById'
     | 'reviewEvento'
     | 'publishEvento'
+    | 'deleteEvento'
   >;
 
 function mapRemoteError(
@@ -207,6 +213,23 @@ export function createRemoteAdminEventRepository(
       try {
         return await api
           .publishEvento(
+            id,
+            accessToken,
+          );
+      } catch (error) {
+        throw mapRemoteError(
+          error,
+        );
+      }
+    },
+
+    async deleteEvent(
+      id,
+      accessToken,
+    ) {
+      try {
+        await api
+          .deleteEvento(
             id,
             accessToken,
           );
