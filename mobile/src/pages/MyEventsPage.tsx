@@ -680,6 +680,24 @@ function MyEventsPage() {
                             )}
                           </div>
                         )}
+
+                        {event.estadoEvento ===
+                          'BORRADOR' &&
+                          event.estadoRevision !==
+                            'APROBADO' && (
+                          <IonButton
+                            fill="outline"
+                            type="button"
+                            aria-label={`Editar ${event.titulo}`}
+                            onClick={() => {
+                              history.push(
+                                `/gestion/eventos/${event.id}/editar`,
+                              );
+                            }}
+                          >
+                            Editar
+                          </IonButton>
+                        )}
                       </article>
                     ),
                   )}

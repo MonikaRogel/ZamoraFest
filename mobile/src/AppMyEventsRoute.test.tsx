@@ -91,5 +91,26 @@ describe(
         ).not.toBeInTheDocument();
       },
     );
+
+    it(
+      'protege la ruta de edición de eventos propios cuando no existe sesión',
+      async () => {
+        window.history.pushState(
+          {},
+          '',
+          '/gestion/eventos/101/editar',
+        );
+
+        render(
+          <App />,
+        );
+
+        expect(
+          await screen.findByText(
+            /^Iniciar sesi/,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
   },
 );

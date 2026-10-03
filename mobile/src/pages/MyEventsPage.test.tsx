@@ -214,6 +214,15 @@ function TestApp() {
         >
           <MyEventsPage />
         </Route>
+
+        <Route
+          exact
+          path="/gestion/eventos/101/editar"
+        >
+          <p>
+            Ruta de edición 101
+          </p>
+        </Route>
       </MemoryRouter>
     </ApplicationStateProvider>
   );
@@ -419,6 +428,93 @@ describe(
             'El servicio de gestión no está disponible temporalmente. Intenta nuevamente en unos momentos.',
           ),
         ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'navega a la edición de un borrador propio permitido',
+      async () => {
+        vi.mocked(
+          ownEventRepository
+            .listOwnEventPage,
+        ).mockResolvedValueOnce({
+          events: [
+            ownEvent,
+          ],
+          meta: {
+            page:
+              1,
+            limit:
+              20,
+            total:
+              1,
+            totalPages:
+              1,
+          },
+        });
+
+        enterMyEvents();
+
+        const editButton =
+          await screen.findByText(
+            'Editar',
+          );
+
+        fireEvent.click(
+          editButton,
+        );
+
+        expect(
+          await screen.findByText(
+            'Ruta de edición 101',
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'no ofrece edición cuando el borrador ya fue aprobado',
+      async () => {
+        vi.mocked(
+          ownEventRepository
+            .listOwnEventPage,
+        ).mockResolvedValueOnce({
+          events: [
+            {
+              ...ownEvent,
+              estadoRevision:
+                'APROBADO',
+            },
+          ],
+          meta: {
+            page:
+              1,
+            limit:
+              20,
+            total:
+              1,
+            totalPages:
+              1,
+          },
+        });
+
+        enterMyEvents();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Festival propio',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            'Editar',
+          ),
+        ).not.toBeInTheDocument();
       },
     );
   },

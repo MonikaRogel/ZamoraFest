@@ -1,4 +1,4 @@
-﻿import {
+import {
   IonApp,
   IonRouterOutlet,
   setupIonicReact,
@@ -14,6 +14,7 @@ import {
 import AdminEventDetailPage from './pages/AdminEventDetailPage';
 import AdminEventsPage from './pages/AdminEventsPage';
 import CreateEventPage from './pages/CreateEventPage';
+import EditEventPage from './pages/EditEventPage';
 import EnvironmentStatusPage from './pages/EnvironmentStatusPage';
 import EventDetailPage from './pages/EventDetailPage';
 import ExploreEventsPage from './pages/ExploreEventsPage';
@@ -129,6 +130,16 @@ function App() {
               ]}
               render={() => (
                 <CreateEventPage />
+              )}
+            />
+            <ProtectedRoute
+              exact
+              path="/gestion/eventos/:id/editar"
+              allowedRoles={[
+                'ASISTENTE',
+              ]}
+              render={() => (
+                <EditEventPage />
               )}
             />
 
