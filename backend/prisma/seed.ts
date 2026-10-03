@@ -15,9 +15,17 @@ const cantones = [
 ] as const;
 
 const categorias = [
-  { nombre: 'Cultura', descripcion: 'Eventos culturales y tradicionales.' },
-  { nombre: 'Música', descripcion: 'Conciertos y presentaciones musicales.' },
-  { nombre: 'Gastronomía', descripcion: 'Ferias y muestras gastronómicas.' },
+  { nombre: 'Cultural', descripcion: 'Eventos culturales y tradicionales.' },
+  { nombre: 'Carnavales', descripcion: 'Actividades y celebraciones de carnaval.' },
+  { nombre: 'Cívica/Patriótica', descripcion: 'Actos cívicos, conmemorativos y patrióticos.' },
+  { nombre: 'Comercial/Feria', descripcion: 'Ferias, exposiciones y actividades comerciales.' },
+  { nombre: 'Turístico', descripcion: 'Actividades y eventos de interés turístico.' },
+] as const;
+
+const categoriasLegadas = [
+  'Cultura',
+  'Música',
+  'Gastronomía',
 ] as const;
 
 const roles = [
@@ -265,6 +273,17 @@ async function seed(): Promise<void> {
       tipoLugar: 'PARQUE',
       direccionReferencial: 'Zamora, Zamora Chinchipe',
       estado: true,
+    },
+  });
+
+  await prisma.categoria.updateMany({
+    where: {
+      nombre: {
+        in: [...categoriasLegadas],
+      },
+    },
+    data: {
+      estado: false,
     },
   });
 

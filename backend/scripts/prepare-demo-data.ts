@@ -7,7 +7,7 @@ interface EventoDemo {
   clave: string;
   titulo: string;
   descripcion: string;
-  categoria: 'Cultura' | 'Música' | 'Gastronomía';
+  categoria: 'Cultural' | 'Carnavales' | 'Cívica/Patriótica' | 'Comercial/Feria' | 'Turístico';
   fechaInicio: Date;
   fechaFin: Date;
   costoReferencial: string;
@@ -25,7 +25,7 @@ const eventosDemo: EventoDemo[] = Array.from({ length: TOTAL_EVENTOS }, (_value,
   const esPublicado = numero <= PUBLICADOS;
   const inicio = new Date(Date.UTC(2026, 8, 5 + index * 7, 19, 0, 0));
   const fin = new Date(inicio.getTime() + 3 * 60 * 60 * 1000);
-  const categorias = ['Cultura', 'Música', 'Gastronomía'] as const;
+  const categorias = ['Cultural', 'Carnavales', 'Cívica/Patriótica', 'Comercial/Feria', 'Turístico'] as const;
   const categoria = categorias[index % categorias.length];
 
   if (!categoria) {
@@ -128,7 +128,7 @@ async function prepararDatosDemo(): Promise<void> {
     prisma.categoria.findMany({
       where: {
         nombre: {
-          in: ['Cultura', 'Música', 'Gastronomía'],
+          in: ['Cultural', 'Carnavales', 'Cívica/Patriótica', 'Comercial/Feria', 'Turístico'],
         },
         estado: true,
       },
@@ -145,8 +145,8 @@ async function prepararDatosDemo(): Promise<void> {
 
   const categoriaIds = new Map(categorias.map((categoria) => [categoria.nombre, categoria.id]));
 
-  if (categoriaIds.size !== 3) {
-    throw new Error('No están disponibles las tres categorías requeridas por T029.');
+  if (categoriaIds.size !== 5) {
+    throw new Error('No están disponibles las cinco categorías requeridas por ZamoraFest.');
   }
 
   for (const eventoDemo of eventosDemo) {
@@ -191,6 +191,12 @@ async function prepararDatosDemo(): Promise<void> {
             id: true,
           },
         });
+
+    await prisma.eventoCategoria.deleteMany({
+      where: {
+        idEvento: evento.id,
+      },
+    });
 
     await prisma.eventoCategoria.upsert({
       where: {
