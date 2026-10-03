@@ -99,6 +99,10 @@ export interface ZamoraFestApi {
     accessToken: string,
   ): Promise<EventosResponse>;
 
+  getOwnEventoById(
+    id: number,
+    accessToken: string,
+  ): Promise<Evento>;
   getAdminEventos(
     params:
       GetAdminEventosParams | undefined,
@@ -1190,6 +1194,36 @@ export function createZamoraFestApi(
       );
     },
 
+    getOwnEventoById(
+      id: number,
+      accessToken:
+        string,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/mios/${id}`,
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isEventoEnvelope,
+        fetcher,
+        {
+          method:
+            'GET',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        },
+      ).then(
+        (response) =>
+          response.data,
+      );
+    },
     getAdminEventoById(
       id: number,
       accessToken:
@@ -1664,6 +1698,19 @@ export const zamoraFestApi:
     );
   },
 
+  getOwnEventoById(
+    id: number,
+    accessToken:
+      string,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getOwnEventoById(
+          id,
+          accessToken,
+        )
+    );
+  },
   getAdminEventoById(
     id: number,
     accessToken:

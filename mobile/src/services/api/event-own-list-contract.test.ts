@@ -304,5 +304,101 @@ describe(
         );
       },
     );
+
+    it(
+      'consulta el detalle propio autenticado por id',
+      async () => {
+        const event =
+          ownEventosResponse.data[0];
+
+        if (!event) {
+          throw new Error(
+            'La respuesta de prueba no contiene un evento propio.',
+          );
+        }
+
+        const mock =
+          vi.fn(
+            async (
+              input:
+                RequestInfo | URL,
+              init?:
+                RequestInit,
+            ) => {
+              void input;
+              void init;
+
+              return jsonResponse({
+                data:
+                  event,
+              });
+            },
+          );
+
+        const api =
+          createZamoraFestApi({
+            baseUrl:
+              'http://127.0.0.1:3000',
+            fetcher:
+              mock as unknown as
+                typeof fetch,
+          });
+
+        await expect(
+          api.getOwnEventoById(
+            101,
+            'access-asistente',
+          ),
+        ).resolves.toEqual(
+          event,
+        );
+
+        expect(
+          mock,
+        ).toHaveBeenCalledOnce();
+
+        const firstCall =
+          mock.mock.calls.at(
+            0,
+          );
+
+        expect(
+          firstCall,
+        ).toBeDefined();
+
+        if (
+          !firstCall
+        ) {
+          throw new Error(
+            'No se registrÃ³ la solicitud de detalle propio.',
+          );
+        }
+
+        const [
+          url,
+          options,
+        ] =
+          firstCall;
+
+        expect(
+          url.toString(),
+        ).toBe(
+          'http://127.0.0.1:3000/api/v1/eventos/mios/101',
+        );
+
+        expect(
+          options,
+        ).toEqual({
+          method:
+            'GET',
+          headers: {
+            Accept:
+              'application/json',
+            Authorization:
+              'Bearer access-asistente',
+          },
+        });
+      },
+    );
   },
 );

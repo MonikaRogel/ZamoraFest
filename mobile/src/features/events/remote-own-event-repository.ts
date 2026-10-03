@@ -3,6 +3,10 @@ import {
   zamoraFestApi,
   type ZamoraFestApi,
 } from '../../services/api/zamorafest-api';
+import type {
+  Evento,
+  UpdateEventoRequest,
+} from '../../types/api';
 import {
   EventRepositoryError,
   type EventListPage,
@@ -20,12 +24,24 @@ export interface OwnEventRepository {
     accessToken:
       string,
   ): Promise<EventListPage>;
+  getOwnEventById(
+    id: number,
+    accessToken: string,
+  ): Promise<Evento>;
+
+  updateOwnEvent(
+    id: number,
+    input: UpdateEventoRequest,
+    accessToken: string,
+  ): Promise<Evento>;
 }
 
 type OwnEventsApi =
   Pick<
     ZamoraFestApi,
-    'getOwnEventos'
+    | 'getOwnEventos'
+    | 'getOwnEventoById'
+    | 'updateEvento'
   >;
 
 function mapRemoteError(
@@ -110,6 +126,42 @@ export function createRemoteOwnEventRepository(
           meta:
             response.meta,
         };
+      } catch (error) {
+        throw mapRemoteError(
+          error,
+        );
+      }
+    },
+
+    async getOwnEventById(
+      id,
+      accessToken,
+    ) {
+      try {
+        return await api
+          .getOwnEventoById(
+            id,
+            accessToken,
+          );
+      } catch (error) {
+        throw mapRemoteError(
+          error,
+        );
+      }
+    },
+
+    async updateOwnEvent(
+      id,
+      input,
+      accessToken,
+    ) {
+      try {
+        return await api
+          .updateEvento(
+            id,
+            input,
+            accessToken,
+          );
       } catch (error) {
         throw mapRemoteError(
           error,

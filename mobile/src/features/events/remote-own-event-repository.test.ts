@@ -142,6 +142,10 @@ describe(
         const repository =
           createRemoteOwnEventRepository({
             getOwnEventos,
+            getOwnEventoById:
+              vi.fn(),
+            updateEvento:
+              vi.fn(),
           });
 
         const query = {
@@ -195,6 +199,10 @@ describe(
         const repository =
           createRemoteOwnEventRepository({
             getOwnEventos,
+            getOwnEventoById:
+              vi.fn(),
+            updateEvento:
+              vi.fn(),
           });
 
         const request =
@@ -223,6 +231,92 @@ describe(
           status:
             403,
         });
+      },
+    );
+
+    it(
+      'obtiene el detalle propio por id conservando el token de acceso',
+      async () => {
+        const getOwnEventoById =
+          vi.fn()
+            .mockResolvedValueOnce(
+              ownEvent,
+            );
+
+        const repository =
+          createRemoteOwnEventRepository({
+            getOwnEventos:
+              vi.fn(),
+            getOwnEventoById,
+            updateEvento:
+              vi.fn(),
+          } as never);
+
+        await expect(
+          repository
+            .getOwnEventById(
+              101,
+              'access-asistente',
+            ),
+        ).resolves.toEqual(
+          ownEvent,
+        );
+
+        expect(
+          getOwnEventoById,
+        ).toHaveBeenCalledWith(
+          101,
+          'access-asistente',
+        );
+      },
+    );
+
+    it(
+      'actualiza un evento propio conservando id, cambios y token',
+      async () => {
+        const updateEvento =
+          vi.fn()
+            .mockResolvedValueOnce({
+              ...ownEvent,
+              titulo:
+                'Festival propio actualizado',
+            });
+
+        const repository =
+          createRemoteOwnEventRepository({
+            getOwnEventos:
+              vi.fn(),
+            getOwnEventoById:
+              vi.fn(),
+            updateEvento,
+          } as never);
+
+        const input = {
+          titulo:
+            'Festival propio actualizado',
+        };
+
+        await expect(
+          repository
+            .updateOwnEvent(
+              101,
+              input,
+              'access-asistente',
+            ),
+        ).resolves.toMatchObject({
+          id:
+            101,
+          titulo:
+            'Festival propio actualizado',
+        });
+
+        expect(
+          updateEvento,
+        ).toHaveBeenCalledWith(
+          101,
+          input,
+          'access-asistente',
+        );
       },
     );
   },
