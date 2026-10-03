@@ -393,6 +393,25 @@ export const eventoService = {
     };
   },
 
+  async getOwnById(
+    identidad: IdentidadAcceso,
+    id: number,
+  ): Promise<EventoPayload> {
+    ensureCanListOwn(identidad);
+
+    const evento = await getEventoOrThrow(id);
+
+    if (!puedeGestionarRecursoPropio(identidad, evento.usuarioCreador.id)) {
+      throw new AppError(
+        403,
+        'FORBIDDEN',
+        'El asistente solo puede consultar sus propios eventos.',
+      );
+    }
+
+    return serializeEvento(evento);
+  },
+
   async listAdmin(
     identidad: IdentidadAcceso,
     query: ListAdminEventosQuery,

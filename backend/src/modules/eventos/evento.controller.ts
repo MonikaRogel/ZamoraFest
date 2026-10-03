@@ -78,6 +78,18 @@ export const listOwnEventosController: RequestHandler = async (request, response
   response.status(200).json(result);
 };
 
+export const getOwnEventoController: RequestHandler = async (request, response) => {
+  const identity = requireIdentity(request);
+
+  const { id } = eventoIdParamsSchema.parse(request.params);
+
+  const evento = await eventoService.getOwnById(identity, id);
+
+  response.status(200).json({
+    data: evento,
+  });
+};
+
 export const getEventoController: RequestHandler = async (request, response) => {
   const { id } = eventoIdParamsSchema.parse(request.params);
 

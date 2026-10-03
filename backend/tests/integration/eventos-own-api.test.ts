@@ -665,3 +665,107 @@ describe(
     );
   },
 );
+describe(
+  'GET /api/v1/eventos/mios/:id',
+  () => {
+    it(
+      'requiere autenticación',
+      async () => {
+        const evento = await createEvento(
+          'DETALLE_SIN_AUTH',
+          support.asistenteId,
+        );
+
+        const response = await request(app)
+          .get(`/api/v1/eventos/mios/${evento.id}`);
+
+        expect(response.status).toBe(401);
+      },
+    );
+
+    it(
+      'rechaza un ADMINISTRADOR porque el flujo pertenece al ASISTENTE',
+      async () => {
+        const evento = await createEvento(
+          'DETALLE_ADMIN',
+          support.asistenteId,
+        );
+
+        const response = await request(app)
+          .get(`/api/v1/eventos/mios/${evento.id}`)
+          .set(
+            'Authorization',
+            `Bearer ${support.administradorToken}`,
+          );
+
+        expect(response.status).toBe(403);
+      },
+    );
+
+    it(
+      'devuelve al ASISTENTE su evento propio no público',
+      async () => {
+        const evento = await createEvento(
+          'DETALLE_PROPIO',
+          support.asistenteId,
+        );
+
+        const response = await request(app)
+          .get(`/api/v1/eventos/mios/${evento.id}`)
+          .set(
+            'Authorization',
+            `Bearer ${support.asistenteToken}`,
+          );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+          data: {
+            id: evento.id,
+            estadoEvento: 'BORRADOR',
+            estadoRevision: 'PENDIENTE',
+          },
+        });
+      },
+    );
+
+    it(
+      'rechaza un evento que pertenece a otro ASISTENTE',
+      async () => {
+        const evento = await createEvento(
+          'DETALLE_AJENO',
+          support.otroAsistenteId,
+        );
+
+        const response = await request(app)
+          .get(`/api/v1/eventos/mios/${evento.id}`)
+          .set(
+            'Authorization',
+            `Bearer ${support.asistenteToken}`,
+          );
+
+        expect(response.status).toBe(403);
+      },
+    );
+
+    it(
+      'devuelve 404 cuando el evento propio está eliminado',
+      async () => {
+        const evento = await createEvento(
+          'DETALLE_ELIMINADO',
+          support.asistenteId,
+          'ELIMINADO',
+          'PENDIENTE',
+        );
+
+        const response = await request(app)
+          .get(`/api/v1/eventos/mios/${evento.id}`)
+          .set(
+            'Authorization',
+            `Bearer ${support.asistenteToken}`,
+          );
+
+        expect(response.status).toBe(404);
+      },
+    );
+  },
+);

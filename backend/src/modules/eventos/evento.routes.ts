@@ -8,6 +8,7 @@ import {
   deleteEventoController,
   getAdminEventoController,
   getEventoController,
+  getOwnEventoController,
   listAdminEventosController,
   listEventosController,
   listOwnEventosController,
@@ -24,6 +25,13 @@ eventoRouter
   .post(authenticate, authorizeRoles('ASISTENTE'), createEventoController);
 
 eventoRouter.get('/mios', authenticate, authorizeRoles('ASISTENTE'), listOwnEventosController);
+
+eventoRouter.get(
+  '/mios/:id',
+  authenticate,
+  authorizeRoles('ASISTENTE'),
+  getOwnEventoController,
+);
 
 eventoRouter.get(
   '/admin',

@@ -467,6 +467,66 @@ export const openApiDocument: JsonObject = {
         }
       }
     },
+    "/eventos/mios/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "Identificador entero del evento.",
+          "schema": {
+            "$ref": "#/components/schemas/EntityId"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Obtener un evento propio del ASISTENTE",
+        "description": "Requiere rol ASISTENTE. Devuelve un evento propio no eliminado, incluso cuando todavÃ­a no es pÃºblico.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evento propio del ASISTENTE.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Evento"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
     "/eventos/{id}": {
       "parameters": [
         {
