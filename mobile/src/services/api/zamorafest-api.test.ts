@@ -359,6 +359,10 @@ describe(
               3,
             categoriaId:
               4,
+            fechaDesde:
+              '2026-10-01T00:00:00.000',
+            fechaHasta:
+              '2026-11-01T00:00:00.000',
           }),
         ).resolves.toEqual(
           response,
@@ -389,7 +393,7 @@ describe(
         expect(
           url.toString(),
         ).toBe(
-          'http://127.0.0.1:3000/api/v1/eventos?page=2&limit=10&cantonId=3&categoriaId=4',
+          'http://127.0.0.1:3000/api/v1/eventos?page=2&limit=10&cantonId=3&categoriaId=4&fechaDesde=2026-10-01T00%3A00%3A00.000&fechaHasta=2026-11-01T00%3A00%3A00.000',
         );
       },
     );

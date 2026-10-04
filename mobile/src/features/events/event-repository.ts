@@ -14,6 +14,15 @@ export interface EventListQuery {
   readonly limit?: number;
   readonly cantonId?: number;
   readonly categoriaId?: number;
+  readonly fechaDesde?: string;
+  readonly fechaHasta?: string;
+}
+
+export interface EventRangeQuery {
+  readonly cantonId?: number;
+  readonly categoriaId?: number;
+  readonly fechaDesde: string;
+  readonly fechaHasta: string;
 }
 
 export interface EventListPage {
@@ -70,4 +79,9 @@ export interface PagedEventRepository {
     query?:
       EventListQuery,
   ): Promise<EventListPage>;
+
+  listEventsInRange(
+    query:
+      EventRangeQuery,
+  ): Promise<readonly Evento[]>;
 }

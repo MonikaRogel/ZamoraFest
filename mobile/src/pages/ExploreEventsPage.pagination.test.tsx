@@ -37,6 +37,8 @@ vi.mock(
         vi.fn(),
       listEventPage:
         vi.fn(),
+      listEventsInRange:
+        vi.fn(),
       getEventById:
         vi.fn(),
     },
@@ -206,6 +208,11 @@ describe(
   () => {
     beforeEach(() => {
       vi.clearAllMocks();
+
+      vi.mocked(
+        eventRepository
+          .listEventsInRange,
+      ).mockResolvedValue([]);
     });
 
     afterEach(() => {

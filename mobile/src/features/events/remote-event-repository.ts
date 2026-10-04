@@ -6,6 +6,7 @@ import {
 import {
   EventRepositoryError,
   type EventListQuery,
+  type EventRangeQuery,
   type EventRepository,
   type PagedEventRepository,
 } from './event-repository';
@@ -112,6 +113,45 @@ export function createRemoteEventRepository(
           meta:
             response.meta,
         };
+      } catch (error) {
+        throw mapRemoteError(
+          error,
+        );
+      }
+    },
+
+    async listEventsInRange(
+      query:
+        EventRangeQuery,
+    ) {
+      try {
+        const events = [];
+        let page = 1;
+        let totalPages = 1;
+
+        do {
+          const response =
+            await api.getEventos({
+              ...query,
+              page,
+              limit: 50,
+            });
+
+          events.push(
+            ...response.data,
+          );
+
+          totalPages =
+            response.meta
+              .totalPages;
+
+          page += 1;
+        } while (
+          page <=
+          totalPages
+        );
+
+        return events;
       } catch (error) {
         throw mapRemoteError(
           error,

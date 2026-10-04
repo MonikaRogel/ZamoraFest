@@ -172,6 +172,119 @@
 }
 
 /* ====================================================== */
+/* Calendario                                             */
+/* ====================================================== */
+
+.zf-explore__calendar {
+  display: grid;
+  gap: var(--zf-space-4);
+  margin-bottom: var(--zf-space-8);
+}
+
+.zf-explore__calendar > .zf-explore__section-heading {
+  align-items: flex-start;
+}
+
+.zf-explore__calendar-navigation {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--zf-space-2);
+}
+
+.zf-explore__calendar-navigation-button,
+.zf-explore__calendar-day {
+  border:
+    1px
+    solid
+    var(--zf-color-border);
+  border-radius:
+    var(--zf-radius-md);
+  background:
+    var(--zf-color-surface);
+  color:
+    var(--zf-color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.zf-explore__calendar-navigation-button {
+  display: inline-grid;
+  place-items: center;
+  width: var(--zf-control-min-size);
+  min-width: var(--zf-control-min-size);
+  height: var(--zf-control-min-size);
+  padding: 0;
+  font-size: var(--zf-font-size-title);
+  font-weight: var(--zf-font-weight-bold);
+}
+
+.zf-explore__calendar-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      7,
+      minmax(0, 1fr)
+    );
+  gap: var(--zf-space-2);
+}
+
+.zf-explore__calendar-weekday {
+  color:
+    var(--zf-color-text-primary);
+  font-size:
+    var(--zf-font-size-caption);
+  font-weight:
+    var(--zf-font-weight-bold);
+  text-align: center;
+  text-decoration: none;
+}
+
+.zf-explore__calendar-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: var(--zf-space-2);
+  font-size: var(--zf-font-size-label);
+  font-weight: var(--zf-font-weight-bold);
+}
+
+.zf-explore__calendar-day[aria-pressed='true'] {
+  border-color:
+    var(--zf-color-primary);
+  color:
+    var(--zf-color-primary);
+}
+
+.zf-explore__calendar-event-count {
+  position: absolute;
+  right: var(--zf-space-2);
+  bottom: var(--zf-space-2);
+  color:
+    var(--zf-color-primary);
+  font-size:
+    var(--zf-font-size-caption);
+  font-weight:
+    var(--zf-font-weight-bold);
+}
+
+.zf-explore__calendar-navigation-button:focus-visible,
+.zf-explore__calendar-day:focus-visible {
+  outline:
+    var(--zf-focus-ring-width)
+    solid
+    var(--zf-color-focus);
+  outline-offset:
+    var(--zf-focus-ring-offset);
+}
+
+.zf-explore__calendar-events {
+  display: grid;
+  gap: var(--zf-space-4);
+  margin-bottom: var(--zf-space-8);
+}
+/* ====================================================== */
 /* Evento destacado                                       */
 /* ====================================================== */
 

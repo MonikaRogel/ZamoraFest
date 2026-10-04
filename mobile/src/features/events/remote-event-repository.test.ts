@@ -195,6 +195,8 @@ describe(
           limit: 10,
           cantonId: 1,
           categoriaId: 1,
+          fechaDesde: '2026-10-01T00:00:00.000',
+          fechaHasta: '2026-11-01T00:00:00.000',
         };
 
         await expect(
@@ -227,6 +229,110 @@ describe(
       },
     );
 
+    it(
+      'obtiene todos los eventos de un rango temporal recorriendo sus páginas',
+      async () => {
+        const secondEvent: Evento = {
+          ...event,
+          id: 2,
+          titulo:
+            'Feria Provincial',
+        };
+
+        const firstPage:
+          EventosResponse = {
+          ...response,
+          data: [
+            event,
+          ],
+          meta: {
+            page: 1,
+            limit: 50,
+            total: 51,
+            totalPages: 2,
+          },
+        };
+
+        const secondPage:
+          EventosResponse = {
+          ...response,
+          data: [
+            secondEvent,
+          ],
+          meta: {
+            page: 2,
+            limit: 50,
+            total: 51,
+            totalPages: 2,
+          },
+        };
+
+        const getEventos =
+          vi.fn()
+            .mockResolvedValueOnce(
+              firstPage,
+            )
+            .mockResolvedValueOnce(
+              secondPage,
+            );
+
+        const getEventoById =
+          createGetEventoByIdMock();
+
+        const repository =
+          createRemoteEventRepository({
+            getEventos,
+            getEventoById,
+          });
+
+        const rangeQuery = {
+          categoriaId: 1,
+          fechaDesde: '2026-10-01T00:00:00.000',
+          fechaHasta: '2026-11-01T00:00:00.000',
+        };
+
+        await expect(
+          repository.listEventsInRange(
+            rangeQuery,
+          ),
+        ).resolves.toEqual([
+          event,
+          secondEvent,
+        ]);
+
+        expect(
+          getEventos,
+        ).toHaveBeenNthCalledWith(
+          1,
+          {
+            ...rangeQuery,
+            page: 1,
+            limit: 50,
+          },
+        );
+
+        expect(
+          getEventos,
+        ).toHaveBeenNthCalledWith(
+          2,
+          {
+            ...rangeQuery,
+            page: 2,
+            limit: 50,
+          },
+        );
+
+        expect(
+          getEventos,
+        ).toHaveBeenCalledTimes(
+          2,
+        );
+
+        expect(
+          getEventoById,
+        ).not.toHaveBeenCalled();
+      },
+    );
     it(
       'traduce un fallo de conexión',
       async () => {

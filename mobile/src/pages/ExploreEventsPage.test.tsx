@@ -57,6 +57,8 @@ vi.mock(
         vi.fn(),
       listEventPage:
         vi.fn(),
+      listEventsInRange:
+        vi.fn(),
       getEventById:
         vi.fn(),
     },
@@ -389,6 +391,11 @@ describe(
       vi.clearAllMocks();
 
       vi.mocked(
+        eventRepository
+          .listEventsInRange,
+      ).mockResolvedValue([]);
+
+      vi.mocked(
         eventCategoryRepository.list,
       ).mockResolvedValue([
         { id: 1, nombre: 'Cultural', descripcion: null },
@@ -467,6 +474,15 @@ describe(
 
         vi.mocked(
           eventCategoryRepository.list,
+        ).mockReturnValueOnce(
+          new Promise<never>(
+            () => undefined,
+          ),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEventsInRange,
         ).mockReturnValueOnce(
           new Promise<never>(
             () => undefined,
@@ -876,6 +892,492 @@ describe(
         ).toHaveTextContent(
           '/eventos/1',
         );
+      },
+    );
+    it(
+      'consulta el calendario del mes visible usando límites locales sin offset',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-10-04T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        await waitFor(() => {
+          expect(
+            eventRepository
+              .listEventsInRange,
+          ).toHaveBeenCalledWith({
+            fechaDesde:
+              '2026-10-01T00:00:00.000',
+            fechaHasta:
+              '2026-11-01T00:00:00.000',
+          });
+        });
+      },
+    );
+    it(
+      'muestra el calendario del mes visible aunque la agenda paginada esté vacía',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-10-04T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Calendario de octubre de 2026',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+    it(
+      'marca en el calendario los días con eventos usando fechas locales del dominio',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-09-18T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        const calendarEvent: Evento = {
+          ...eventos[0],
+          fechaInicio:
+            '2026-09-20T18:00:00.000',
+          fechaFin:
+            '2026-09-20T22:00:00.000',
+        };
+
+        vi.mocked(
+          eventRepository
+            .listEventsInRange,
+        ).mockResolvedValueOnce([
+          calendarEvent,
+        ]);
+
+        renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'button',
+            {
+              name:
+                '20 de septiembre de 2026, 1 evento',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+    it(
+      'selecciona un día del calendario y abre el detalle de su evento',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-09-18T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        const calendarEvent: Evento = {
+          ...eventos[0],
+          fechaInicio:
+            '2026-09-20T18:00:00.000',
+          fechaFin:
+            '2026-09-20T22:00:00.000',
+        };
+
+        vi.mocked(
+          eventRepository
+            .listEventsInRange,
+        ).mockResolvedValueOnce([
+          calendarEvent,
+        ]);
+
+        renderExplore();
+
+        const dayButton =
+          await screen.findByRole(
+            'button',
+            {
+              name:
+                '20 de septiembre de 2026, 1 evento',
+            },
+          );
+
+        fireEvent.click(
+          dayButton,
+        );
+
+        const selectedDayHeading =
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Eventos del 20 de septiembre de 2026',
+            },
+          );
+
+        const selectedDaySection =
+          selectedDayHeading.closest(
+            'section',
+          );
+
+        expect(
+          selectedDaySection,
+        ).not.toBeNull();
+
+        expect(
+          within(
+            selectedDaySection!,
+          ).getByRole(
+            'heading',
+            {
+              name:
+                'Festival Cultural de Zamora',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        const detailButton =
+          within(
+            selectedDaySection!,
+          ).getByText(
+            'Ver detalles',
+            {
+              selector:
+                'ion-button',
+            },
+          );
+
+        fireEvent.click(
+          detailButton,
+        );
+
+        expect(
+          await screen.findByTestId(
+            'detail-route',
+          ),
+        ).toHaveTextContent(
+          '/eventos/1',
+        );
+      },
+    );
+    it(
+      'avanza al mes siguiente y consulta su rango temporal',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-10-04T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Calendario de octubre de 2026',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        fireEvent.click(
+          screen.getByRole(
+            'button',
+            {
+              name:
+                'Mes siguiente',
+            },
+          ),
+        );
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Calendario de noviembre de 2026',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        await waitFor(() => {
+          expect(
+            eventRepository
+              .listEventsInRange,
+          ).toHaveBeenLastCalledWith({
+            fechaDesde:
+              '2026-11-01T00:00:00.000',
+            fechaHasta:
+              '2026-12-01T00:00:00.000',
+          });
+        });
+      },
+    );
+    it(
+      'alinea el primer día del mes con el día real de la semana',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-10-04T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        expect(
+          await screen.findByText(
+            'Lun',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Mar',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Mié',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Jue',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Vie',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Sáb',
+          ),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Dom',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByRole(
+            'button',
+            {
+              name:
+                '1 de octubre de 2026, sin eventos',
+            },
+          ),
+        ).toHaveStyle({
+          gridColumnStart:
+            '4',
+        });
+      },
+    );
+    it(
+      'mantiene visibles los filtros cuando la agenda está vacía y filtra el calendario',
+      async () => {
+        vi.spyOn(
+          Date,
+          'now',
+        ).mockReturnValue(
+          new Date(
+            '2026-10-04T12:00:00.000Z',
+          ).getTime(),
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        renderExplore();
+
+        const categoryButton =
+          await screen.findByRole(
+            'button',
+            {
+              name:
+                'Comercial/Feria',
+            },
+          );
+
+        fireEvent.click(
+          categoryButton,
+        );
+
+        await waitFor(() => {
+          expect(
+            eventRepository
+              .listEventsInRange,
+          ).toHaveBeenLastCalledWith({
+            fechaDesde:
+              '2026-10-01T00:00:00.000',
+            fechaHasta:
+              '2026-11-01T00:00:00.000',
+            categoriaId: 2,
+          });
+        });
+      },
+    );
+    it(
+      'muestra un estado de carga propio mientras consulta el calendario',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEventsInRange,
+        ).mockReturnValueOnce(
+          new Promise<never>(
+            () => undefined,
+          ),
+        );
+
+        renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Cargando calendario',
+            },
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+    it(
+      'muestra el error del calendario y permite reintentar su consulta',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .listEvents,
+        ).mockResolvedValueOnce(
+          [],
+        );
+
+        vi.mocked(
+          eventRepository
+            .listEventsInRange,
+        ).mockRejectedValueOnce(
+          new EventRepositoryError(
+            'server',
+            'Remote server error',
+            500,
+          ),
+        );
+
+        renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'No pudimos cargar el calendario',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            'El servicio de eventos no está disponible temporalmente. Intente nuevamente en unos momentos.',
+          ),
+        ).toBeInTheDocument();
+
+        fireEvent.click(
+          screen.getByText(
+            'Reintentar',
+          ),
+        );
+
+        await waitFor(() => {
+          expect(
+            eventRepository
+              .listEventsInRange,
+          ).toHaveBeenCalledTimes(
+            2,
+          );
+        });
       },
     );
   },

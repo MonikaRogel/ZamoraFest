@@ -61,6 +61,8 @@ export interface GetEventosParams {
   readonly limit?: number;
   readonly cantonId?: number;
   readonly categoriaId?: number;
+  readonly fechaDesde?: string;
+  readonly fechaHasta?: string;
 }
 
 export interface GetOwnEventosParams {
@@ -1141,6 +1143,26 @@ export function createZamoraFestApi(
           String(
             params.categoriaId,
           ),
+        );
+      }
+
+      if (
+        params.fechaDesde !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'fechaDesde',
+          params.fechaDesde,
+        );
+      }
+
+      if (
+        params.fechaHasta !==
+        undefined
+      ) {
+        url.searchParams.set(
+          'fechaHasta',
+          params.fechaHasta,
         );
       }
 
