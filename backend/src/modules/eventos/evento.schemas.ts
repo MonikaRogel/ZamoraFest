@@ -193,8 +193,19 @@ export const listEventosQuerySchema = z
     limit: z.coerce.number().int().min(1).max(50).default(10),
     cantonId: queryEntityIdSchema.optional(),
     categoriaId: queryEntityIdSchema.optional(),
+    fechaDesde: fechaHoraLocalSchema.optional(),
+    fechaHasta: fechaHoraLocalSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((data, context) => {
+    if (!rangoFechasValido(data.fechaDesde, data.fechaHasta)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['fechaHasta'],
+        message: 'La fecha hasta debe ser posterior a la fecha desde.',
+      });
+    }
+  });
 
 export const listOwnEventosQuerySchema = z
   .object({

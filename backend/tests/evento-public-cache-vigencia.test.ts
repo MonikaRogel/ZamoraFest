@@ -83,6 +83,37 @@ describe('T044-B - vigencia temporal del cache publico de eventos', () => {
     vi.useRealTimers();
   });
 
+  it('propaga el rango temporal al caché y lo convierte al contrato de base de datos para el repositorio', async () => {
+    listMock.mockResolvedValue({
+      total: 0,
+      eventos: [],
+      earliestFechaFin: null,
+    });
+
+    await eventoService.list({
+      page: 1,
+      limit: 50,
+      categoriaId: 19,
+      fechaDesde: '2026-10-01T00:00:00.000',
+      fechaHasta: '2026-11-01T00:00:00.000',
+    });
+
+    expect(listKeyMock).toHaveBeenCalledWith(
+      1,
+      50,
+      undefined,
+      19,
+      '2026-10-01T00:00:00.000',
+      '2026-11-01T00:00:00.000',
+    );
+
+    expect(listMock).toHaveBeenCalledWith(1, 50, 'basic', {
+      categoriaId: 19,
+      fechaDesde: new Date('2026-10-01T00:00:00.000Z'),
+      fechaHasta: new Date('2026-11-01T00:00:00.000Z'),
+    });
+  });
+
   it('acorta el TTL del listado usando el vencimiento mas proximo de todo el conjunto filtrado', async () => {
     listMock.mockResolvedValue({
       total: 2,

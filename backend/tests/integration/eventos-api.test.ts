@@ -606,6 +606,65 @@ describe('T051 - CRUD canónico de eventos', () => {
     expect(draftDetail.status).toBe(404);
   });
 
+  it('filtra eventos públicos por rango temporal local', async () => {
+    const eventoOctubre = await createEvento('RANGO_OCTUBRE');
+    const eventoNoviembre = await createEvento('RANGO_NOVIEMBRE');
+
+    await approveEvento(eventoOctubre.id);
+    await publishEvento(eventoOctubre.id);
+
+    await approveEvento(eventoNoviembre.id);
+    await publishEvento(eventoNoviembre.id);
+
+    await prisma.evento.update({
+      where: {
+        id: eventoOctubre.id,
+      },
+      data: {
+        fechaInicio: new Date('2099-10-15T18:00:00.000Z'),
+        fechaFin: new Date('2099-10-15T22:00:00.000Z'),
+      },
+    });
+
+    await prisma.evento.update({
+      where: {
+        id: eventoNoviembre.id,
+      },
+      data: {
+        fechaInicio: new Date('2099-11-15T18:00:00.000Z'),
+        fechaFin: new Date('2099-11-15T22:00:00.000Z'),
+      },
+    });
+
+    await eventoCache.invalidate();
+
+    const response = await request(app).get('/api/v1/eventos').query({
+      page: 1,
+      limit: 50,
+      fechaDesde: '2099-10-01T00:00:00.000',
+      fechaHasta: '2099-11-01T00:00:00.000',
+    });
+
+    expect(response.status).toBe(200);
+
+    const listado = listadoResponseSchema.parse(response.body as unknown);
+    const ids = listado.data.map((evento) => evento.id);
+
+    expect(ids).toContain(eventoOctubre.id);
+    expect(ids).not.toContain(eventoNoviembre.id);
+  });
+
+  it('rechaza un rango temporal cuyo límite final no es posterior al inicial', async () => {
+    const response = await request(app).get('/api/v1/eventos').query({
+      page: 1,
+      limit: 50,
+      fechaDesde: '2099-11-01T00:00:00.000',
+      fechaHasta: '2099-10-01T00:00:00.000',
+    });
+
+    expect(response.status).toBe(400);
+  });
+
   it('excluye de listado y detalle públicos un evento PROGRAMADO/APROBADO ya vencido', async () => {
     const evento = await createEvento('PUBLICO_VENCIDO');
 

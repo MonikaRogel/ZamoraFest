@@ -46,6 +46,40 @@ describe('T044 - claves canonicas de cache', () => {
     );
   });
 
+  it('segmenta listado por rango temporal', async () => {
+    const octubreKey = await eventoCache.listKey(
+      1,
+      50,
+      undefined,
+      undefined,
+      '2026-10-01T00:00:00.000',
+      '2026-11-01T00:00:00.000',
+    );
+
+    const noviembreKey = await eventoCache.listKey(
+      1,
+      50,
+      undefined,
+      undefined,
+      '2026-11-01T00:00:00.000',
+      '2026-12-01T00:00:00.000',
+    );
+
+    expect(octubreKey).toBe(
+      'eventos:v7:public:list:page=1:limit=50:cantonId=all:categoriaId=all:' +
+        'fechaDesde=2026-10-01T00:00:00.000:' +
+        'fechaHasta=2026-11-01T00:00:00.000',
+    );
+
+    expect(noviembreKey).toBe(
+      'eventos:v7:public:list:page=1:limit=50:cantonId=all:categoriaId=all:' +
+        'fechaDesde=2026-11-01T00:00:00.000:' +
+        'fechaHasta=2026-12-01T00:00:00.000',
+    );
+
+    expect(octubreKey).not.toBe(noviembreKey);
+  });
+
   it('genera detalle con ID entero', async () => {
     await expect(eventoCache.detailKey(15)).resolves.toBe('eventos:v7:public:detail:id=15');
   });

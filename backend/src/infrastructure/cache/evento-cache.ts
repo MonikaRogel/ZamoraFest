@@ -63,6 +63,8 @@ export const eventoCache = {
     limit: number,
     cantonId?: number,
     categoriaId?: number,
+    fechaDesde?: string,
+    fechaHasta?: string,
   ): Promise<string> {
     assertPositiveSafeInteger(page, 'page');
 
@@ -78,11 +80,17 @@ export const eventoCache = {
 
     const version = await getVersion();
 
+    const temporalSuffix =
+      fechaDesde === undefined && fechaHasta === undefined
+        ? ''
+        : `:fechaDesde=${fechaDesde ?? 'all'}` + `:fechaHasta=${fechaHasta ?? 'all'}`;
+
     return (
       `eventos:v${version}:public:list:` +
       `page=${page}:limit=${limit}:` +
       `cantonId=${cantonId ?? 'all'}:` +
-      `categoriaId=${categoriaId ?? 'all'}`
+      `categoriaId=${categoriaId ?? 'all'}` +
+      temporalSuffix
     );
   },
 

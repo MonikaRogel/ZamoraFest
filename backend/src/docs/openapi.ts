@@ -350,6 +350,22 @@ export const openApiDocument: JsonObject = {
             "schema": {
               "$ref": "#/components/schemas/EntityId"
             }
+          },
+          {
+            "name": "fechaDesde",
+            "in": "query",
+            "description": "Inicio opcional del rango temporal local. Se incluyen eventos cuya fecha de finalización sea posterior a este valor.",
+            "schema": {
+              "$ref": "#/components/schemas/LocalDateTime"
+            }
+          },
+          {
+            "name": "fechaHasta",
+            "in": "query",
+            "description": "Fin exclusivo opcional del rango temporal local. Se incluyen eventos cuya fecha de inicio sea anterior a este valor. Si también se envía fechaDesde, debe ser posterior a ella.",
+            "schema": {
+              "$ref": "#/components/schemas/LocalDateTime"
+            }
           }
         ],
         "responses": {

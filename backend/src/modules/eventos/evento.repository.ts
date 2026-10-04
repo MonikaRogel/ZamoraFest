@@ -7,6 +7,8 @@ export type EventoDetailLevel = 'basic' | 'detailed';
 export interface PublicEventoFilters {
   cantonId?: number;
   categoriaId?: number;
+  fechaDesde?: Date;
+  fechaHasta?: Date;
 }
 
 export interface AdminEventoFilters {
@@ -268,6 +270,25 @@ function buildPublicEventoWhere(filters: PublicEventoFilters): Prisma.EventoWher
           },
         },
       },
+    });
+  }
+
+  if (filters.fechaDesde !== undefined || filters.fechaHasta !== undefined) {
+    conditions.push({
+      ...(filters.fechaHasta === undefined
+        ? {}
+        : {
+            fechaInicio: {
+              lt: filters.fechaHasta,
+            },
+          }),
+      ...(filters.fechaDesde === undefined
+        ? {}
+        : {
+            fechaFin: {
+              gt: filters.fechaDesde,
+            },
+          }),
     });
   }
 

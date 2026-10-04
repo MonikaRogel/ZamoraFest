@@ -328,6 +328,16 @@ export const eventoService = {
     const filters = {
       ...(query.cantonId !== undefined ? { cantonId: query.cantonId } : {}),
       ...(query.categoriaId !== undefined ? { categoriaId: query.categoriaId } : {}),
+      ...(query.fechaDesde !== undefined
+        ? {
+            fechaDesde: eventoLocalDateTimeToDatabaseDate(query.fechaDesde),
+          }
+        : {}),
+      ...(query.fechaHasta !== undefined
+        ? {
+            fechaHasta: eventoLocalDateTimeToDatabaseDate(query.fechaHasta),
+          }
+        : {}),
     };
 
     const cacheKey = await eventoCache.listKey(
@@ -335,6 +345,8 @@ export const eventoService = {
       query.limit,
       query.cantonId,
       query.categoriaId,
+      query.fechaDesde,
+      query.fechaHasta,
     );
 
     const cachedResult = await eventoCache.get<ListEventosPayload>(cacheKey);
