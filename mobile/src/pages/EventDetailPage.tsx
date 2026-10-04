@@ -26,6 +26,9 @@ import {
   eventRepository,
 } from '../features/events/remote-event-repository';
 import {
+  eventProgramRepository,
+} from '../features/events/remote-event-program-repository';
+import {
   remoteError,
   remoteLoading,
   remoteSuccess,
@@ -33,6 +36,7 @@ import {
 } from '../state/remote-data';
 import type {
   Evento,
+  Programacion,
 } from '../types/api';
 
 import './EventDetailPage.css';
@@ -144,6 +148,29 @@ function formatEventCost(
   );
 }
 
+function formatProgramDateRange(
+  program: Programacion,
+): string {
+  const start =
+    formatEventDate(
+      program.fechaHoraInicio,
+    );
+
+  if (
+    program.fechaHoraFin ===
+    null
+  ) {
+    return start;
+  }
+
+  const end =
+    formatEventDate(
+      program.fechaHoraFin,
+    );
+
+  return `${start} - ${end}`;
+}
+
 function getErrorMessage(
   error: unknown,
 ): string {
@@ -211,6 +238,19 @@ function EventDetailPage() {
       remoteLoading(),
     );
 
+  const [
+    programState,
+    setProgramState,
+  ] =
+    useState<
+      RemoteData<
+        readonly Programacion[],
+        string
+      >
+    >(
+      remoteLoading(),
+    );
+
   const loadEvent =
     useCallback(
       async () => {
@@ -254,6 +294,46 @@ function EventDetailPage() {
       ],
     );
 
+  const loadProgram =
+    useCallback(
+      async () => {
+        if (
+          eventId ===
+          null
+        ) {
+          return;
+        }
+
+        setProgramState(
+          remoteLoading(),
+        );
+
+        try {
+          const program =
+            await eventProgramRepository
+              .list(
+                eventId,
+              );
+
+          setProgramState(
+            remoteSuccess(
+              program,
+            ),
+          );
+        } catch (error) {
+          setProgramState(
+            remoteError(
+              error instanceof Error
+                ? error.message
+                : 'Ocurrió un error inesperado al consultar la programación.',
+            ),
+          );
+        }
+      },
+      [
+        eventId,
+      ],
+    );
   useEffect(
     () => {
       if (
@@ -264,10 +344,12 @@ function EventDetailPage() {
       }
 
       void loadEvent();
+      void loadProgram();
     },
     [
       eventId,
       loadEvent,
+      loadProgram,
     ],
   );
 
@@ -344,6 +426,7 @@ function EventDetailPage() {
                 }
                 onAction={() => {
                   void loadEvent();
+                  void loadProgram();
                 }}
               />
             )}
@@ -461,6 +544,99 @@ function EventDetailPage() {
                   </dl>
                 </section>
 
+                <section
+                  className="zf-event-detail__panel"
+                  aria-labelledby="zf-event-program-heading"
+                >
+                  <h2
+                    id="zf-event-program-heading"
+                    className="zf-event-detail__section-title"
+                  >
+                    Programación
+                  </h2>
+
+                  {programState.status ===
+                    'loading' && (
+                    <p className="zf-event-detail__source">
+                      Cargando programación...
+                    </p>
+                  )}
+
+                  {programState.status ===
+                    'error' && (
+                    <>
+                      <p className="zf-event-detail__source">
+                        {programState.error}
+                      </p>
+
+                      <IonButton
+                        fill="outline"
+                        onClick={() => {
+                          void loadProgram();
+                        }}
+                      >
+                        Reintentar programación
+                      </IonButton>
+                    </>
+                  )}
+
+                  {programState.status ===
+                    'success' &&
+                    programState.data.length ===
+                      0 && (
+                    <p className="zf-event-detail__source">
+                      No hay actividades programadas para este evento.
+                    </p>
+                  )}
+
+                  {programState.status ===
+                    'success' &&
+                    programState.data.length >
+                      0 && (
+                    <dl className="zf-event-detail__facts">
+                      {programState.data.map(
+                        (program) => (
+                          <div
+                            key={program.id}
+                            className="zf-event-detail__fact"
+                          >
+                            <dt>
+                              {program.tituloActividad}
+                            </dt>
+
+                            <dd>
+                              {formatProgramDateRange(
+                                program,
+                              )}
+                            </dd>
+
+                            {program.lugar !==
+                              null && (
+                              <dd>
+                                {program.lugar.nombre}
+                              </dd>
+                            )}
+
+                            {program.artistaInvitado !==
+                              null && (
+                              <dd>
+                                Artista invitado:{' '}
+                                {program.artistaInvitado}
+                              </dd>
+                            )}
+
+                            {program.descripcion !==
+                              null && (
+                              <dd>
+                                {program.descripcion}
+                              </dd>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </dl>
+                  )}
+                </section>
                 <section
                   className="zf-event-detail__panel"
                   aria-labelledby="zf-event-categories-heading"

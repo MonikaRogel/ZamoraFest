@@ -84,6 +84,40 @@ export interface LugaresResponse {
   readonly data: readonly LugarConsulta[];
 }
 
+export interface ProgramacionLugar {
+  readonly id: number;
+  readonly nombre: string;
+  readonly direccionReferencial: string | null;
+  readonly sector: {
+    readonly nombre: string;
+    readonly parroquia: {
+      readonly nombre: string;
+      readonly canton: {
+        readonly id: number;
+        readonly nombre: string;
+      };
+    };
+  };
+}
+
+export interface Programacion {
+  readonly id: number;
+  readonly eventoId: number;
+  readonly lugarId: number | null;
+  readonly tituloActividad: string;
+  readonly descripcion: string | null;
+  readonly fechaHoraInicio: string;
+  readonly fechaHoraFin: string | null;
+  readonly artistaInvitado: string | null;
+  readonly orden: number | null;
+  readonly estado: boolean;
+  readonly lugar: ProgramacionLugar | null;
+}
+
+export interface ProgramacionesResponse {
+  readonly data: readonly Programacion[];
+}
+
 export interface RolResumen {
   readonly id: number;
   readonly nombre: string;

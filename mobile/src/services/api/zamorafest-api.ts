@@ -23,6 +23,9 @@ import type {
   ParroquiaConsulta,
   Provincia,
   ProvinciaConsulta,
+  Programacion,
+  ProgramacionLugar,
+  ProgramacionesResponse,
   RegisterRequest,
   RegisteredVisitor,
   RolResumen,
@@ -128,6 +131,10 @@ export interface ZamoraFestApi {
   getEventoById(
     id: number,
   ): Promise<Evento>;
+
+  getProgramaciones(
+    eventoId: number,
+  ): Promise<ProgramacionesResponse>;
 
   getCategorias(): Promise<CategoriasResponse>;
 
@@ -534,6 +541,70 @@ function isLugarConsulta(
   );
 }
 
+function isProgramacionLugar(
+  value: unknown,
+): value is ProgramacionLugar {
+  if (
+    !isRecord(value) ||
+    !isEntityId(value.id) ||
+    !isString(value.nombre) ||
+    !isNullableString(value.direccionReferencial) ||
+    !isRecord(value.sector) ||
+    !isString(value.sector.nombre) ||
+    !isRecord(value.sector.parroquia) ||
+    !isString(value.sector.parroquia.nombre) ||
+    !isRecord(value.sector.parroquia.canton)
+  ) {
+    return false;
+  }
+
+  return (
+    isEntityId(
+      value.sector.parroquia.canton.id,
+    ) &&
+    isString(
+      value.sector.parroquia.canton.nombre,
+    )
+  );
+}
+
+function isProgramacion(
+  value: unknown,
+): value is Programacion {
+  return (
+    isRecord(value) &&
+    isEntityId(value.id) &&
+    isEntityId(value.eventoId) &&
+    (
+      value.lugarId === null ||
+      isEntityId(value.lugarId)
+    ) &&
+    isString(value.tituloActividad) &&
+    isNullableString(value.descripcion) &&
+    isString(value.fechaHoraInicio) &&
+    isNullableString(value.fechaHoraFin) &&
+    isNullableString(value.artistaInvitado) &&
+    (
+      value.orden === null ||
+      isInteger(value.orden)
+    ) &&
+    typeof value.estado === 'boolean' &&
+    (
+      value.lugar === null ||
+      isProgramacionLugar(value.lugar)
+    )
+  );
+}
+
+function isProgramacionesResponse(
+  value: unknown,
+): value is ProgramacionesResponse {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.data) &&
+    value.data.every(isProgramacion)
+  );
+}
 function isRolResumen(
   value: unknown,
 ): value is RolResumen {
@@ -1354,6 +1425,21 @@ export function createZamoraFestApi(
       );
     },
 
+    getProgramaciones(
+      eventoId: number,
+    ) {
+      const url =
+        new URL(
+          `/api/v1/eventos/${eventoId}/programaciones`,
+          resolveBaseUrl(),
+        );
+
+      return requestJson(
+        url,
+        isProgramacionesResponse,
+        fetcher,
+      );
+    },
     getCategorias() {
       const url =
         new URL(
@@ -1767,6 +1853,16 @@ export const zamoraFestApi:
     );
   },
 
+  getProgramaciones(
+    eventoId: number,
+  ) {
+    return (
+      createZamoraFestApi()
+        .getProgramaciones(
+          eventoId,
+        )
+    );
+  },
   getCategorias() {
     return (
       createZamoraFestApi()
