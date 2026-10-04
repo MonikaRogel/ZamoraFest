@@ -25,6 +25,9 @@ import {
   EventRepositoryError,
 } from '../features/events/event-repository';
 import {
+  eventCategoryRepository,
+} from '../features/events/remote-event-category-repository';
+import {
   eventRepository,
 } from '../features/events/remote-event-repository';
 import { useApplicationState } from '../state/ApplicationStateContext';
@@ -35,6 +38,7 @@ import {
   type RemoteData,
 } from '../state/remote-data';
 import type {
+  Categoria,
   Evento,
   PaginationMeta,
 } from '../types/api';
@@ -202,10 +206,17 @@ function ExploreEventsPage() {
   );
 
   const [
-    selectedCategory,
-    setSelectedCategory,
+    categories,
+    setCategories,
   ] = useState<
-    string | null
+    readonly Categoria[]
+  >([]);
+
+  const [
+    selectedCategoryId,
+    setSelectedCategoryId,
+  ] = useState<
+    number | null
   >(
     null,
   );
@@ -231,6 +242,7 @@ function ExploreEventsPage() {
               .listEventPage({
                 page: 1,
                 limit: EVENTS_PAGE_SIZE,
+                ...(selectedCategoryId === null ? {} : { categoriaId: selectedCategoryId }),
               });
 
           setPagination(
@@ -252,7 +264,7 @@ function ExploreEventsPage() {
           );
         }
       },
-      [],
+      [selectedCategoryId],
     );
 
   const loadMoreEvents =
@@ -285,6 +297,7 @@ function ExploreEventsPage() {
                   1,
                 limit:
                   pagination.limit,
+                ...(selectedCategoryId === null ? {} : { categoriaId: selectedCategoryId }),
               });
 
           setEventsState(
@@ -325,6 +338,7 @@ function ExploreEventsPage() {
       [
         isLoadingMore,
         pagination,
+        selectedCategoryId,
       ],
     );
 
@@ -341,6 +355,29 @@ function ExploreEventsPage() {
         history,
       ],
     );
+
+  useEffect(() => {
+    let active = true;
+
+    void eventCategoryRepository
+      .list()
+      .then(
+        (data) => {
+          if (active) {
+            setCategories(data);
+          }
+        },
+        () => {
+          if (active) {
+            setCategories([]);
+          }
+        },
+      );
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     void loadEvents();
@@ -360,63 +397,6 @@ function ExploreEventsPage() {
       ],
     );
 
-  const categories =
-    useMemo(
-      () =>
-        Array.from(
-          new Set(
-            events.flatMap(
-              (event) =>
-                event.categorias.map(
-                  (
-                    category,
-                  ) =>
-                    category.nombre,
-                ),
-            ),
-          ),
-        ).sort(
-          (
-            a,
-            b,
-          ) =>
-            a.localeCompare(
-              b,
-              'es',
-            ),
-        ),
-      [
-        events,
-      ],
-    );
-
-  const visibleEvents =
-    useMemo(
-      () => {
-        if (
-          selectedCategory ===
-          null
-        ) {
-          return events;
-        }
-
-        return events.filter(
-          (event) =>
-            event.categorias.some(
-              (
-                category,
-              ) =>
-                category.nombre ===
-                selectedCategory,
-            ),
-        );
-      },
-      [
-        events,
-        selectedCategory,
-      ],
-    );
-
   const nextEvent =
     useMemo(
       () => {
@@ -425,7 +405,7 @@ function ExploreEventsPage() {
 
         return (
           [
-            ...visibleEvents,
+            ...events,
           ]
             .filter(
               (event) => {
@@ -475,7 +455,7 @@ function ExploreEventsPage() {
         );
       },
       [
-        visibleEvents,
+        events,
       ],
     );
 
@@ -484,15 +464,15 @@ function ExploreEventsPage() {
       () =>
         nextEvent ===
         null
-          ? visibleEvents
-          : visibleEvents.filter(
+          ? events
+          : events.filter(
               (event) =>
                 event.id !==
                 nextEvent.id,
             ),
       [
         nextEvent,
-        visibleEvents,
+        events,
       ],
     );
 
@@ -569,6 +549,8 @@ function ExploreEventsPage() {
 
           {eventsState.status ===
             'success' &&
+            selectedCategoryId ===
+              null &&
             events.length ===
               0 && (
               <AsyncStateView
@@ -580,8 +562,12 @@ function ExploreEventsPage() {
 
           {eventsState.status ===
             'success' &&
-            events.length >
-              0 && (
+            (
+              events.length >
+                0 ||
+              selectedCategoryId !==
+                null
+            ) && (
               <>
                 {categories.length >
                   0 && (
@@ -592,11 +578,11 @@ function ExploreEventsPage() {
                     <FilterChip
                       label="Todos"
                       selected={
-                        selectedCategory ===
+                        selectedCategoryId ===
                         null
                       }
                       onClick={() => {
-                        setSelectedCategory(
+                        setSelectedCategoryId(
                           null,
                         );
                       }}
@@ -608,18 +594,18 @@ function ExploreEventsPage() {
                       ) => (
                         <FilterChip
                           key={
-                            category
+                            category.id
                           }
                           label={
-                            category
+                            category.nombre
                           }
                           selected={
-                            selectedCategory ===
-                            category
+                            selectedCategoryId ===
+                            category.id
                           }
                           onClick={() => {
-                            setSelectedCategory(
-                              category,
+                            setSelectedCategoryId(
+                              category.id,
                             );
                           }}
                         />
@@ -628,7 +614,7 @@ function ExploreEventsPage() {
                   </section>
                 )}
 
-                {visibleEvents.length ===
+                {events.length ===
                 0 ? (
                   <AsyncStateView
                     state="empty"

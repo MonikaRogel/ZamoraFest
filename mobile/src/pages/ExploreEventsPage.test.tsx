@@ -2,6 +2,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from '@testing-library/react';
 import {
@@ -23,6 +24,9 @@ import {
   EventRepositoryError,
 } from '../features/events/event-repository';
 import {
+  eventCategoryRepository,
+} from '../features/events/remote-event-category-repository';
+import {
   eventRepository,
 } from '../features/events/remote-event-repository';
 import {
@@ -34,6 +38,16 @@ import type {
   Evento,
 } from '../types/api';
 import ExploreEventsPage from './ExploreEventsPage';
+
+vi.mock(
+  '../features/events/remote-event-category-repository',
+  () => ({
+    eventCategoryRepository: {
+      list:
+        vi.fn(),
+    },
+  }),
+);
 
 vi.mock(
   '../features/events/remote-event-repository',
@@ -154,7 +168,7 @@ const eventos:
         {
           id: 1,
           nombre:
-            'Cultura',
+            'Cultural',
           descripcion:
             null,
         },
@@ -244,7 +258,7 @@ const eventos:
         {
           id: 2,
           nombre:
-            'Gastronomía',
+            'Comercial/Feria',
           descripcion:
             null,
         },
@@ -375,15 +389,36 @@ describe(
       vi.clearAllMocks();
 
       vi.mocked(
+        eventCategoryRepository.list,
+      ).mockResolvedValue([
+        { id: 1, nombre: 'Cultural', descripcion: null },
+        { id: 2, nombre: 'Comercial/Feria', descripcion: null },
+        { id: 3, nombre: 'Carnavales', descripcion: null },
+      ]);
+
+      vi.mocked(
         eventRepository
           .listEventPage,
       ).mockImplementation(
         async (
           query = {},
         ) => {
-          const events =
+          const allEvents =
             await eventRepository
               .listEvents();
+
+          const events =
+            query.categoriaId ===
+              undefined
+              ? allEvents
+              : allEvents.filter(
+                  (event) =>
+                    event.categorias.some(
+                      (category) =>
+                        category.id ===
+                        query.categoriaId,
+                    ),
+                );
 
           const page =
             query.page ??
@@ -426,6 +461,14 @@ describe(
             .listEvents,
         ).mockReturnValueOnce(
           new Promise(
+            () => undefined,
+          ),
+        );
+
+        vi.mocked(
+          eventCategoryRepository.list,
+        ).mockReturnValueOnce(
+          new Promise<never>(
             () => undefined,
           ),
         );
@@ -617,11 +660,18 @@ describe(
         vi.mocked(
           eventRepository
             .listEvents,
-        ).mockResolvedValueOnce(
+        ).mockResolvedValue(
           eventos,
         );
 
         renderExplore();
+
+        expect(
+          await screen.findByRole(
+            'button',
+            { name: 'Carnavales' },
+          ),
+        ).toBeInTheDocument();
 
         expect(
           await screen.findByRole(
@@ -648,9 +698,22 @@ describe(
             'button',
             {
               name:
-                'Gastronomía',
+                'Comercial/Feria',
             },
           ),
+        );
+
+        await waitFor(
+          () => {
+            expect(
+              eventRepository
+                .listEventPage,
+            ).toHaveBeenLastCalledWith({
+              page: 1,
+              limit: 5,
+              categoriaId: 2,
+            });
+          },
         );
 
         expect(
@@ -669,6 +732,49 @@ describe(
             {
               name:
                 'Feria Gastronómica Provincial',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        fireEvent.click(
+          screen.getByRole(
+            'button',
+            {
+              name:
+                'Carnavales',
+            },
+          ),
+        );
+
+        await waitFor(
+          () => {
+            expect(
+              eventRepository
+                .listEventPage,
+            ).toHaveBeenLastCalledWith({
+              page: 1,
+              limit: 5,
+              categoriaId: 3,
+            });
+          },
+        );
+
+        expect(
+          screen.getByRole(
+            'button',
+            {
+              name:
+                'Carnavales',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByRole(
+            'heading',
+            {
+              name:
+                'Sin coincidencias',
             },
           ),
         ).toBeInTheDocument();
