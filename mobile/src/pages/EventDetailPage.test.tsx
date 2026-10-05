@@ -296,6 +296,66 @@ describe(
     );
 
     it(
+      'muestra las coordenadas del lugar cuando están disponibles',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .getEventById,
+        ).mockResolvedValueOnce(
+          event,
+        );
+
+        renderDetail();
+
+        expect(
+          await screen.findByText(
+            'Coordenadas',
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            '-4.069, -78.956',
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      'omite las coordenadas cuando el lugar no está georreferenciado',
+      async () => {
+        vi.mocked(
+          eventRepository
+            .getEventById,
+        ).mockResolvedValueOnce({
+          ...event,
+          lugar: {
+            ...event.lugar,
+            latitud: null,
+            longitud: null,
+          },
+        });
+
+        renderDetail();
+
+        expect(
+          await screen.findByRole(
+            'heading',
+            {
+              name:
+                'Festival Cultural de Zamora',
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            'Coordenadas',
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+    it(
       'muestra la programación pública del evento',
       async () => {
         vi.mocked(

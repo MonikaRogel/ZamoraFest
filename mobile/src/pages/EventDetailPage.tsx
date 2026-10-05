@@ -529,6 +529,21 @@ function EventDetailPage() {
                       </dd>
                     </div>
 
+                    {event.lugar.latitud !==
+                      null &&
+                      event.lugar.longitud !==
+                        null && (
+                        <div className="zf-event-detail__fact">
+                          <dt>
+                            Coordenadas
+                          </dt>
+
+                          <dd>
+                            {`${event.lugar.latitud}, ${event.lugar.longitud}`}
+                          </dd>
+                        </div>
+                      )}
+
                     <div className="zf-event-detail__fact">
                       <dt>
                         Costo
