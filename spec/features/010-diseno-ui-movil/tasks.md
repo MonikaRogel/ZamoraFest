@@ -72,8 +72,6 @@
 - [x] T043 Conservar capturas de la pantalla en dos anchos y con fuente ampliada.
 - [x] T044 Documentar la verificación de accesibilidad y las correcciones aplicadas.
 - [x] T045 Registrar el uso de herramientas de inteligencia artificial durante Feature 010.
-- [ ] T046 Incorporar el enlace del repositorio al informe técnico.
-- [ ] T047 Preparar el informe técnico PDF requerido por Semana 10.
 
 ## 8. Cierre Git
 

@@ -90,7 +90,7 @@ La feature debe incluir únicamente lo necesario para demostrar el entorno y la 
 - centralizar la URL base del backend mediante variables de entorno;
 - probar conectividad contra el backend real de ZamoraFest;
 - documentar configuración, ejecución, target y limitaciones en README;
-- conservar evidencia adecuada para el video académico.
+- conservar evidencia reproducible de la ejecución y la integración.
 
 ## 7. Exclusiones explícitas
 

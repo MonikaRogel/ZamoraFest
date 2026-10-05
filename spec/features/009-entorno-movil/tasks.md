@@ -103,7 +103,7 @@
 - [x] T058 Registrar el uso de inteligencia artificial, consultas aprovechadas, ajustes y verificaciones.
 - [x] T059 Preparar evidencias de versiones, diagnóstico completo, estructura, ejecución y recarga.
 - [x] T060 Preparar evidencias de la solicitud exitosa hacia la API propia y su respuesta.
-- [x] T061 Verificar el guion del video contra todos los criterios de evaluación de Semana 9.
+- [x] T061 Verificar las evidencias técnicas de ejecución e integración de Semana 9.
 
 ## 10. Puertas finales y publicación
 
